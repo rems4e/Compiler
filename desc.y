@@ -27,8 +27,10 @@ int ind = 0 ;
 
 //TODO
 void affectation(char* nom){
+int i = 0;
 bool found = isDeclar(nom) ;
-	for(int i=0; i<length;i++){
+
+	for(i=0; i<length;i++){
 		if(strcmp(nom,tab_symb[i].nom)==0)
 			tab_symb[i].affected = 1 ;
 			tab_symb[i].add = i ;		
@@ -37,8 +39,9 @@ bool found = isDeclar(nom) ;
 }
 
 void declaration(char* nom){
+int i = 0 ;
 entry new_entry = {False,nom} ;
-	for(int i=0; i<length;i++){
+	for(i=0; i<length;i++){
 		if(strcmp(nom,tab_symb[i].nom)==0)
 			printf("redéclaration d'une variable");
 		else{
@@ -48,7 +51,8 @@ entry new_entry = {False,nom} ;
 }
 
 bool isDeclar(char* nom){
-	for(int i=0; i<length;i++){
+int i = 0;
+	for( i=0; i<length;i++){
 		if(strcmp(nom,tab_symb[i].nom)==0)
 			return True ;
 	}

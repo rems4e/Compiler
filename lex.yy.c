@@ -848,32 +848,30 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 #line 39 "desc.l"
-{yylval.var= strdup(yytext) ; 
-	return tID;}
+{return tID;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 42 "desc.l"
-{yylval.nb=atoi(yytext);
-		return tNOMBRE;}
+#line 41 "desc.l"
+{return tNOMBRE;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 45 "desc.l"
+#line 43 "desc.l"
 ;
 	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-#line 46 "desc.l"
+#line 44 "desc.l"
 ;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 47 "desc.l"
+#line 45 "desc.l"
 ECHO;
 	YY_BREAK
-#line 877 "lex.yy.c"
+#line 875 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1871,4 +1869,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 47 "desc.l"
+#line 45 "desc.l"

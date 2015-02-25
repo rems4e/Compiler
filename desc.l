@@ -17,30 +17,28 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 
 
 %%
-"main"	{return tMAIN;}
-"("	{return tPO;}
-")"	{return tPF;}
-"}"	{return tBO;}
-"{"	{return tBF;}
-","	{return tVIR;}
+"main"		{return tMAIN;}
+"("		{return tPO;}
+")"		{return tPF;}
+"}"		{return tBO;}
+"{"		{return tBF;}
+","		{return tVIR;}
 {Delim}	;
-"/"	{return tDIV;}
-"*"	{return tMUL;}
-"-"	{return tMOINS;}
-"+"	{return tPLUS;}
-"="	{return tEGAL ;}
+"/"		{return tDIV;}
+"*"		{return tMUL;}
+"-"		{return tMOINS;}
+"+"		{return tPLUS;}
+"="		{return tEGAL ;}
 \n	;
-";"	{return tF;}
+";"		{return tF;}
 		
-"int"	{return tINT;}
+"int"		{return tINT;}
 		
-"const"	{return tCONST;}
+"const"		{return tCONST;}
 
-{Nom}	{yylval.var= strdup(yytext) ; 
-	return tID;}
+{Nom}		{return tID;}
 	
-{nombre}	{yylval.nb=atoi(yytext);
-		return tNOMBRE;}
+{nombre}	{return tNOMBRE;}
 
 {Comm}	;
 {Comml} ;
