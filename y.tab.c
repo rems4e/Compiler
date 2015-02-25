@@ -77,11 +77,8 @@ int i = 0;
 	return False ;
 }
 
-void print(int val){
-	printf("%d",val) ;
-} 
 
-#line 68 "desc.y"
+#line 65 "desc.y"
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
@@ -90,7 +87,7 @@ void print(int val){
 #define YYSTYPE_IS_DECLARED 1
 typedef union {int nb; char* var;} YYSTYPE;
 #endif /* !YYSTYPE_IS_DECLARED */
-#line 93 "y.tab.c"
+#line 90 "y.tab.c"
 
 /* compatibility with bison */
 #ifdef YYPARSE_PARAM
@@ -142,58 +139,65 @@ extern int YYPARSE_DECL();
 #define tMAIN 273
 #define YYERRCODE 256
 static const short yylhs[] = {                           -1,
-    0,    0,    1,    4,    6,    4,    8,    4,    9,    4,
-   10,   10,   10,   10,   10,    2,    2,    3,    3,    7,
-    7,    7,    7,    7,    7,    7,    7,   12,   12,   11,
-   11,   13,   13,    5,    5,
+    0,    0,    0,    1,    2,    2,    4,    4,    6,    7,
+    6,    9,    6,   10,    6,    5,    5,   11,   11,   11,
+   12,   12,    8,    8,    8,    8,    8,    8,    8,    8,
+   13,   13,   14,   14,    3,    3,
 };
 static const short yylen[] = {                            2,
-    0,    2,    2,    3,    0,    4,    0,    6,    0,    6,
-    0,    2,    2,    4,    4,    0,    2,    0,    2,    1,
-    1,    3,    3,    3,    3,    3,    4,    0,    2,    0,
-    2,    1,    2,    1,    1,
+    0,    1,    2,    7,    2,    8,    0,    2,    3,    0,
+    4,    0,    6,    0,    6,    0,    2,    0,    4,    4,
+    0,    2,    1,    1,    3,    3,    3,    3,    3,    4,
+    0,    2,    1,    3,    1,    1,
 };
 static const short yydefred[] = {                         0,
-   34,   35,    0,    0,    0,    0,    0,    2,   20,    0,
-    0,    3,    0,    0,   17,    0,    0,    0,    0,    0,
-   12,    0,    0,    0,    0,   13,   19,    4,    0,    0,
-    0,    0,    0,    0,   26,    0,    0,   24,   25,    0,
-    6,   33,   27,   31,   14,   15,    0,    0,    8,   10,
+   35,   36,    0,    2,    0,    0,    0,    0,    3,    0,
+    0,    0,    5,    0,    0,    8,    0,    9,    0,    0,
+    0,    0,   17,    0,    0,   23,    0,    0,    0,   11,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,   19,   20,    0,    0,    0,    0,   29,    0,
+    0,   27,   28,   13,   15,    0,    0,    0,    0,   30,
+   32,    4,    6,   34,
 };
 static const short yydgoto[] = {                          3,
-    4,    5,   12,    6,    7,   30,   13,   47,   48,   14,
-   32,    0,   33,
+    4,    5,    6,    7,   13,    8,   20,   46,   40,   41,
+   14,    0,   47,   48,
 };
-static const short yysindex[] = {                      -195,
-    0,    0,    0, -195, -197, -195, -254,    0,    0, -247,
- -169,    0, -203, -197,    0, -230, -169, -169, -248, -175,
-    0, -169, -169, -169, -169,    0,    0,    0, -169, -252,
- -262, -234, -169, -194,    0, -227, -227,    0,    0, -214,
-    0,    0,    0,    0,    0,    0, -222, -226,    0,    0,
+static const short yysindex[] = {                      -239,
+    0,    0,    0,    0, -239, -251, -242, -239,    0, -254,
+ -227, -236,    0, -242, -238,    0, -210,    0, -247, -217,
+ -202, -247,    0, -248, -203,    0, -199, -247, -224,    0,
+ -201, -184, -239, -247, -174, -247, -247, -247, -247, -197,
+ -200, -239,    0,    0, -242, -170, -188, -247,    0, -230,
+ -230,    0,    0,    0,    0, -190, -183, -185, -247,    0,
+    0,    0,    0,    0,
 };
 static const short yyrindex[] = {                         2,
-    0,    0,    0,    2,    1,   11,    0,    0,    0, -185,
-    0,    0,    0,    1,    0, -200, -182,    0, -239,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
- -161,    0, -182,    0,    0, -223, -210,    0,    0, -236,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    2,    0,    1,    4,    0, -192,
+    0,    0,    0,    1,    0,    0,    0,    0,    0,    0,
+    0,    0,    0, -192,    0,    0, -220,    0, -253,    0,
+    0,    0, -240, -202,    0,    0,    0,    0,    0,    0,
+    0, -240,    0,    0, -182, -156,    0, -202,    0, -204,
+ -191,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,
 };
-static const short yygindex[] = {                        76,
-    0,   75,   84,    0,    0,    0,   -8,    0,    0,    0,
-   57,    0,    0,
+static const short yygindex[] = {                        84,
+    0,   48,   -8,   -5,   -9,    0,    0,   -7,    0,    0,
+    0,    0,   43,   44,
 };
-#define YYTABLESIZE 271
-static const short yytable[] = {                         42,
-   11,    1,   20,   16,   22,   23,   24,   25,   31,   34,
-   16,   17,   17,   36,   37,   38,   39,   21,   21,   41,
-   40,   21,   21,   18,   31,    7,   43,   21,   21,   21,
-   21,   28,   21,   22,   22,    9,   22,   22,   22,   49,
-   29,   24,   25,   22,   22,   50,   23,   23,   22,   23,
-   23,   23,   22,   23,   24,   25,   23,   23,   21,    9,
-   10,   23,   11,   22,   23,   24,   25,   45,   26,    1,
-    2,    5,   22,   23,   24,   25,   21,   46,   30,    8,
-   15,   21,   21,   21,   21,   35,   21,    9,   19,   44,
-   11,   22,   23,   24,   25,   32,   32,   27,   32,   32,
+#define YYTABLESIZE 268
+static const short yytable[] = {                         15,
+   16,    1,   16,    7,   23,   17,   10,   18,   12,   26,
+   27,   29,   28,   18,   32,   12,   19,    7,   14,   24,
+   35,   11,   19,    7,   15,    1,    2,   45,   50,   51,
+   52,   53,   21,   57,   22,   58,   24,   24,   38,   39,
+   24,   24,   36,   37,   38,   39,   24,   24,   24,   24,
+   25,   24,   25,   25,   30,   25,   25,   25,   31,   33,
+   34,   42,   25,   25,   54,   26,   26,   25,   26,   26,
+   26,   55,   60,   62,   10,   26,   26,   43,   63,   10,
+   26,   16,   36,   37,   38,   39,   49,   44,    9,   56,
+   61,   59,   36,   37,   38,   39,   36,   37,   38,   39,
+   33,   33,   64,   33,   33,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -208,22 +212,21 @@ static const short yytable[] = {                         42,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,   16,   16,
-    0,   16,    0,    0,    0,   11,   11,   16,   16,    0,
-   16,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    7,
+    0,    7,    0,    0,   16,   16,   16,    7,
 };
-static const short yycheck[] = {                        262,
-    0,    0,   11,  258,  267,  268,  269,  270,   17,   18,
-    0,  260,  260,   22,   23,   24,   25,  257,  258,  272,
-   29,  261,  262,  271,   33,  262,  261,  267,  268,  269,
-  270,  262,  272,  257,  258,  272,  260,  261,  262,  262,
-  271,  269,  270,  267,  268,  272,  257,  258,  272,  260,
-  261,  262,  267,  268,  269,  270,  267,  268,  262,  257,
-  258,  272,  260,  267,  268,  269,  270,  262,  272,  265,
-  266,  272,  267,  268,  269,  270,  262,  272,  261,    4,
-    6,  267,  268,  269,  270,  261,  272,  257,  258,   33,
-  260,  267,  268,  269,  270,  257,  258,   14,  260,  261,
+static const short yycheck[] = {                          8,
+    0,    0,    8,    0,   14,  260,  258,  262,  262,  257,
+  258,   19,  260,  262,   22,  258,  271,  258,  272,  258,
+   28,  273,  271,  264,   33,  265,  266,   33,   36,   37,
+   38,   39,  260,   42,  271,   45,  257,  258,  269,  270,
+  261,  262,  267,  268,  269,  270,  267,  268,  269,  270,
+  261,  272,  257,  258,  272,  260,  261,  262,  261,  263,
+  260,  263,  267,  268,  262,  257,  258,  272,  260,  261,
+  262,  272,  261,  264,  258,  267,  268,  262,  264,  272,
+  272,  264,  267,  268,  269,  270,  261,  272,    5,   42,
+   48,  262,  267,  268,  269,  270,  267,  268,  269,  270,
+  257,  258,   59,  260,  261,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
@@ -238,10 +241,8 @@ static const short yycheck[] = {                        262,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  257,  258,
-   -1,  260,   -1,   -1,   -1,  265,  266,  257,  258,   -1,
-  260,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  258,
+   -1,  258,   -1,   -1,  264,  265,  266,  264,
 };
 #define YYFINAL 3
 #ifndef YYDEBUG
@@ -265,8 +266,13 @@ static const char *yyname[] = {
 static const char *yyrule[] = {
 "$accept : S",
 "S :",
+"S : LeMain",
 "S : Corps S",
+"LeMain : Type tMAIN tPO tPF tBO Corps tBF",
 "Corps : Defs Instrucs",
+"Corps : Type tID tPO tPF tBO Defs Instrucs tBF",
+"Defs :",
+"Defs : Def Defs",
 "Def : Type tID tVIR",
 "$$1 :",
 "Def : Type tID $$1 tF",
@@ -274,15 +280,13 @@ static const char *yyrule[] = {
 "Def : Type tID tEGAL Exp $$2 tVIR",
 "$$3 :",
 "Def : Type tID tEGAL Exp $$3 tF",
-"Instruc :",
-"Instruc : Exp tVIR",
-"Instruc : Exp tF",
-"Instruc : tID tEGAL Exp tVIR",
-"Instruc : tID tEGAL Exp tF",
-"Defs :",
-"Defs : Def Defs",
 "Instrucs :",
 "Instrucs : Instruc Instrucs",
+"Instruc :",
+"Instruc : tID tEGAL Exp tVIR",
+"Instruc : tID tEGAL Exp tF",
+"Exps :",
+"Exps : Exp Exps",
 "Exp : tNOMBRE",
 "Exp : tID",
 "Exp : Exp tPLUS Exp",
@@ -291,12 +295,10 @@ static const char *yyrule[] = {
 "Exp : Exp tMUL Exp",
 "Exp : tPO Exp tPF",
 "Exp : tID tPO Args tPF",
-"Exps :",
-"Exps : Exp Exps",
 "Args :",
 "Args : Arg Args",
 "Arg : Exp",
-"Arg : Exp tVIR",
+"Arg : Exp tVIR Arg",
 "Type : tINT",
 "Type : tCONST",
 
@@ -336,7 +338,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 129 "desc.y"
+#line 130 "desc.y"
 int yyerror(const char *s) {
   printf("%s \n",s);
 }
@@ -346,7 +348,7 @@ int main(void) {
 }
 
 //http://langevin.univ-tln.fr/CDE/LEXYACC/Lex-Yacc3.html
-#line 348 "y.tab.c"
+#line 350 "y.tab.c"
 
 #if YYDEBUG
 #include <stdio.h>		/* needed for printf */
@@ -549,22 +551,66 @@ yyreduce:
     switch (yyn)
     {
 case 4:
-#line 91 "desc.y"
-	{declaration(yystack.l_mark[-1].var);}
-break;
-case 5:
-#line 92 "desc.y"
-	{declaration(yystack.l_mark[0].var);}
-break;
-case 7:
-#line 93 "desc.y"
-	{declaration(yystack.l_mark[-2].var);affectation(yystack.l_mark[-2].var);}
+#line 87 "desc.y"
+	{printf("Main \n");}
 break;
 case 9:
-#line 94 "desc.y"
-	{declaration(yystack.l_mark[-2].var);affectation(yystack.l_mark[-2].var);}
+#line 95 "desc.y"
+	{printf("%s",yystack.l_mark[-1].var) ; declaration(yystack.l_mark[-1].var);}
 break;
-#line 566 "y.tab.c"
+case 10:
+#line 96 "desc.y"
+	{printf("%s",yystack.l_mark[0].var) ; declaration(yystack.l_mark[0].var);}
+break;
+case 12:
+#line 97 "desc.y"
+	{printf("%s",yystack.l_mark[-2].var) ; declaration(yystack.l_mark[-2].var);affectation(yystack.l_mark[-2].var);}
+break;
+case 14:
+#line 98 "desc.y"
+	{printf("%s",yystack.l_mark[-2].var) ; declaration(yystack.l_mark[-2].var);affectation(yystack.l_mark[-2].var);}
+break;
+case 23:
+#line 110 "desc.y"
+	{printf("nombre \n") ; }
+break;
+case 24:
+#line 111 "desc.y"
+	{printf("identifiant \n") ;}
+break;
+case 25:
+#line 112 "desc.y"
+	{printf("Expression \n") ;}
+break;
+case 26:
+#line 113 "desc.y"
+	{printf("Expression \n") ;}
+break;
+case 27:
+#line 114 "desc.y"
+	{printf("Expression \n") ;}
+break;
+case 28:
+#line 115 "desc.y"
+	{printf("Expression \n") ;}
+break;
+case 29:
+#line 116 "desc.y"
+	{printf("Expression \n") ;}
+break;
+case 30:
+#line 117 "desc.y"
+	{printf("Expression \n") ;}
+break;
+case 35:
+#line 126 "desc.y"
+	{printf("type reconnue \n") ;}
+break;
+case 36:
+#line 127 "desc.y"
+	{printf("type reconnue \n") ;}
+break;
+#line 612 "y.tab.c"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

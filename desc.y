@@ -59,9 +59,6 @@ int i = 0;
 	return False ;
 }
 
-void print(int val){
-	printf("%d",val) ;
-} 
 
 %}
 
@@ -83,47 +80,51 @@ void print(int val){
 %start S
 
 %%
-S :
-	|Corps S ;
+S :     
+        |LeMain  
+        |Corps S ;
 
-Corps :	Defs Instrucs ;
-	
-Def : Type tID tVIR {declaration($2);}
-	|Type tID {declaration($2);}tF
-	|Type tID  tEGAL Exp {declaration($2);affectation($2);} tVIR
-	|Type tID tEGAL Exp {declaration($2);affectation($2);} tF ;
+LeMain : 	Type tMAIN  tPO tPF  tBO Corps tBF {printf("Main \n");};
 
-Instruc :
-	|Exp tVIR
-	|Exp tF
-	|tID tEGAL Exp tVIR
-	|tID tEGAL Exp tF;
-	
+Corps :	Defs Instrucs
+        |Type tID tPO tPF tBO Defs Instrucs tBF ;
+
 Defs : 
 	|Def Defs ;
 
-Instrucs:
+Def : Type tID tVIR {printf("%s",$2) ; declaration($2);}
+	|Type tID {printf("%s",$2) ; declaration($2);} tF
+	|Type tID  tEGAL Exp {printf("%s",$2) ; declaration($2);affectation($2);} tVIR
+	|Type tID tEGAL Exp {printf("%s",$2) ; declaration($2);affectation($2);} tF ;
+
+Instrucs :
 	|Instruc Instrucs ;
 
-Exp :  tNOMBRE
-	| tID 
-	| Exp tPLUS Exp  //{$$=$1+$3 ;}
-	| Exp tMOINS Exp //{$$=$1-$3 ;}
-	| Exp tDIV Exp //{$$=$1/$3 ;}
-	| Exp tMUL Exp //{$$=$1*$3 ;}
-	| tPO Exp tPF 	//{$$=$2}
-	| tID tPO Args tPF ;//{$$=$2;}; //TODO
+Instruc :
+	|tID tEGAL Exp tVIR
+	|tID tEGAL Exp tF;
 
 Exps :
-	|Exp Exps ;
+	|Exp Exps ;	
+
+Exp :  tNOMBRE {printf("nombre \n") ; }
+	| tID  {printf("identifiant \n") ;}
+	| Exp tPLUS Exp {printf("Expression \n") ;}  //{$$=$1+$3 ;} 
+	| Exp tMOINS Exp {printf("Expression \n") ;} //{$$=$1-$3 ;}
+	| Exp tDIV Exp {printf("Expression \n") ;} //{$$=$1/$3 ;}
+	| Exp tMUL Exp {printf("Expression \n") ;} //{$$=$1*$3 ;}
+	| tPO Exp tPF {printf("Expression \n") ;} //{$$=$2}
+	| tID tPO Args tPF {printf("Expression \n") ;} ; //{$$=$2;}; //TODO
+
 	
 Args : 
 	|Arg Args ;
 	
 Arg :	Exp
-	|Exp tVIR; //{$$=$1};
+	|Exp tVIR Arg; //{$$=$1};
 
-Type : tINT | tCONST;
+Type : tINT  {printf("type reconnue \n") ;}
+        | tCONST {printf("type reconnue \n") ;} ;
 
 %%
 int yyerror(const char *s) {

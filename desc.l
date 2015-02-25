@@ -22,8 +22,8 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "main"		{return tMAIN;}
 "("		{return tPO;}
 ")"		{return tPF;}
-"}"		{return tBO;}
-"{"		{return tBF;}
+"{"		{return tBO;}
+"}"		{return tBF;}
 ","		{return tVIR;}
 {Delim}	;
 "/"		{return tDIV;}
