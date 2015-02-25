@@ -9,7 +9,7 @@
 #define False 0
 #define length 30
 
-
+char buffer[400] ;
 typedef int bool ;
 typedef struct entry {
 	bool affected ;//TODO

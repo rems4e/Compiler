@@ -4,6 +4,8 @@
 #include <string.h>
 #include "y.tab.h"
 
+char buffer[400] ;
+
 %}
 
 Delim	[ \t]+
@@ -36,9 +38,13 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 		
 "const"		{return tCONST;}
 
-{Nom}		{return tID;}
+{Nom}		{ECHO ;
+		strcpy(buffer,yytext);
+		return tID;}
 	
-{nombre}	{return tNOMBRE;}
+{nombre}	{ECHO ;
+		strcpy(buffer,yytext);
+		return tNOMBRE;}
 
 {Comm}	;
 {Comml} ;

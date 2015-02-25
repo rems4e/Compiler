@@ -492,7 +492,9 @@ char *yytext;
 #include <string.h>
 #include "y.tab.h"
 
-#line 496 "lex.yy.c"
+char buffer[400] ;
+
+#line 498 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -679,9 +681,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 19 "desc.l"
+#line 21 "desc.l"
 
-#line 685 "lex.yy.c"
+#line 687 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -766,112 +768,116 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 20 "desc.l"
+#line 22 "desc.l"
 {return tMAIN;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 21 "desc.l"
+#line 23 "desc.l"
 {return tPO;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 22 "desc.l"
+#line 24 "desc.l"
 {return tPF;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 23 "desc.l"
+#line 25 "desc.l"
 {return tBO;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 24 "desc.l"
+#line 26 "desc.l"
 {return tBF;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 25 "desc.l"
+#line 27 "desc.l"
 {return tVIR;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 26 "desc.l"
+#line 28 "desc.l"
 ;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 27 "desc.l"
+#line 29 "desc.l"
 {return tDIV;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 28 "desc.l"
+#line 30 "desc.l"
 {return tMUL;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 29 "desc.l"
+#line 31 "desc.l"
 {return tMOINS;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 30 "desc.l"
+#line 32 "desc.l"
 {return tPLUS;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 31 "desc.l"
+#line 33 "desc.l"
 {return tEGAL ;}
 	YY_BREAK
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 32 "desc.l"
+#line 34 "desc.l"
 ;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 33 "desc.l"
+#line 35 "desc.l"
 {return tF;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 35 "desc.l"
+#line 37 "desc.l"
 {return tINT;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 37 "desc.l"
+#line 39 "desc.l"
 {return tCONST;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 39 "desc.l"
-{return tID;}
+#line 41 "desc.l"
+{ECHO ;
+		strcpy(buffer,yytext);
+		return tID;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 41 "desc.l"
-{return tNOMBRE;}
+#line 45 "desc.l"
+{ECHO ;
+		strcpy(buffer,yytext);
+		return tNOMBRE;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 43 "desc.l"
+#line 49 "desc.l"
 ;
 	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-#line 44 "desc.l"
+#line 50 "desc.l"
 ;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 45 "desc.l"
+#line 51 "desc.l"
 ECHO;
 	YY_BREAK
-#line 875 "lex.yy.c"
+#line 881 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1869,4 +1875,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 45 "desc.l"
+#line 51 "desc.l"

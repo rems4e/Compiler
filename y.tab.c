@@ -27,7 +27,7 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #define False 0
 #define length 30
 
-
+char buffer[400] ;
 typedef int bool ;
 typedef struct entry {
 	bool affected ;/*TODO*/
