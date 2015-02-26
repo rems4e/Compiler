@@ -8,16 +8,24 @@
 #include "symbol.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define SYM_COUNT 100
 
 static symbol symbols[SYM_COUNT];
+static symbol privateSymbols[SYM_COUNT];
 
 void initSymbolTable() {
-	for(int i = 0; i < SYM_COUNT; ++i) {
+	int address = 0;
+	for(int i = 0; i < SYM_COUNT; ++i, ++address) {
 		symbols[i].affected = false;
 		symbols[i].name = NULL;
-		symbols[i].add = 0;
+		symbols[i].address = i;
+	}
+	for(int i = 0; i < SYM_COUNT; ++i, ++address) {
+		symbols[i].affected = false;
+		symbols[i].name = NULL;
+		symbols[i].address = address;
 	}
 }
 
@@ -54,4 +62,20 @@ symbol *createSymbol(char const *name) {
 bool symbolDeclared(char const *name) {
 	return getExistingSymbol(name) != NULL;
 }
+
+symbol *createPrivateSymbol() {
+	for(int i = 0; i < SYM_COUNT; ++i) {
+		if(privateSymbols[i].name == NULL) {
+			privateSymbols[i].name = malloc(10 + 1);
+			strcpy(privateSymbols[i].name, "__private");
+			privateSymbols[i].name[10] = i;
+			return &privateSymbols[i];
+		}
+	}
+
+	fprintf(stderr, "Symbol table too small, couldn't get room for new private symbol.\n");
+	return NULL;
+
+}
+
 

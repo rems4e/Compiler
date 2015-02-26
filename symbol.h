@@ -13,13 +13,16 @@
 typedef struct {
 	bool affected;
 	char *name;
-	int add;
+	int address;
 } symbol;
 
 void initSymbolTable(void);
+void cleanSymbolTable(void);
 
 symbol *getExistingSymbol(char const *name);
 symbol *createSymbol(char const *name);
+
+symbol *createPrivateSymbol(void);
 
 bool symbolDeclared(char const *name);
 
