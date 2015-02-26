@@ -2,59 +2,37 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
+	#include "constants.h"
+	#include "symbol.h"
 
-	//#include <hashcode.h>
-
-	#define True 1
-	#define False 0
-	#define length 30
+	#define SYMBOL_SIZE 30
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
-	typedef int bool ;
-	typedef struct entry {
-		bool affected ;//TODO
-		char* nom ;
-		int add ;
-	} entry ;
-
 	bool isDeclar(char* nom);
-	int yyerror(const char *s) ;
+	void yyerror(const char *s) ;
 	int yylex() ;
 	YY_BUFFER_STATE yy_scan_string (const char *yy_str  );
 
-	/*table des symbole*/
-	entry tab_symb[length] ; // à remplacer par un hashcode //TODO
-	int ind = 0 ;
-
 	//TODO
-	void affectation(char* nom){
-		bool found = isDeclar(nom) ;
-		for(int i=0; i<length;i++){
-			if(strcmp(nom,tab_symb[i].nom)==0)
-			tab_symb[i].affected = 1 ;
-			tab_symb[i].add = i ;
+	void affectation(char const *nom) {
+		symbol *sym = getExistingSymbol(nom);
+		if(sym == NULL) {
+			yyerror("Erreur : variable non déclarée");
 		}
-		if(found ==0){printf("Erreur : variable non déclarée") ;}
+
+		printf("Affectation de la variable %s.\n", nom);
+		// TODO:
 	}
 
-	void declaration(char* nom){
-		entry new_entry = {False,nom} ;
-		for(int i=0; i<length;i++){
-			if(strcmp(nom,tab_symb[i].nom)==0)
-			printf("redéclaration d'une variable");
-			else{
-				tab_symb[ind++]=new_entry ;
-			}
+	void declaration(char const *nom) {
+		symbol *sym = createSymbol(nom);
+		if(sym == NULL) {
+			yyerror("Erreur : variable déjà déclarée");
 		}
-	}
 
-	bool isDeclar(char* nom){
-		for(int i=0; i<length;i++){
-			if(strcmp(nom,tab_symb[i].nom)==0)
-			return True ;
-		}
-		return False ;
+		printf("Déclaration de la variable %s.\n", nom);
+		// TODO:
 	}
 
 	void print(int val){
@@ -87,10 +65,19 @@ S :
 
 Corps :	tMAIN tBO Defs Instrucs tBF;
 
+Defs :
+| Def Defs ;
+
 Def : Type tID tVIR {declaration($2);}
 | Type tID {declaration($2);}tF
 | Type tID  tEGAL Exp {declaration($2);affectation($2);} tVIR
 | Type tID tEGAL Exp {declaration($2);affectation($2);} tF ;
+
+
+
+
+Instrucs:
+| Instrucs Instruc ;
 
 Instruc :
 | Exp tVIR
@@ -98,11 +85,11 @@ Instruc :
 | tID tEGAL Exp tVIR
 | tID tEGAL Exp tF;
 
-Defs :
-| Def Defs ;
 
-Instrucs:
-| Instrucs Instruc ;
+
+
+Exps :
+| Exps Exp ;
 
 Exp :  tNOMBRE
 | tID
@@ -113,55 +100,55 @@ Exp :  tNOMBRE
 | tPO Exp tPF 	//{$$=$2}
 | tID tPO Args tPF ;//{$$=$2;}; //TODO
 
-Exps :
-| Exps Exp ;
+
+
 
 Args :
 | Args Arg ;
 
-Arg :	Exp
+Arg : Exp
 | Exp tVIR; //{$$=$1};
 
 Type : tINT | tCONST;
 
 %%
-int yyerror(const char *s) {
-	printf("%s \n",s);
-	return 0;
+void yyerror(const char *s) {
+	printf("%s\n",s);
 }
 
 int main(int argc, char const **argv) {
+	initSymbolTable();
+
 	char *buf;
 	if(argc > 1) {
 		long len;
 		FILE * f = fopen (argv[1], "rb");
 
-		if (f)
-		{
+		if(f) {
 			fseek (f, 0, SEEK_END);
 			len = ftell (f);
 			fseek (f, 0, SEEK_SET);
-			buf = malloc (length);
-			if (buf)
-			{
-				fread (buf, 1, length, f);
+			buf = malloc (len);
+			if(buf) {
+				fread (buf, 1, len, f);
 			}
 			fclose (f);
 		}
 
-		if (buf)
-		{
+		if(buf) {
 			yy_scan_string(buf);
 		}
 		else {
 			return 1;
 		}
-
 	}
+
+
+
 	yyparse();
 	free(buf);
 
-return 0;
+	return 0;
 }
 
 //http://langevin.univ-tln.fr/CDE/LEXYACC/Lex-Yacc3.html
