@@ -23,16 +23,16 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "main"	{ECHO;return tMAIN;}
 "("	{ECHO;return tPO;}
 ")"	{ECHO;return tPF;}
-"}"	{ECHO;return tBO;}
-"{"	{ECHO;return tBF;}
+"{"	{ECHO;return tBO;}
+"}"	{ECHO;return tBF;}
 ","	{ECHO;return tVIR;}
 Delim	{ECHO;}
+\n	{ECHO;}
 "/"	{ECHO;return tDIV;}
 "*"	{ECHO;return tMUL;}
 "-"	{ECHO;return tMOINS;}
 "+"	{ECHO;return tPLUS;}
 "="	{ECHO;return tEGAL ;}
-\n	{ECHO;}
 ";"	{ECHO;return tF;}
 
 "int"	{ECHO;return tINT;}
