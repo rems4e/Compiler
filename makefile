@@ -1,5 +1,5 @@
 all: y.tab.c lex.yy.c
-	gcc -std=c99 y.tab.c lex.yy.c -ll -o desc
+	gcc -std=c99 -g y.tab.c lex.yy.c -ll -o desc
 	
 y.tab.c: desc.y
 	yacc -d desc.y
