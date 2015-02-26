@@ -63,6 +63,23 @@ bool symbolDeclared(char const *name) {
 	return getExistingSymbol(name) != NULL;
 }
 
+bool symbolAffected(char const *name) {
+	symbol *s = getExistingSymbol(name);
+	return s != NULL && s->affected;
+}
+
+void printSymbolTable() {
+	for(int i = 0; i < SYM_COUNT; ++i) {
+		if(symbols[i].name != NULL) {
+			printf("%x: \"%s\" affected: %s\n", symbols[i].address, symbols[i].name, (symbols[i].affected ? "true" : "false"));
+		}
+		else {
+			break;
+		}
+	}
+}
+
+
 symbol *createPrivateSymbol() {
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(privateSymbols[i].name == NULL) {

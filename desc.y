@@ -21,7 +21,9 @@
 		}
 
 		printf("Affectation de la variable %s.\n", nom);
-		// TODO:
+		sym->affected = true;
+
+		printSymbolTable();
 	}
 
 	void declaration(char const *nom) {
@@ -31,7 +33,8 @@
 		}
 
 		printf("Déclaration de la variable %s.\n", nom);
-		// TODO:
+		
+		printSymbolTable();
 	}
 
 	void print(int val){

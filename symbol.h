@@ -21,9 +21,12 @@ void cleanSymbolTable(void);
 
 symbol *getExistingSymbol(char const *name);
 symbol *createSymbol(char const *name);
+bool symbolDeclared(char const *name);
+bool symbolAffected(char const *name);
+
+void printSymbolTable();
+
 
 symbol *createPrivateSymbol(void);
-
-bool symbolDeclared(char const *name);
 
 #endif /* defined(__Syste_me_Info__symbol__) */
