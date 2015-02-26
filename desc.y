@@ -113,7 +113,8 @@ Args :
 Arg : Exp
 | Exp tVIR; //{$$=$1};
 
-Type : tINT | tCONST;
+Type : tINT  {printf("type reconnue \n") ;}
+        | tCONST {printf("type reconnue \n") ;} ;
 
 %%
 void yyerror(const char *s) {

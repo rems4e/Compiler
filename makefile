@@ -8,5 +8,3 @@ lex.yy.c: desc.l
 	flex desc.l
 
 desc.l: y.tab.c
-
-
