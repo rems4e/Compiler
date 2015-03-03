@@ -9,7 +9,14 @@
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
-	bool isDeclar(char* nom);
+	bool isUsable(char* nom){
+		if(!symbolDeclared(nom)){printf("affectation avec %s , variable non déclarée \n", nom) ;}
+		else if (!symbolAffected(nom)){printf("affectation avec %s, variable non affectée \n", nom);}
+		return symbolDeclared(nom) && symbolAffected(nom) ;
+	}
+
+
+
 	void yyerror(const char *s) ;
 	int yylex() ;
 	YY_BUFFER_STATE yy_scan_string (const char *yy_str  );
@@ -40,6 +47,7 @@
 	void print(int val){
 		printf("%d",val) ;
 	}
+ 
 
 	%}
 
@@ -47,13 +55,16 @@
 
 %token <nb> tNOMBRE
 %token <var> tID
-%token tFCT
+%token <var> tFCT
 
 %token tPO tPF tVIR tBO tBF
-%token tINT tCONST
+%token tINT tCONST tBOOL
 %token tPLUS tMOINS tDIV tMUL tEGAL
+%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF
+
 %token tF
 %token tMAIN
+%token tIF tTHEN
 %token END_OF_FILE
 
 %left tPLUS tMOINS
@@ -74,29 +85,30 @@ Def : Type TypedDef;
 
 TypedDef : tID {declaration($1);} tVIR TypedDef
 | tID {declaration($1);} tF
-| tID  tEGAL Exp {declaration($1);affectation($1);} tVIR TypedDef
+| tID  tEGAL Exp {declaration($1);affectation($1);} tVIR TypedDef //Exps n'est jamais atteint
 | tID tEGAL Exp {declaration($1);affectation($1);} tF;
 
 
 
 
 Instrucs:
-| Instrucs Instruc;
+| Instrucs Instruc; //pourquoi cet ordre dans la récursivité (risque de boucle infini : Instrucs -> Instrucs -> Instrucs -> ...)
 
 Instruc :
-| Exp tVIR
+| Exp tVIR //("a," ne devrait pas faire partie du langage)
 | Exp tF
-| tID tEGAL Exp tVIR {affectation($1);}
-| tID tEGAL Exp tF {affectation($1);};
+| tID tEGAL Exp tVIR {affectation($1);} Instruc
+| tID tEGAL Exp tF {affectation($1);}
+| tIF Bool tTHEN Instruc;
 
 
 
 
-Exps :
-| Exps Exp;
+/*Exps :
+| Exps Exp;*/
 
 Exp :  tNOMBRE
-| tID
+| tID {isUsable($1);}
 | Exp tPLUS Exp  //{$$=$1+$3 ;}
 | Exp tMOINS Exp //{$$=$1-$3 ;}
 | Exp tDIV Exp //{$$=$1/$3 ;}
@@ -115,6 +127,10 @@ Arg : Exp
 
 Type : tINT  {printf("type reconnue \n") ;}
         | tCONST {printf("type reconnue \n") ;} ;
+
+Bool : tBOOL
+	|Exp OpBool Exp ;
+
 
 %%
 void yyerror(const char *s) {
