@@ -24,7 +24,6 @@
 #define tIF 280
 #define tTHEN 281
 #define END_OF_FILE 282
-#define OpBool 283
 #ifdef YYSTYPE
 #undef  YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1

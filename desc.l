@@ -23,12 +23,11 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "main"	{ECHO;return tMAIN;}
 
 
-"bool"	{ECHO;return tBOOL;}
+{bool}	{ECHO;return tBOOL;}
 "int"	{ECHO;return tINT;}
 "const"	{ECHO;return tCONST;}
 
 "if"	{ECHO;return tIF;}
-"then"	{ECHO; return tTHEN;} 
 
 "("	{ECHO;return tPO;}
 ")"	{ECHO;return tPF;}

@@ -9,13 +9,6 @@
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
-	bool isUsable(char* nom){
-		if(!symbolDeclared(nom)){printf("affectation avec %s , variable non déclarée \n", nom) ;}
-		else if (!symbolAffected(nom)){printf("affectation avec %s, variable non affectée \n", nom);}
-		return symbolDeclared(nom) && symbolAffected(nom) ;
-	}
-
-
 
 	void yyerror(const char *s) ;
 	int yylex() ;
@@ -48,6 +41,11 @@
 		printf("%d",val) ;
 	}
  
+	bool isUsable(char* nom){
+		if(!symbolDeclared(nom)){printf("affectation avec %s , variable non déclarée \n", nom) ;}
+		else if (!symbolAffected(nom)){printf("affectation avec %s, variable non affectée \n", nom);}
+		return symbolDeclared(nom) && symbolAffected(nom) ;
+	}
 
 	%}
 
@@ -99,7 +97,7 @@ Instruc :
 | Exp tF
 | tID tEGAL Exp tVIR {affectation($1);} Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF Bool tTHEN Instruc;
+| tIF tPO Bool tPF tBO Instruc tBF;
 
 
 Exp :  tNOMBRE
@@ -126,6 +124,7 @@ Type : tINT  {printf("type reconnue \n") ;}
 Bool : tBOOL
 	|Exp OpBool Exp ;
 
+OpBool : tBOOLEGAL | tINFEGAL | tSUPEGAL | tSUP | tINF ;
 
 %%
 void yyerror(const char *s) {
