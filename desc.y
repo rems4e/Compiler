@@ -102,11 +102,6 @@ Instruc :
 | tIF Bool tTHEN Instruc;
 
 
-
-
-/*Exps :
-| Exps Exp;*/
-
 Exp :  tNOMBRE
 | tID {isUsable($1);}
 | Exp tPLUS Exp  //{$$=$1+$3 ;}
