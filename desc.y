@@ -63,9 +63,9 @@
 %token <var> tFCT
 
 %token tPO tPF tVIR tBO tBF
-%token tINT tCONST tBOOL
+%token tINT tCONST tTRUE tFALSE
 %token tPLUS tMOINS tDIV tMUL tEGAL
-%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF
+%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU
 
 %token tF
 %token tMAIN
@@ -75,64 +75,70 @@
 %left tPLUS tMOINS
 %left tDIV tMUL
 
+%left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF
+%left tOU
+%left tET
+
 %start S
 
 %%
 S :
 | S Corps;
 
-Corps :	tMAIN tBO Defs Instrucs tBF;
+Corps :	tINT tMAIN Suite;
+
+//Deb : tINT tMAIN ;
+
+Suite : tBO Defs Instrucs tBF ;
 
 Defs :
-| Def Defs;
+| Defs Def;
 
 Def : Type TypedDef;
 
+Type : tINT  {printf("type reconnue \n") ;}
+        | tCONST {printf("type reconnue \n") ;} ;
+        
+        
 TypedDef : tID {declaration($1);} tVIR TypedDef
 | tID {declaration($1);} tF
 | tID  tEGAL Exp {declaration($1);affectation($1);} tVIR TypedDef 
 | tID tEGAL Exp {declaration($1);affectation($1);} tF;
 
-
-
-
 Instrucs:
 | Instrucs Instruc; 
 
-Instruc :
-| Exp tVIR 
+Instruc : Exp tVIR Instruc
 | Exp tF
 | tID tEGAL Exp tVIR {affectation($1);} Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF Cond tBO Instruc tBF;
+| tIF tPO Cond tPF tBO Instruc tBF;
 
-Cond : tPO Exp tPF ;
+Terme :  tNOMBRE
+| tID {isUsable($1);} ;
 
-Exp :  tNOMBRE
-| tID {isUsable($1);}
-| Exp Exps  //{$$=$1+$3 ;}
-| Cond 	//{$$=$2}
-//| tID tPO Args tPF
-| Exp ExpsBool ;//{$$=$2;}; //TODO
+Cond : Bool
+| Bool tET Cond 
+| Bool tOU Cond ;
 
-ExpsBool : OpBool Exp ;
+Bool : Terme
+| Terme tINF Terme 
+| Terme tSUP Terme
+| Terme tINFEGAL Terme
+| Terme tSUPEGAL Terme
+| Terme tBOOLEGAL Terme
+| tTRUE 
+| tFALSE;
 
-Exps : Op Exp ;
 
-/*Args : ;
-| Args Arg;
+Exp : Terme
+| Terme tPLUS Terme 
+| Terme tMOINS Terme 
+| Terme tMUL Terme 
+| Terme tDIV Terme ;
 
-Arg : Exp
-| Exp tVIR; //{$$=$1};
-*/
-Type : tINT  {printf("type reconnue \n") ;}
-        | tCONST {printf("type reconnue \n") ;} ;
 
-/*Bool : tBOOL
-	|Exp OpBool Exp ; */
 
-OpBool : tBOOLEGAL | tINFEGAL | tSUPEGAL | tSUP | tINF ;
-Op : tPLUS | tMOINS | tMUL | tDIV ;
 %%
 void yyerror(const char *s, ...) {
 	va_list args;

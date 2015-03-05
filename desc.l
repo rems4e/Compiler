@@ -9,7 +9,6 @@
 %}
 
 Delim	[ \t]+
-bool	"True"|"False"
 Nom	[a-zA-Z][_a-zA-Z0-9]*
 chiffre	[0-9]
 nombre	{chiffre}+(\.{chiffre}+)?(E[+\-]?{chiffre}+)?
@@ -22,12 +21,15 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "main"	{ECHO;return tMAIN;}
 
 
-{bool}	{ECHO;return tBOOL;}
+"true"	{ECHO;return tTRUE;}
+"false"	{ECHO;return tFALSE;}
 "int"	{ECHO;return tINT;}
 "const"	{ECHO;return tCONST;}
 
 "if"	{ECHO;return tIF;}
 "else"	{ECHO;return tELSE;}
+"&&"	{ECHO;return tET;}
+"||"	{ECHO;return tOU;}
 
 "("	{ECHO;return tPO;}
 ")"	{ECHO;return tPF;}
