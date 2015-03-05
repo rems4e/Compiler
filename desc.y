@@ -69,7 +69,7 @@
 
 %token tF
 %token tMAIN
-%token tIF tTHEN tELSE
+%token tIF tELSE
 %token END_OF_FILE
 
 %left tPLUS tMOINS
@@ -112,7 +112,8 @@ Instruc : Exp tVIR Instruc
 | Exp tF
 | tID tEGAL Exp tVIR {affectation($1);} Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF tPO Cond tPF tBO Instruc tBF;
+| tIF tPO Cond tPF tBO Instrucs tBF 
+| tIF tPO Cond tPF tBO Instrucs tBF tELSE tBO Instrucs tBF;
 
 Terme :  tNOMBRE
 | tID {isUsable($1);} ;
