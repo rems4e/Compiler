@@ -135,8 +135,6 @@
 	#include "constants.h"
 	#include "symbol.h"
 
-	#define SYMBOL_SIZE 30
-
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 
@@ -207,10 +205,10 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 61 "desc.y"
+#line 59 "desc.y"
 {int nb; char* var;}
 /* Line 193 of yacc.c.  */
-#line 214 "y.tab.c"
+#line 212 "y.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -223,7 +221,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 227 "y.tab.c"
+#line 225 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -524,11 +522,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    83,    83,    84,    86,    88,    89,    91,    93,    93,
-      94,    94,    95,    95,    96,    96,   101,   102,   104,   105,
-     106,   107,   107,   108,   109,   112,   113,   114,   115,   116,
-     117,   118,   119,   124,   125,   127,   128,   130,   131,   133,
-     134,   136,   136,   136,   136,   136
+       0,    81,    81,    82,    84,    86,    87,    89,    91,    91,
+      92,    92,    93,    93,    94,    94,    99,   100,   102,   103,
+     104,   105,   105,   106,   107,   110,   111,   112,   113,   114,
+     115,   116,   117,   122,   123,   125,   126,   128,   129,   131,
+     132,   134,   134,   134,   134,   134
 };
 #endif
 
@@ -1480,53 +1478,53 @@ yyreduce:
   switch (yyn)
     {
         case 8:
-#line 93 "desc.y"
+#line 91 "desc.y"
     {declaration((yyvsp[(1) - (1)].var));}
     break;
 
   case 10:
-#line 94 "desc.y"
+#line 92 "desc.y"
     {declaration((yyvsp[(1) - (1)].var));}
     break;
 
   case 12:
-#line 95 "desc.y"
+#line 93 "desc.y"
     {declaration((yyvsp[(1) - (3)].var));affectation((yyvsp[(1) - (3)].var));}
     break;
 
   case 14:
-#line 96 "desc.y"
+#line 94 "desc.y"
     {declaration((yyvsp[(1) - (3)].var));affectation((yyvsp[(1) - (3)].var));}
     break;
 
   case 21:
-#line 107 "desc.y"
+#line 105 "desc.y"
     {affectation((yyvsp[(1) - (4)].var));}
     break;
 
   case 23:
-#line 108 "desc.y"
+#line 106 "desc.y"
     {affectation((yyvsp[(1) - (4)].var));}
     break;
 
   case 26:
-#line 113 "desc.y"
+#line 111 "desc.y"
     {isUsable((yyvsp[(1) - (1)].var));}
     break;
 
   case 37:
-#line 130 "desc.y"
+#line 128 "desc.y"
     {printf("type reconnue \n") ;}
     break;
 
   case 38:
-#line 131 "desc.y"
+#line 129 "desc.y"
     {printf("type reconnue \n") ;}
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1530 "y.tab.c"
+#line 1528 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1740,7 +1738,7 @@ yyreturn:
 }
 
 
-#line 138 "desc.y"
+#line 136 "desc.y"
 
 void yyerror(const char *s, ...) {
 	va_list args;

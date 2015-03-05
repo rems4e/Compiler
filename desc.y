@@ -6,8 +6,6 @@
 	#include "constants.h"
 	#include "symbol.h"
 
-	#define SYMBOL_SIZE 30
-
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 
