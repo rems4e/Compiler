@@ -491,7 +491,7 @@ static const yytype_uint8 yyrline[] =
        0,    65,    65,    66,    68,    70,    71,    73,    75,    75,
       76,    76,    77,    77,    78,    78,    83,    84,    86,    87,
       88,    89,    90,    98,    99,   100,   101,   102,   103,   104,
-     105,   110,   111,   113,   114,   116,   116
+     105,   110,   111,   113,   114,   116,   117
 };
 #endif
 
@@ -1457,9 +1457,19 @@ yyreduce:
     {affectation((yyvsp[(1) - (4)].var));}
     break;
 
+  case 35:
+#line 116 "desc.y"
+    {printf("type reconnue \n") ;}
+    break;
+
+  case 36:
+#line 117 "desc.y"
+    {printf("type reconnue \n") ;}
+    break;
+
 
 /* Line 1267 of yacc.c.  */
-#line 1463 "y.tab.c"
+#line 1473 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1673,7 +1683,7 @@ yyreturn:
 }
 
 
-#line 118 "desc.y"
+#line 119 "desc.y"
 
 void yyerror(const char *s) {
 	printf("%s\n",s);
