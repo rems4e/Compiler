@@ -68,8 +68,8 @@
 %token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU
 
 %token tF
-%token tMAIN
-%token tIF tELSE
+%token tMAIN tRETURN tPRINTF
+%token tIF tELSE tWHILE tFOR tDO
 %token END_OF_FILE
 
 %left tPLUS tMOINS
@@ -89,7 +89,7 @@ Corps :	tINT tMAIN Suite;
 
 //Deb : tINT tMAIN ;
 
-Suite : tBO Defs Instrucs tBF ;
+Suite : tBO Defs Instrucs tRETURN Exp tF tBF ;
 
 Defs :
 | Defs Def;
@@ -112,8 +112,12 @@ Instruc : Exp tVIR Instruc
 | Exp tF
 | tID tEGAL Exp tVIR {affectation($1);} Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF tPO Cond tPF tBO Instrucs tBF 
-| tIF tPO Cond tPF tBO Instrucs tBF tELSE tBO Instrucs tBF;
+| tIF Cond tBO Instrucs tBF 
+| tIF Cond tBO Instrucs tBF tELSE tBO Instrucs tBF
+| tWHILE Cond tBO Instrucs tBF 
+| tDO tBO Instrucs tBF tWHILE Cond ;
+| tPRINTF tPO Exp tPF tF ;
+
 
 Terme :  tNOMBRE
 | tID {isUsable($1);} ;
@@ -122,21 +126,22 @@ Cond : Bool
 | Bool tET Cond 
 | Bool tOU Cond ;
 
-Bool : Terme
-| Terme tINF Terme 
-| Terme tSUP Terme
-| Terme tINFEGAL Terme
-| Terme tSUPEGAL Terme
-| Terme tBOOLEGAL Terme
+Bool : tPO Exp tPF
+| tPO Exp tINF Exp tPF 
+| tPO Exp tSUP Exp tPF
+| tPO Exp tINFEGAL Exp tPF
+| tPO Exp tSUPEGAL Exp tPF
+| tPO Exp tBOOLEGAL Exp tPF
 | tTRUE 
 | tFALSE;
 
 
 Exp : Terme
-| Terme tPLUS Terme 
-| Terme tMOINS Terme 
-| Terme tMUL Terme 
-| Terme tDIV Terme ;
+| Exp tPLUS Exp 
+| Exp tMOINS Exp 
+| Exp tMUL Exp
+| Exp tDIV Exp 
+| tPO Exp tPF ;
 
 
 

@@ -19,7 +19,8 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 %%
 
 "main"	{ECHO;return tMAIN;}
-
+"return"	{ECHO;return tRETURN;}
+"printf"	{ECHO;return tPRINTF;}
 
 "true"	{ECHO;return tTRUE;}
 "false"	{ECHO;return tFALSE;}
@@ -30,6 +31,9 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "else"	{ECHO;return tELSE;}
 "&&"	{ECHO;return tET;}
 "||"	{ECHO;return tOU;}
+"while"	{ECHO;return tWHILE;}
+"for"	{ECHO;return tFOR;}
+"do"	{ECHO;return tDO;}
 
 "("	{ECHO;return tPO;}
 ")"	{ECHO;return tPF;}
