@@ -14,6 +14,7 @@ typedef struct {
 	bool affected;
 	char *name;
 	int address;
+	bool constant;
 } symbol;
 
 void initSymbolTable(void);

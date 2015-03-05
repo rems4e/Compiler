@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "y.tab.h"
-char *strdup(const char *s1);
 
 #define ECHO fwrite(yytext, yyleng, 1, yyout)
 

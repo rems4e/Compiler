@@ -2,6 +2,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
+	#include <stdarg.h>
 	#include "constants.h"
 	#include "symbol.h"
 
@@ -10,14 +11,17 @@
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 
-	void yyerror(const char *s) ;
+	void yyerror(const char *s, ...) ;
 	int yylex() ;
 	YY_BUFFER_STATE yy_scan_string (const char *yy_str  );
 
 	void affectation(char const *nom) {
 		symbol *sym = getExistingSymbol(nom);
 		if(sym == NULL) {
-			yyerror("Erreur : variable non déclarée");
+			yyerror("variable non déclarée");
+		}
+		else if(sym->constant) {
+			yyerror("affectation d'une constante");
 		}
 
 		printf("Affectation de la variable %s.\n", nom);
@@ -29,7 +33,7 @@
 	void declaration(char const *nom) {
 		symbol *sym = createSymbol(nom);
 		if(sym == NULL) {
-			yyerror("Erreur : variable déjà déclarée");
+			yyerror("variable déjà déclarée");
 		}
 
 		printf("Déclaration de la variable %s.\n", nom);
@@ -41,10 +45,15 @@
 		printf("%d",val) ;
 	}
  
-	bool isUsable(char* nom){
-		if(!symbolDeclared(nom)){printf("affectation avec %s , variable non déclarée \n", nom) ;}
-		else if (!symbolAffected(nom)){printf("affectation avec %s, variable non affectée \n", nom);}
-		return symbolDeclared(nom) && symbolAffected(nom) ;
+	bool isUsable(char* nom) {
+		bool d = symbolDeclared(nom), a = symbolAffected(nom);
+		if(!d) {
+			yyerror("affectation avec %s , variable non déclarée \n", nom);
+		}
+		else if(!a) {
+			printf("affectation avec %s, variable non affectée \n", nom);
+		}
+		return d && a;
 	}
 
 	%}
@@ -127,8 +136,23 @@ Bool : tBOOL
 OpBool : tBOOLEGAL | tINFEGAL | tSUPEGAL | tSUP | tINF ;
 
 %%
-void yyerror(const char *s) {
-	printf("%s\n",s);
+void yyerror(const char *s, ...) {
+	va_list args;
+	va_start(args, s);
+
+	static char const *prefix = "Erreur : ";
+	static size_t prefix_len = 0;
+	if(prefix_len == 0) {
+		prefix_len = strlen(prefix);
+	}
+
+	char *format = malloc(strlen(s) + prefix_len + 1);
+	strcpy(format, prefix);
+	strcpy(format + prefix_len, prefix);
+
+	vprintf(format, args);
+
+	va_end(args);
 }
 
 int main(int argc, char const **argv) {

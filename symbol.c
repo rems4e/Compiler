@@ -21,11 +21,13 @@ void initSymbolTable() {
 		symbols[i].affected = false;
 		symbols[i].name = NULL;
 		symbols[i].address = i;
+		symbols[i].constant = false;
 	}
 	for(int i = 0; i < SYM_COUNT; ++i, ++address) {
-		symbols[i].affected = false;
-		symbols[i].name = NULL;
-		symbols[i].address = address;
+		privateSymbols[i].affected = false;
+		privateSymbols[i].name = NULL;
+		privateSymbols[i].address = address;
+		privateSymbols[i].constant = false;
 	}
 }
 
@@ -71,7 +73,7 @@ bool symbolAffected(char const *name) {
 void printSymbolTable() {
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name != NULL) {
-			printf("%x: \"%s\" affected: %s\n", symbols[i].address, symbols[i].name, (symbols[i].affected ? "true" : "false"));
+			printf("%#x: \"%s\" affected: %s\n", symbols[i].address, symbols[i].name, (symbols[i].affected ? "true" : "false"));
 		}
 		else {
 			break;
