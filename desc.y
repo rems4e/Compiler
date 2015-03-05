@@ -9,9 +9,9 @@
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 
-	void yyerror(const char *s, ...) ;
-	int yylex() ;
-	YY_BUFFER_STATE yy_scan_string (const char *yy_str  );
+	void yyerror(const char *s, ...);
+	int yylex();
+	YY_BUFFER_STATE yy_scan_string (const char *yy_str);
 
 	void affectation(char const *nom) {
 		symbol_t *sym = getExistingSymbol(nom);
@@ -148,7 +148,7 @@ void yyerror(const char *s, ...) {
 	strcpy(format, prefix);
 	strcpy(format + prefix_len, prefix);
 
-	vprintf(format, args);
+	vfprintf(stderr, format, args);
 
 	va_end(args);
 }
