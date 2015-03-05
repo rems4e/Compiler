@@ -10,24 +10,30 @@
 
 #include "constants.h"
 
+#define SYM_COUNT 100
+
 typedef struct {
 	bool affected;
 	char *name;
 	int address;
 	bool constant;
-} symbol;
+} symbol_t;
 
-void initSymbolTable(void);
-void cleanSymbolTable(void);
+typedef struct {
+	symbol_t symbols[SYM_COUNT];
+} symbolTable_t;
 
-symbol *getExistingSymbol(char const *name);
-symbol *createSymbol(char const *name);
+void initSymbolTables(void);
+void cleanSymbolTables(void);
+
+symbolTable_t *pushSymbolTable();
+void popSymbolTable();
+
+symbol_t *getExistingSymbol(char const *name);
+symbol_t *createSymbol(char const *name);
 bool symbolDeclared(char const *name);
 bool symbolAffected(char const *name);
 
 void printSymbolTable();
-
-
-symbol *createPrivateSymbol(void);
 
 #endif /* defined(__Syste_me_Info__symbol__) */

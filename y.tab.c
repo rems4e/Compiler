@@ -145,7 +145,7 @@
 	YY_BUFFER_STATE yy_scan_string (const char *yy_str  );
 
 	void affectation(char const *nom) {
-		symbol *sym = getExistingSymbol(nom);
+		symbol_t *sym = getExistingSymbol(nom);
 		if(sym == NULL) {
 			yyerror("variable non déclarée");
 		}
@@ -160,7 +160,7 @@
 	}
 
 	void declaration(char const *nom) {
-		symbol *sym = createSymbol(nom);
+		symbol_t *sym = createSymbol(nom);
 		if(sym == NULL) {
 			yyerror("variable déjà déclarée");
 		}
@@ -1762,7 +1762,7 @@ void yyerror(const char *s, ...) {
 }
 
 int main(int argc, char const **argv) {
-	initSymbolTable();
+	initSymbolTables();
 
 	char *buf;
 	if(argc > 1) {
@@ -1792,6 +1792,8 @@ int main(int argc, char const **argv) {
 
 	yyparse();
 	free(buf);
+
+	cleanSymbolTables();
 
 	return 0;
 }
