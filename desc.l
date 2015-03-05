@@ -27,6 +27,7 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "const"	{ECHO;return tCONST;}
 
 "if"	{ECHO;return tIF;}
+"else"	{ECHO;return tELSE;}
 
 "("	{ECHO;return tPO;}
 ")"	{ECHO;return tPF;}

@@ -69,7 +69,7 @@
 
 %token tF
 %token tMAIN
-%token tIF tTHEN
+%token tIF tTHEN tELSE
 %token END_OF_FILE
 
 %left tPLUS tMOINS
@@ -90,49 +90,49 @@ Def : Type TypedDef;
 
 TypedDef : tID {declaration($1);} tVIR TypedDef
 | tID {declaration($1);} tF
-| tID  tEGAL Exp {declaration($1);affectation($1);} tVIR TypedDef //Exps n'est jamais atteint
+| tID  tEGAL Exp {declaration($1);affectation($1);} tVIR TypedDef 
 | tID tEGAL Exp {declaration($1);affectation($1);} tF;
 
 
 
 
 Instrucs:
-| Instrucs Instruc; //pourquoi cet ordre dans la récursivité (risque de boucle infini : Instrucs -> Instrucs -> Instrucs -> ...)
+| Instrucs Instruc; 
 
 Instruc :
-| Exp tVIR //("a," ne devrait pas faire partie du langage)
+| Exp tVIR 
 | Exp tF
 | tID tEGAL Exp tVIR {affectation($1);} Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF tPO Bool tPF tBO Instruc tBF;
+| tIF Cond tBO Instruc tBF;
 
+Cond : tPO Exp tPF ;
 
 Exp :  tNOMBRE
 | tID {isUsable($1);}
-| Exp tPLUS Exp  //{$$=$1+$3 ;}
-| Exp tMOINS Exp //{$$=$1-$3 ;}
-| Exp tDIV Exp //{$$=$1/$3 ;}
-| Exp tMUL Exp //{$$=$1*$3 ;}
-| tPO Exp tPF 	//{$$=$2}
-| tID tPO Args tPF;//{$$=$2;}; //TODO
+| Exp Exps  //{$$=$1+$3 ;}
+| Cond 	//{$$=$2}
+//| tID tPO Args tPF
+| Exp ExpsBool ;//{$$=$2;}; //TODO
 
+ExpsBool : OpBool Exp ;
 
+Exps : Op Exp ;
 
-
-Args :
+/*Args : ;
 | Args Arg;
 
 Arg : Exp
 | Exp tVIR; //{$$=$1};
-
+*/
 Type : tINT  {printf("type reconnue \n") ;}
         | tCONST {printf("type reconnue \n") ;} ;
 
-Bool : tBOOL
-	|Exp OpBool Exp ;
+/*Bool : tBOOL
+	|Exp OpBool Exp ; */
 
 OpBool : tBOOLEGAL | tINFEGAL | tSUPEGAL | tSUP | tINF ;
-
+Op : tPLUS | tMOINS | tMUL | tDIV ;
 %%
 void yyerror(const char *s, ...) {
 	va_list args;
