@@ -4,7 +4,7 @@
 #include <string.h>
 #include "y.tab.h"
 
-#define ECHO fwrite(yytext, yyleng, 1, yyout)
+#define ECHO /*fwrite(yytext, yyleng, 1, yyout)*/
 
 %}
 

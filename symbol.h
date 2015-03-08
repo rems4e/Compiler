@@ -23,7 +23,9 @@ typedef struct {
 
 typedef struct {
 	symbol_t symbols[SYM_COUNT];
+	symbol_t *symbolsStack[SYM_COUNT];
 	address_t lastTemporary;
+	int stackSize;
 } symbolTable_t;
 
 void initSymbolTable(void);
@@ -34,7 +36,10 @@ symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name);
 
 symbol_t *allocTemp(void);
-address_t freeTempAndGetAddress();
+void freeIfTemp(symbol_t *s);
+
+void pushSymbol(symbol_t *s);
+symbol_t *popSymbol(void);
 
 bool symbolDeclared(char const *name);
 bool symbolAffected(char const *name);

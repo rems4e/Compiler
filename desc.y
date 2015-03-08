@@ -27,9 +27,10 @@
 
 		printf("Affectation de la variable %s.\n", nom);
 		sym->affected = true;
-		address_t val = freeTempAndGetAddress();
+		symbol_t *val = popSymbol();
 
-		assemblyOutput("MOV %d %d", sym->address, val);
+		assemblyOutput("MOV %d %d ; %s", sym->address, val->address, nom);
+		freeIfTemp(val);
 
 		//printSymbolTable();
 	}
@@ -128,8 +129,12 @@ Instruc : Exp tVIR Instruc
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp();
 	assemblyOutput("MOV %d %d", s->address, $1);
+	pushSymbol(s);
 }
-| tID { isUsable($1); }
+| tID {
+	assert(isUsable($1));
+	pushSymbol(getExistingSymbol($1));
+}
 | Bool ;
 
 Cond : tPO Exp tPF;
@@ -138,21 +143,25 @@ Bool:
 | tTRUE {
 	symbol_t *s = allocTemp();
 	assemblyOutput("MOV %d %d", s->address, 1);
+	pushSymbol(s);
 }
 | tFALSE {
 	symbol_t *s = allocTemp();
 	assemblyOutput("MOV %d %d", s->address, 0);
+	pushSymbol(s);
 };
 
 
 Exp : Terme
 | Exp tPLUS Exp {
-	allocTemp();
-	address_t res = freeTempAndGetAddress();
-	address_t a2 = freeTempAndGetAddress();
-	address_t a1 = freeTempAndGetAddress();
+	symbol_t *s2 = popSymbol();
+	symbol_t *s1 = popSymbol();
+	symbol_t *res = allocTemp();
+	pushSymbol(res);
 
-	assemblyOutput("ADD %d %d %d", res, a1, a2);
+	assemblyOutput("ADD %d %d %d", res->address, s1->address, s2->address);
+	freeIfTemp(s2);
+	freeIfTemp(s1);
 }
 | Exp tMOINS Exp 
 | Exp tMUL Exp

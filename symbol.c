@@ -22,12 +22,15 @@ void initSymbolTable() {
 
 void resetSymbolTable() {
 	symbolTable.lastTemporary = SYM_COUNT;
+	symbolTable.stackSize = 0;
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		symbolTable.symbols[i].affected = false;
 		symbolTable.symbols[i].name = NULL;
 		symbolTable.symbols[i].address = i;
 		symbolTable.symbols[i].constant = false;
+
+		symbolTable.symbolsStack[i] = NULL;
 	}
 }
 
@@ -80,13 +83,11 @@ symbol_t *createSymbol(char const *name) {
 symbol_t *allocTemp() {
 	symbol_t *symbols = symbolTable.symbols;
 
-	for(int i = symbolTable.lastTemporary - 1; i >= 0; ++i) {
-		if(symbols[i].name == NULL) {
-			symbols[i].name = tempSymbol;
-			--symbolTable.lastTemporary;
+	if(symbols[symbolTable.lastTemporary - 1].name == NULL) {
+		symbols[symbolTable.lastTemporary - 1].name = tempSymbol;
+		--symbolTable.lastTemporary;
 
-			return &symbols[i];
-		}
+		return &symbols[symbolTable.lastTemporary - 1];
 	}
 
 	fprintf(stderr, "Symbol table too small, couldn't get room for new temporary symbol.\n");
@@ -94,16 +95,27 @@ symbol_t *allocTemp() {
 
 }
 
-address_t freeTempAndGetAddress() {
-	symbol_t *symbols = symbolTable.symbols;
+void freeIfTemp(symbol_t *s) {
+	if(s->address >= symbolTable.lastTemporary) {
+		s->name = NULL;
+		++symbolTable.lastTemporary;
+	}
+}
 
-	assert(symbolTable.lastTemporary < SYM_COUNT);
-	symbol_t *temp = &symbols[symbolTable.lastTemporary];
 
-	temp->name = NULL;
-	++symbolTable.lastTemporary;
+void pushSymbol(symbol_t *s) {
+	assert(symbolTable.stackSize < SYM_COUNT - 1);
+	symbolTable.symbolsStack[symbolTable.stackSize] = s;
+	++symbolTable.stackSize;
+}
 
-	return temp->address;
+symbol_t *popSymbol() {
+	assert(symbolTable.stackSize > 0);
+	--symbolTable.stackSize;
+	symbol_t *ret = symbolTable.symbolsStack[symbolTable.stackSize];
+	symbolTable.symbolsStack[symbolTable.stackSize] = NULL;
+
+	return ret;
 }
 
 bool symbolDeclared(char const *name) {
