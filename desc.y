@@ -64,17 +64,21 @@
 %token <var> tFCT
 
 %token tPO tPF tVIR tBO tBF
-%token tINT tCONST tBOOL
+%token tINT tCONST tTRUE tFALSE
 %token tPLUS tMOINS tDIV tMUL tEGAL
-%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF
+%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU
 
 %token tF
-%token tMAIN
-%token tIF tTHEN
+%token tMAIN tRETURN tPRINTF
+%token tIF tELSE tWHILE tFOR tDO
 %token END_OF_FILE
 
 %left tPLUS tMOINS
 %left tDIV tMUL
+
+%left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF
+%left tOU
+%left tET
 
 %start S
 
@@ -82,57 +86,65 @@
 S :
 | S Corps;
 
-Corps :	tMAIN tBO Defs Instrucs tBF;
+Corps :	tINT tMAIN Suite;
+
+//Deb : tINT tMAIN ;
+
+Suite : tBO Defs Instrucs tRETURN Exp tF tBF ;
 
 Defs :
-| Def Defs;
+| Defs Def;
 
 Def : Type TypedDef;
 
+Type : tINT  {printf("type reconnue \n") ;}
+        | tCONST {printf("type reconnue \n") ;} ;
+        
+        
 TypedDef : tID {declaration($1);} tVIR TypedDef
 | tID {declaration($1);} tF
-| tID  tEGAL Exp {declaration($1);affectation($1);} tVIR TypedDef //Exps n'est jamais atteint
+| tID  tEGAL Exp {declaration($1);affectation($1);} tVIR TypedDef 
 | tID tEGAL Exp {declaration($1);affectation($1);} tF;
 
-
-
-
 Instrucs:
-| Instrucs Instruc; //pourquoi cet ordre dans la récursivité (risque de boucle infini : Instrucs -> Instrucs -> Instrucs -> ...)
+| Instrucs Instruc; 
 
-Instruc :
-| Exp tVIR //("a," ne devrait pas faire partie du langage)
+Instruc : Exp tVIR Instruc
 | Exp tF
 | tID tEGAL Exp tVIR {affectation($1);} Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF tPO Bool tPF tBO Instruc tBF;
+| tIF Cond tBO Instrucs tBF 
+| tIF Cond tBO Instrucs tBF tELSE tBO Instrucs tBF
+| tWHILE Cond tBO Instrucs tBF 
+| tDO tBO Instrucs tBF tWHILE Cond ;
+| tPRINTF tPO Exp tPF tF ;
 
 
-Exp :  tNOMBRE
-| tID {isUsable($1);}
-| Exp tPLUS Exp  //{$$=$1+$3 ;}
-| Exp tMOINS Exp //{$$=$1-$3 ;}
-| Exp tDIV Exp //{$$=$1/$3 ;}
-| Exp tMUL Exp //{$$=$1*$3 ;}
-| tPO Exp tPF 	//{$$=$2}
-| tID tPO Args tPF;//{$$=$2;}; //TODO
+Terme :  tNOMBRE
+| tID {isUsable($1);} ;
+
+Cond : Bool
+| Bool tET Cond 
+| Bool tOU Cond ;
+
+Bool : tPO Exp tPF
+| tPO Exp tINF Exp tPF 
+| tPO Exp tSUP Exp tPF
+| tPO Exp tINFEGAL Exp tPF
+| tPO Exp tSUPEGAL Exp tPF
+| tPO Exp tBOOLEGAL Exp tPF
+| tTRUE 
+| tFALSE;
 
 
+Exp : Terme
+| Exp tPLUS Exp 
+| Exp tMOINS Exp 
+| Exp tMUL Exp
+| Exp tDIV Exp 
+| tPO Exp tPF ;
 
 
-Args :
-| Args Arg;
-
-Arg : Exp
-| Exp tVIR; //{$$=$1};
-
-Type : tINT  {printf("type reconnue \n") ;}
-        | tCONST {printf("type reconnue \n") ;} ;
-
-Bool : tBOOL
-	|Exp OpBool Exp ;
-
-OpBool : tBOOLEGAL | tINFEGAL | tSUPEGAL | tSUP | tINF ;
 
 %%
 void yyerror(const char *s, ...) {
