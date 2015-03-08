@@ -11,6 +11,6 @@
 void initAssemblyOutput(char const *path);
 void closeAssemblyOutput();
 
-void assemblyOutput(char const *line);
+void assemblyOutput(char const *lineFormat, ...);
 
 #endif /* defined(__Syste_me_Info__assembly__) */

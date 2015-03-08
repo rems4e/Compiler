@@ -7,6 +7,7 @@
 
 #include "assembly.h"
 #include <stdio.h>
+#include <stdarg.h>
 
 static FILE *output = NULL;
 
@@ -18,6 +19,12 @@ void closeAssemblyOutput() {
 	fclose(output);
 }
 
-void assemblyOutput(char const *line) {
-	fprintf(output, "%s\n", line);
+void assemblyOutput(char const *lineFormat, ...) {
+	va_list args;
+	va_start(args, lineFormat);
+
+	vfprintf(output, lineFormat, args);
+	fputc('\n', output);
+
+	va_end(args);
 }

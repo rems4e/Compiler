@@ -34,7 +34,7 @@ symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name);
 
 symbol_t *allocTemp(void);
-void freeTemp(symbol_t tmp);
+address_t freeTempAndGetAddress();
 
 bool symbolDeclared(char const *name);
 bool symbolAffected(char const *name);

@@ -3,6 +3,7 @@
 	#include <stdlib.h>
 	#include <string.h>
 	#include <stdarg.h>
+	#include <assert.h>
 	#include "constants.h"
 	#include "symbol.h"
 	#include "assembly.h"
@@ -26,8 +27,11 @@
 
 		printf("Affectation de la variable %s.\n", nom);
 		sym->affected = true;
+		address_t val = freeTempAndGetAddress();
 
-		printSymbolTable();
+		assemblyOutput("MOV %d %d", sym->address, val);
+
+		//printSymbolTable();
 	}
 
 	void declaration(char const *nom) {
@@ -38,11 +42,11 @@
 
 		printf("Déclaration de la variable %s.\n", nom);
 		
-		printSymbolTable();
+		//printSymbolTable();
 	}
 
 	void print(int val){
-		printf("%d",val) ;
+		printf("%d", val) ;
 	}
  
 	bool isUsable(char* nom) {
@@ -55,7 +59,6 @@
 		}
 		return d && a;
 	}
-
 	%}
 
 %union {int nb; char* var;}
@@ -122,19 +125,35 @@ Instruc : Exp tVIR Instruc
 | tPRINTF tPO Exp tPF tF ;
 
 
-Terme :  tNOMBRE
+Terme :  tNOMBRE {
+	symbol_t *s = allocTemp();
+	assemblyOutput("MOV %d %d", s->address, $1);
+}
 | tID { isUsable($1); }
-| Bool;
+| Bool ;
 
 Cond : tPO Exp tPF;
 
 Bool:
-| tTRUE
-| tFALSE;
+| tTRUE {
+	symbol_t *s = allocTemp();
+	assemblyOutput("MOV %d %d", s->address, 1);
+}
+| tFALSE {
+	symbol_t *s = allocTemp();
+	assemblyOutput("MOV %d %d", s->address, 0);
+};
 
 
 Exp : Terme
-| Exp tPLUS Exp 
+| Exp tPLUS Exp {
+	allocTemp();
+	address_t res = freeTempAndGetAddress();
+	address_t a2 = freeTempAndGetAddress();
+	address_t a1 = freeTempAndGetAddress();
+
+	assemblyOutput("ADD %d %d %d", res, a1, a2);
+}
 | Exp tMOINS Exp 
 | Exp tMUL Exp
 | Exp tDIV Exp
@@ -156,17 +175,8 @@ void yyerror(const char *s, ...) {
 	va_list args;
 	va_start(args, s);
 
-	static char const *prefix = "Erreur : ";
-	static size_t prefix_len = 0;
-	if(prefix_len == 0) {
-		prefix_len = strlen(prefix);
-	}
-
-	char *format = malloc(strlen(s) + prefix_len + 1);
-	strcpy(format, prefix);
-	strcpy(format + prefix_len, s);
-
-	vfprintf(stderr, format, args);
+	fprintf(stderr, "Erreur :");
+	vfprintf(stderr, s, args);
 
 	va_end(args);
 }

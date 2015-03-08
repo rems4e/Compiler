@@ -80,9 +80,11 @@ symbol_t *createSymbol(char const *name) {
 symbol_t *allocTemp() {
 	symbol_t *symbols = symbolTable.symbols;
 
-	for(int i = symbolTable.lastTemporary; i >= 0; ++i) {
+	for(int i = symbolTable.lastTemporary - 1; i >= 0; ++i) {
 		if(symbols[i].name == NULL) {
 			symbols[i].name = tempSymbol;
+			--symbolTable.lastTemporary;
+
 			return &symbols[i];
 		}
 	}
@@ -92,8 +94,16 @@ symbol_t *allocTemp() {
 
 }
 
-void freeTemp(symbol_t tmp) {
+address_t freeTempAndGetAddress() {
+	symbol_t *symbols = symbolTable.symbols;
 
+	assert(symbolTable.lastTemporary < SYM_COUNT);
+	symbol_t *temp = &symbols[symbolTable.lastTemporary];
+
+	temp->name = NULL;
+	++symbolTable.lastTemporary;
+
+	return temp->address;
 }
 
 bool symbolDeclared(char const *name) {
