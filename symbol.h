@@ -12,25 +12,30 @@
 
 #define SYM_COUNT 100
 
+typedef unsigned int address_t;
+
 typedef struct {
 	bool affected;
 	char *name;
-	int address;
+	address_t address;
 	bool constant;
 } symbol_t;
 
 typedef struct {
 	symbol_t symbols[SYM_COUNT];
+	address_t lastTemporary;
 } symbolTable_t;
 
-void initSymbolTables(void);
-void cleanSymbolTables(void);
-
-symbolTable_t *pushSymbolTable();
-void popSymbolTable();
+void initSymbolTable(void);
+void resetSymbolTable(void);
+void cleanSymbolTable(void);
 
 symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name);
+
+symbol_t *allocTemp(void);
+void freeTemp(symbol_t tmp);
+
 bool symbolDeclared(char const *name);
 bool symbolAffected(char const *name);
 

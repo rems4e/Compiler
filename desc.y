@@ -5,6 +5,7 @@
 	#include <stdarg.h>
 	#include "constants.h"
 	#include "symbol.h"
+	#include "assembly.h"
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
@@ -154,12 +155,23 @@ void yyerror(const char *s, ...) {
 }
 
 int main(int argc, char const **argv) {
-	initSymbolTables();
+	char *outputName = strdup("a.s");
+
+	initSymbolTable();
 
 	char *buf;
 	if(argc > 1) {
-		long len;
-		FILE * f = fopen (argv[1], "rb");
+		long len = strlen(argv[1]);
+
+		if(len < 2 || argv[1][len - 1] != 'c' || argv[1][len - 2] != '.') {
+			fprintf(stderr, "Le fichier doit avoir l'extension \".c\" !\n");
+			return 1;
+		}
+		FILE * f = fopen(argv[1], "rb");
+		char *name = strdup(argv[1]);
+		name[len - 1] = 's';
+
+		outputName = name;
 
 		if(f) {
 			fseek (f, 0, SEEK_END);
@@ -180,12 +192,14 @@ int main(int argc, char const **argv) {
 		}
 	}
 
-
+	initAssemblyOutput(outputName);
+	free(outputName);
 
 	yyparse();
 	free(buf);
 
-	cleanSymbolTables();
+	closeAssemblyOutput();
+	cleanSymbolTable();
 
 	return 0;
 }
