@@ -10,4 +10,4 @@ lex.yy.c: desc.l
 desc.l: y.tab.c
 
 clean:
-	rm -rf y.tab.c y.tab.h lex.yy.c desc.dSYM desc
+	rm -rf y.tab.c y.tab.h lex.yy.c desc.dSYM desc y.output

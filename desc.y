@@ -10,17 +10,18 @@
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 
-	void yyerror(const char *s, ...);
+	void yyerror(char const *s, ...);
+
 	int yylex();
 	YY_BUFFER_STATE yy_scan_string (const char *yy_str);
 
 	void affectation(char const *nom) {
 		symbol_t *sym = getExistingSymbol(nom);
 		if(sym == NULL) {
-			yyerror("variable non déclarée");
+			yyerror("variable %s non déclarée\n", nom);
 		}
 		else if(sym->constant) {
-			yyerror("affectation d'une constante");
+			yyerror("affectation d'une constante\n");
 		}
 
 		printf("Affectation de la variable %s.\n", nom);
@@ -32,7 +33,7 @@
 	void declaration(char const *nom) {
 		symbol_t *sym = createSymbol(nom);
 		if(sym == NULL) {
-			yyerror("variable déjà déclarée");
+			yyerror("variable déjà déclarée\n");
 		}
 
 		printf("Déclaration de la variable %s.\n", nom);
@@ -97,21 +98,21 @@ Defs :
 
 Def : Type TypedDef;
 
-Type : tINT  {printf("type reconnue \n") ;}
-        | tCONST {printf("type reconnue \n") ;} ;
+Type : tINT  { printf("type reconnu\n"); }
+| tCONST { printf("type reconnu\n"); } ;
         
         
-TypedDef : tID {declaration($1);} tVIR TypedDef
-| tID {declaration($1);} tF
-| tID  tEGAL Exp {declaration($1);affectation($1);} tVIR TypedDef 
-| tID tEGAL Exp {declaration($1);affectation($1);} tF;
+TypedDef : tID { declaration($1); } tVIR TypedDef
+| tID { declaration($1); } tF
+| tID  tEGAL Exp { declaration($1); affectation($1); } tVIR TypedDef
+| tID tEGAL Exp { declaration($1); affectation($1); } tF;
 
 Instrucs:
 | Instrucs Instruc; 
 
 Instruc : Exp tVIR Instruc
 | Exp tF
-| tID tEGAL Exp tVIR {affectation($1);} Instruc
+| tID tEGAL Exp tVIR { affectation($1); } Instruc
 | tID tEGAL Exp tF {affectation($1);}
 | tIF Cond tBO Instrucs tBF 
 | tIF Cond tBO Instrucs tBF tELSE tBO Instrucs tBF
@@ -122,19 +123,13 @@ Instruc : Exp tVIR Instruc
 
 
 Terme :  tNOMBRE
-| tID {isUsable($1);} ;
+| tID { isUsable($1); }
+| Bool;
 
-Cond : Bool
-| Bool tET Cond 
-| Bool tOU Cond ;
+Cond : tPO Exp tPF;
 
-Bool : tPO Exp tPF
-| tPO Exp tINF Exp tPF 
-| tPO Exp tSUP Exp tPF
-| tPO Exp tINFEGAL Exp tPF
-| tPO Exp tSUPEGAL Exp tPF
-| tPO Exp tBOOLEGAL Exp tPF
-| tTRUE 
+Bool:
+| tTRUE
 | tFALSE;
 
 
@@ -142,7 +137,16 @@ Exp : Terme
 | Exp tPLUS Exp 
 | Exp tMOINS Exp 
 | Exp tMUL Exp
-| Exp tDIV Exp 
+| Exp tDIV Exp
+
+| Exp tET Exp
+| Exp tOU Exp
+| Exp tINF Exp
+| Exp tSUP Exp
+| Exp tINFEGAL Exp
+| Exp tSUPEGAL Exp
+| Exp tBOOLEGAL Exp
+
 | tPO Exp tPF ;
 
 
@@ -160,7 +164,7 @@ void yyerror(const char *s, ...) {
 
 	char *format = malloc(strlen(s) + prefix_len + 1);
 	strcpy(format, prefix);
-	strcpy(format + prefix_len, prefix);
+	strcpy(format + prefix_len, s);
 
 	vfprintf(stderr, format, args);
 
@@ -187,14 +191,14 @@ int main(int argc, char const **argv) {
 		outputName = name;
 
 		if(f) {
-			fseek (f, 0, SEEK_END);
+			fseek(f, 0, SEEK_END);
 			len = ftell (f);
-			fseek (f, 0, SEEK_SET);
+			fseek(f, 0, SEEK_SET);
 			buf = malloc (len);
 			if(buf) {
 				fread (buf, 1, len, f);
 			}
-			fclose (f);
+			fclose(f);
 		}
 
 		if(buf) {
