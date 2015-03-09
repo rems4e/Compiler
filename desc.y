@@ -9,7 +9,7 @@
 	#include "symbol.h"
 	#include "assembly.h"
 
-#define OPCODE_TEXT
+//#define OPCODE_TEXT
 
 #ifdef OPCODE_TEXT
 
@@ -303,7 +303,7 @@ int main(int argc, char const **argv) {
 			fprintf(stderr, "Le fichier doit avoir l'extension \".c\" !\n");
 			return 1;
 		}
-		FILE * f = fopen(argv[1], "rb");
+		FILE *f = fopen(argv[1], "rb");
 		char *name = strdup(argv[1]);
 		name[len - 1] = 's';
 
@@ -311,11 +311,11 @@ int main(int argc, char const **argv) {
 
 		if(f) {
 			fseek(f, 0, SEEK_END);
-			len = ftell (f);
+			len = ftell(f);
 			fseek(f, 0, SEEK_SET);
-			buf = malloc (len);
+			buf = malloc(len);
 			if(buf) {
-				fread (buf, 1, len, f);
+				fread(buf, 1, len, f);
 			}
 			fclose(f);
 		}
