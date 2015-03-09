@@ -192,7 +192,11 @@ Instruc : Exp tVIR Instruc
 | tWHILE Cond tBO Instrucs tBF 
 | tDO tBO Instrucs tBF tWHILE Cond
 | tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
-| tPRINTF tPO Exp tPF tF ;
+| tPRINTF tPO Exp tPF tF {
+	symbol_t *s = popSymbol();
+	assemblyOutput(PRI" %d", s->address);
+	freeIfTemp(s);
+};
 
 
 Terme :  tNOMBRE {

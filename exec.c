@@ -99,7 +99,12 @@ void exec(char const *sourcePath) {
 	int pc = 0;
 	while(pc < linesCount) {
 		char *line = &source[linesIndex[pc]];
-		sscanf(line, "%d", &opcode);
+		if(line[0] >= '0' && line[0] <= '9')
+			opcode = line[0] - '0';
+		else {
+			opcode = line[0] - 'A' + 10;
+		}
+		++line;
 
 		switch(opcode) {
 			case ADD:
@@ -155,11 +160,11 @@ void exec(char const *sourcePath) {
 				
 			case PRI:
 				SCAN_ONE;
-				printf("%d\n", op1);
+				printf("%d\n", memory[op1]);
 				break;
 		}
 
-		++linesCount;
+		++pc;
 	}
 
 	free(memory);
