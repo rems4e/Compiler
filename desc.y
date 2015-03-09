@@ -156,11 +156,7 @@ Instruc : Exp tVIR Instruc
 | tIF Cond tBO Instrucs tBF 
 | tIF Cond tBO Instrucs tBF tELSE tBO Instrucs tBF
 | tWHILE Cond tBO Instrucs tBF 
-<<<<<<< HEAD
-| tDO tBO Instrucs tBF tWHILE Cond 
-=======
 | tDO tBO Instrucs tBF tWHILE Cond
->>>>>>> d29e5711906d467109d85f70726c4a3bda3bbd79
 | tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
 | tPRINTF tPO Exp tPF tF ;
 
