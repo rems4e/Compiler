@@ -140,7 +140,7 @@
 %token tPO tPF tVIR tBO tBF
 %token tINT tCONST tTRUE tFALSE
 %token tPLUS tMOINS tDIV tMUL tEGAL
-%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU
+%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
 
 %token tF
 %token tMAIN tRETURN tPRINTF
@@ -303,7 +303,8 @@ Exp : Terme
 }
 | Exp tBOOLEGAL Exp { binOp(EQU); }
 
-| tPO Exp tPF ;
+| tPO Exp tPF 
+| Exp tDIFF Exp;
 
 
 

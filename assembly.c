@@ -40,6 +40,7 @@ void assemblyOutput(char const *lineFormat, ...) {
 
 int numCharInstruc() {
 	int num = ftell(output) ;
+	return num ;
 }
 
 
