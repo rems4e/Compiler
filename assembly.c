@@ -11,11 +11,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#define TAILLE_MAX 100
+
 
 static FILE *output = NULL;
+
 labels_stack labelsStack = {NULL,0} ;
 
-static int NAME_LABEL = 0 ;
 
 
 void initAssemblyOutput(char const *path) {
@@ -49,10 +51,10 @@ void freeLabelStack(){
 		lab = temp->suiv ;
 		freeLabel(temp);
 	}
-	
+
 	freeLabel(lab) ;
 	freeLabel(temp);
-} 
+}
 
 void freeLabel(label* lab){
 	free(lab->suiv) ;
@@ -62,10 +64,10 @@ void freeLabel(label* lab){
 
 label makeLabel(int saut){
 
-	char* name = malloc(100) ; 
-	sprintf(name,"toto%d",NAME_LABEL);  
-	label lab = {name,0,labelsStack.label} ;
-	
+	char* name = malloc(100) ;
+	sprintf(name,"toto%d",labelsStack.stackSize);
+	label lab = {name,saut,labelsStack.label} ;
+
 	return lab ;
 }
 
@@ -77,10 +79,10 @@ void pushLabel(label lab){
 
 label* popLabel(){
 	label* point = labelsStack.label ;
-	
+
 	labelsStack.label = point->suiv ;
 	labelsStack.stackSize -- ;
-	
+
 	point->suiv = NULL ;
 	return point ;
 }
@@ -105,12 +107,19 @@ label getLabel(char* name){
 
 int getAddSaut(char* name){
 	return (*(getLabel(name).adresseSaut)) ;
-	
+
 }
 
-void setLabelAdd (char* name, int saut){
-	label l = getLabel(name) ;
+void setLabelAdd (label l, int saut){
 
 	l.adresseSaut = &saut ;
+}
+
+void handleLabel(FILE* f){
+    char* chaine = malloc(TAILLE_MAX) ;
+    while(fgets(chaine,TAILLE_MAX,f)!=NULL){
+
+    }
+    free(chaine);
 }
 
