@@ -30,6 +30,8 @@ void pushLabel(label lab) ;
 label* popLabel() ;
 char* getNameLabel(label lab) ;
 label makeLabel(int saut) ;
+int getAddSaut(char* name) ;
+void setLabelAdd ();
 
 void freeLabel(label* lab) ;
 void freeLabelStack() ;
