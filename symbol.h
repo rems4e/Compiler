@@ -19,6 +19,7 @@ typedef struct {
 	char *name;
 	address_t address;
 	bool constant;
+	int refCount;
 } symbol_t;
 
 typedef struct {

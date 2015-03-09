@@ -28,6 +28,7 @@ void resetSymbolTable() {
 		symbolTable.symbols[i].name = NULL;
 		symbolTable.symbols[i].address = i;
 		symbolTable.symbols[i].constant = false;
+		symbolTable.symbols[i].refCount = 0;
 
 		symbolTable.symbolsStack[i] = NULL;
 	}
@@ -85,6 +86,7 @@ symbol_t *allocTemp() {
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name == NULL) {
 			symbols[i].name = tempSymbol;
+			symbols[i].refCount = 1;
 			return &symbols[i];
 		}
 	}
@@ -96,7 +98,11 @@ symbol_t *allocTemp() {
 
 void freeIfTemp(symbol_t *s) {
 	if(s->name == tempSymbol) {
-		s->name = NULL;
+		assert(s->refCount > 0);
+		--s->refCount;
+		if(s->refCount == 0) {
+			s->name = NULL;
+		}
 	}
 }
 
