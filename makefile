@@ -1,5 +1,10 @@
-all: y.tab.c lex.yy.c symbol.c
-	gcc -std=gnu99 -g y.tab.c lex.yy.c symbol.c assembly.c -ll -o desc
+all: compiler exec
+
+clean:
+	rm -rf y.tab.c y.tab.h lex.yy.c *.dSYM compiler exec y.output
+
+compiler: y.tab.c lex.yy.c symbol.c
+	gcc -std=gnu99 -g y.tab.c lex.yy.c symbol.c assembly.c -ll -o compiler
 	
 y.tab.c: desc.y
 	yacc -dv desc.y
@@ -9,5 +14,5 @@ lex.yy.c: desc.l
 
 desc.l: y.tab.c
 
-clean:
-	rm -rf y.tab.c y.tab.h lex.yy.c desc.dSYM desc y.output
+exec: exec.c
+	gcc -std=gnu99 -g exec.c -o exec
