@@ -86,7 +86,31 @@ label* popLabel(){
 }
 
 char* getNameLabel(label lab){
-
 	return lab.name ;
+}
+
+label getLabel(char* name){
+
+	label* lab = labelsStack.label ;
+	label* temp ;
+	while(lab !=NULL){
+		temp = lab ;
+		lab = temp->suiv ;
+		if(strcmp(name,getNameLabel(*temp))){
+			return (*temp) ;
+		}
+	}
+}
+
+
+int getAddSaut(char* name){
+	return (*(getLabel(name).adresseSaut)) ;
+	
+}
+
+void setLabelAdd (char* name, int saut){
+	label l = getLabel(name) ;
+
+	l.adresseSaut = &saut ;
 }
 

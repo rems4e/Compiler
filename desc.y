@@ -206,7 +206,11 @@ Terme :  tNOMBRE {
 }
 | Bool ;
 
-Cond : tPO Exp tPF ; //{$$=$2};
+Cond : tPO Exp tPF {
+	symbol_t *s = popSymbol() ;
+	label l = makeLabel(0) ;
+	pushLabel(l) ;
+	assemblyOutput(JMF" %d %d",s->address,getNameLabel(l)) ;} ;
 
 Bool:
 | tTRUE {
