@@ -28,6 +28,7 @@ typedef struct {
 	int stackSize;
 } symbolTable_t;
 
+
 void initSymbolTable(void);
 void resetSymbolTable(void);
 void cleanSymbolTable(void);
@@ -46,5 +47,6 @@ bool symbolDeclared(char const *name);
 bool symbolAffected(char const *name);
 
 void printSymbolTable();
+
 
 #endif /* defined(__Syste_me_Info__symbol__) */

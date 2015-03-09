@@ -206,7 +206,7 @@ Terme :  tNOMBRE {
 }
 | Bool ;
 
-Cond : tPO Exp tPF;
+Cond : tPO Exp tPF ; //{$$=$2};
 
 Bool:
 | tTRUE {

@@ -8,8 +8,15 @@
 #include "assembly.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
 
 static FILE *output = NULL;
+labels_stack labelsStack = {NULL,0} ;
+
+static int NAME_LABEL = 0 ;
+
 
 void initAssemblyOutput(char const *path) {
 	output = fopen(path, "w+");
@@ -28,3 +35,58 @@ void assemblyOutput(char const *lineFormat, ...) {
 
 	va_end(args);
 }
+
+int numCharInstruc() {
+	int num = ftell(output) ;
+}
+
+
+void freeLabelStack(){
+	label* lab = labelsStack.label ;
+	label* temp ;
+	while(lab !=NULL){
+		temp = lab ;
+		lab = temp->suiv ;
+		freeLabel(temp);
+	}
+	
+	freeLabel(lab) ;
+	freeLabel(temp);
+} 
+
+void freeLabel(label* lab){
+	free(lab->suiv) ;
+	free(lab->name) ;
+}
+
+
+label makeLabel(int saut){
+
+	char* name = malloc(100) ; 
+	sprintf(name,"toto%d",NAME_LABEL);  
+	label lab = {name,0,labelsStack.label} ;
+	
+	return lab ;
+}
+
+void pushLabel(label lab){
+	labelsStack.label = &lab ;
+	labelsStack.stackSize ++ ;
+}
+
+
+label* popLabel(){
+	label* point = labelsStack.label ;
+	
+	labelsStack.label = point->suiv ;
+	labelsStack.stackSize -- ;
+	
+	point->suiv = NULL ;
+	return point ;
+}
+
+char* getNameLabel(label lab){
+
+	return lab.name ;
+}
+
