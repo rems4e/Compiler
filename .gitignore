@@ -1,7 +1,8 @@
 /y.tab.*
-/desc
+/compiler
+/exec
 /lex.yy.c
-/desc.dSYM
+/*.dSYM
 /*~
 /y.output
 /*.s
