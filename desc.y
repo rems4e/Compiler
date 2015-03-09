@@ -12,6 +12,7 @@
 #define OPCODE_TEXT
 
 #ifdef OPCODE_TEXT
+
 #define ADD "ADD"
 #define SOU "SOU"
 #define MUL "MUL"
@@ -30,6 +31,23 @@
 #define PRI "PRI"
 
 #else
+
+#define ADD "1"
+#define SOU "3"
+#define MUL "2"
+#define DIV "4"
+
+#define EQU "B"
+#define INF "9"
+#define SUP "A"
+
+#define COP "5"
+#define AFC "6"
+
+#define JMP "7"
+#define JMF "8"
+
+#define PRI "C"
 
 #endif
 
