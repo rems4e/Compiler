@@ -123,7 +123,7 @@ TypedDef : tID { declaration($1); } tVIR TypedDef
 | tID tEGAL Exp { declaration($1); affectation($1); } tF;
 
 Instrucs:
-| Instrucs Instruc; 
+| Instrucs Instruc { clearSymbolStack(); };
 
 Instruc : Exp tVIR Instruc
 | Exp tF

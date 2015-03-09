@@ -39,6 +39,7 @@ void freeIfTemp(symbol_t *s);
 
 void pushSymbol(symbol_t *s);
 symbol_t *popSymbol(void);
+void clearSymbolStack();
 
 bool symbolDeclared(char const *name);
 bool symbolAffected(char const *name);

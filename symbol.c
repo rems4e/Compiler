@@ -116,6 +116,12 @@ symbol_t *popSymbol() {
 	return ret;
 }
 
+void clearSymbolStack() {
+	while(symbolTable.symbolsStack[0] != NULL) {
+		popSymbol();
+	}
+}
+
 bool symbolDeclared(char const *name) {
 	return getExistingSymbol(name) != NULL;
 }
