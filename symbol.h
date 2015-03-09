@@ -24,7 +24,6 @@ typedef struct {
 typedef struct {
 	symbol_t symbols[SYM_COUNT];
 	symbol_t *symbolsStack[SYM_COUNT];
-	address_t lastTemporary;
 	int stackSize;
 } symbolTable_t;
 

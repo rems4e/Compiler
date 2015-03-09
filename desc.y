@@ -60,6 +60,17 @@
 		}
 		return d && a;
 	}
+
+	void binOp(char const *op) {
+		symbol_t *s2 = popSymbol();
+		symbol_t *s1 = popSymbol();
+		symbol_t *res = allocTemp();
+		pushSymbol(res);
+
+		assemblyOutput("%s %d %d %d", op, res->address, s1->address, s2->address);
+		freeIfTemp(s2);
+		freeIfTemp(s1);
+	}
 	%}
 
 %union {int nb; char* var;}
@@ -153,27 +164,18 @@ Bool:
 
 
 Exp : Terme
-| Exp tPLUS Exp {
-	symbol_t *s2 = popSymbol();
-	symbol_t *s1 = popSymbol();
-	symbol_t *res = allocTemp();
-	pushSymbol(res);
+| Exp tPLUS Exp { binOp("ADD"); }
+| Exp tMOINS Exp { binOp("SUB"); }
+| Exp tMUL Exp { binOp("MUL"); }
+| Exp tDIV Exp { binOp("DIV"); }
 
-	assemblyOutput("ADD %d %d %d", res->address, s1->address, s2->address);
-	freeIfTemp(s2);
-	freeIfTemp(s1);
-}
-| Exp tMOINS Exp 
-| Exp tMUL Exp
-| Exp tDIV Exp
-
-| Exp tET Exp
-| Exp tOU Exp
-| Exp tINF Exp
-| Exp tSUP Exp
-| Exp tINFEGAL Exp
-| Exp tSUPEGAL Exp
-| Exp tBOOLEGAL Exp
+| Exp tET Exp { binOp("AND"); }
+| Exp tOU Exp { binOp("OR"); }
+| Exp tINF Exp { binOp("INF"); }
+| Exp tSUP Exp { binOp("SUP"); }
+| Exp tINFEGAL Exp { binOp("INE"); }
+| Exp tSUPEGAL Exp { binOp("SUE"); }
+| Exp tBOOLEGAL Exp { binOp("EQ"); }
 
 | tPO Exp tPF ;
 
