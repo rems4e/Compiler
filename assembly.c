@@ -115,7 +115,7 @@ int getAddLabel(label l){
 	return (l.adresseCourante) ;
 }
 
-void setLabelAdd (label l, int saut){
+void setLabelSaut (label l, int saut){
 
 	l.adresseSaut = &saut ;
 }

@@ -33,7 +33,7 @@ char* getNameLabel(label lab) ;
 int getAddLabel(label l) ;
 label makeLabel() ;
 int getAddSaut(char* name) ;
-void setLabelAdd ();
+void setLabelSaut ();
 
 void freeLabel(label* lab) ;
 void freeLabelStack() ;

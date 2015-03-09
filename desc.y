@@ -201,22 +201,19 @@ Instruc : Exp tVIR Instruc
 
 FinIf : tBF {
 	label lIf = *popLabel() ;
-	setLabelAdd(lIf,numCharInstruc());
-	pushLabel(lIf);} ;
+	setLabelSaut(lIf,numCharInstruc());} ;
 
 Else : tELSE tBO {
 	label lElse = makeLabel() ;
 	pushLabel(lElse) ;
-	assemblyOutput(JMP" %s",getNameLabel(lElse)) ;} ;
+	assemblyOutput(JMP" %d",getAddLabel(lElse)) ;} ;
 
 FinElse : tBF {label lElse = *popLabel() ;
-	setLabelAdd(lElse,numCharInstruc());
-	pushLabel(lElse);} ;
+	setLabelSaut(lElse,numCharInstruc());} ;
 
 FinWhile : tBF {label lWhile = *popLabel() ;
 	assemblyOutput(JMP" %d",getAddLabel(lWhile)) ;
-	setLabelAdd(lWhile,numCharInstruc());
-	pushLabel(lWhile);} ;
+	setLabelSaut(lWhile,numCharInstruc());} ;
 
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp();
@@ -233,7 +230,7 @@ Cond : tPO Exp tPF {
 	symbol_t *s = popSymbol() ;
 	label l = makeLabel() ;
 	pushLabel(l) ;
-	assemblyOutput(JMF" %d %s",s->address,getNameLabel(l)) ;
+	assemblyOutput(JMF" %d %d",s->address,getAddLabel(l)) ;
 } ;
 
 Bool:
