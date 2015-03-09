@@ -187,9 +187,9 @@ Instruc : Exp tVIR Instruc
 | Exp tF
 | tID tEGAL Exp tVIR { affectation($1); } Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF Cond tBO Instrucs FINIF 
-| tIF Cond tBO Instrucs FINIF ELSE Instrucs FINELSE
-| tWHILE Cond tBO Instrucs tBF 
+| tIF Cond tBO Instrucs FinIf 
+| tIF Cond tBO Instrucs FinIf Else Instrucs FinElse
+| tWHILE Cond tBO Instrucs FinWhile 
 | tDO tBO Instrucs tBF tWHILE Cond
 | tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
 | tPRINTF tPO Exp tPF tF {
@@ -199,19 +199,24 @@ Instruc : Exp tVIR Instruc
 };
 
 
-FINIF : tBF {
+FinIf : tBF {
 	label lIf = *popLabel() ;
 	setLabelAdd(lIf,numCharInstruc());
 	pushLabel(lIf);} ;
 
-ELSE : tELSE tBO {
-	label lElse = makeLabel(0) ;
+Else : tELSE tBO {
+	label lElse = makeLabel() ;
 	pushLabel(lElse) ;
 	assemblyOutput(JMP" %s",getNameLabel(lElse)) ;} ;
 
-FINELSE : tBF {label lElse = *popLabel() ;
+FinElse : tBF {label lElse = *popLabel() ;
 	setLabelAdd(lElse,numCharInstruc());
 	pushLabel(lElse);} ;
+
+FinWhile : tBF {label lWhile = *popLabel() ;
+	assemblyOutput(JMP" %d",getAddLabel(lWhile)) ;
+	setLabelAdd(lWhile,numCharInstruc());
+	pushLabel(lWhile);} ;
 
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp();
@@ -226,7 +231,7 @@ Terme :  tNOMBRE {
 
 Cond : tPO Exp tPF {
 	symbol_t *s = popSymbol() ;
-	label l = makeLabel(0) ;
+	label l = makeLabel() ;
 	pushLabel(l) ;
 	assemblyOutput(JMF" %d %s",s->address,getNameLabel(l)) ;
 } ;

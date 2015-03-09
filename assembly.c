@@ -52,21 +52,21 @@ void freeLabelStack(){
 		freeLabel(temp);
 	}
 
-	freeLabel(lab) ;
-	freeLabel(temp);
+	free(lab) ;
 }
 
 void freeLabel(label* lab){
 	free(lab->suiv) ;
 	free(lab->name) ;
+	free(lab->adresseSaut) ;
 }
 
 
-label makeLabel(int saut){
+label makeLabel(){
 
 	char* name = malloc(100) ;
 	sprintf(name,"toto%d",labelsStack.stackSize);
-	label lab = {name,saut,labelsStack.label} ;
+	label lab = {name,0,numCharInstruc(),labelsStack.label} ;
 
 	return lab ;
 }
@@ -108,6 +108,10 @@ label getLabel(char* name){
 int getAddSaut(char* name){
 	return (*(getLabel(name).adresseSaut)) ;
 
+}
+
+int getAddLabel(label l){
+	return (l.adresseCourante) ;
 }
 
 void setLabelAdd (label l, int saut){

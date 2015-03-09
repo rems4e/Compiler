@@ -16,6 +16,7 @@ void assemblyOutput(char const *lineFormat, ...);
 typedef struct label {
 	char* name ;
 	int* adresseSaut ;
+	int adresseCourante ;
 	struct label* suiv ;
 } label ;
 
@@ -29,7 +30,8 @@ void freeLabelStack() ;
 void pushLabel(label lab) ;
 label* popLabel() ;
 char* getNameLabel(label lab) ;
-label makeLabel(int saut) ;
+int getAddLabel(label l) ;
+label makeLabel() ;
 int getAddSaut(char* name) ;
 void setLabelAdd ();
 
