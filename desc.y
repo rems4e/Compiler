@@ -132,7 +132,7 @@ Instruc : Exp tVIR Instruc
 | tIF Cond tBO Instrucs tBF 
 | tIF Cond tBO Instrucs tBF tELSE tBO Instrucs tBF
 | tWHILE Cond tBO Instrucs tBF 
-| tDO tBO Instrucs tBF tWHILE Cond ;
+| tDO tBO Instrucs tBF tWHILE Cond 
 | tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
 | tPRINTF tPO Exp tPF tF ;
 
@@ -148,7 +148,7 @@ Terme :  tNOMBRE {
 }
 | Bool ;
 
-Cond : tPO Exp tPF;
+Cond : tPO Exp tPF ; //{$$=$2};
 
 Bool:
 | tTRUE {

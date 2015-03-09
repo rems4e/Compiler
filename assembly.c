@@ -28,3 +28,8 @@ void assemblyOutput(char const *lineFormat, ...) {
 
 	va_end(args);
 }
+
+int num_instruc() {
+	return 
+
+}

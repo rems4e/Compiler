@@ -13,4 +13,6 @@ void closeAssemblyOutput();
 
 void assemblyOutput(char const *lineFormat, ...);
 
+int num_instruc() ;
+
 #endif /* defined(__Syste_me_Info__assembly__) */
