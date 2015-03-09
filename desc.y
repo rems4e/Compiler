@@ -135,6 +135,8 @@
 %token <var> tID
 %token <var> tFCT
 
+%token tCOM
+
 %token tPO tPF tVIR tBO tBF
 %token tINT tCONST tTRUE tFALSE
 %token tPLUS tMOINS tDIV tMUL tEGAL

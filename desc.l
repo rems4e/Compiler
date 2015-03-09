@@ -13,10 +13,13 @@ Nom	[a-zA-Z][_a-zA-Z0-9]*
 chiffre	[0-9]
 nombre	{chiffre}+(\.{chiffre}+)?(E[+\-]?{chiffre}+)?
 Comm	"/*".*"*/"
-Comml	"//".*\n
+Comml	"//"[^\n]*\n
 string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 
 %%
+
+Comm {return tCOM;}
+Comml {return tCOM;}
 
 "main"	{ECHO;return tMAIN;}
 "return"	{ECHO;return tRETURN;}
@@ -63,9 +66,6 @@ Delim	{ECHO;}
 
 {nombre}	{yylval.nb=atoi(yytext);
 		return tNOMBRE;}
-
-{Comm}	;
-{Comml} ;
 
 %%
 
