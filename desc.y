@@ -8,6 +8,30 @@
 	#include "symbol.h"
 	#include "assembly.h"
 
+#define OPCODE_TEXT
+
+#ifdef OPCODE_TEXT
+#define ADD "ADD"
+#define SOU "SOU"
+#define MUL "MUL"
+#define DIV "DIV"
+
+#define EQU "EQU"
+#define INF "INF"
+#define SUP "SUP"
+
+#define COP "COP"
+#define AFC "AFC"
+
+#define JMP "JMP"
+#define JMF "JMF"
+
+#define PRI "PRI"
+
+#else
+
+#endif
+
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 
@@ -29,7 +53,7 @@
 		sym->affected = true;
 		symbol_t *val = popSymbol();
 
-		assemblyOutput("MOV %d %d ; %s", sym->address, val->address, nom);
+		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, nom);
 		freeIfTemp(val);
 
 		//printSymbolTable();
@@ -132,14 +156,18 @@ Instruc : Exp tVIR Instruc
 | tIF Cond tBO Instrucs tBF 
 | tIF Cond tBO Instrucs tBF tELSE tBO Instrucs tBF
 | tWHILE Cond tBO Instrucs tBF 
+<<<<<<< HEAD
 | tDO tBO Instrucs tBF tWHILE Cond 
+=======
+| tDO tBO Instrucs tBF tWHILE Cond
+>>>>>>> d29e5711906d467109d85f70726c4a3bda3bbd79
 | tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
 | tPRINTF tPO Exp tPF tF ;
 
 
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp();
-	assemblyOutput("MOV %d %d", s->address, $1);
+	assemblyOutput(AFC" %d %d", s->address, $1);
 	pushSymbol(s);
 }
 | tID {
@@ -153,29 +181,38 @@ Cond : tPO Exp tPF ; //{$$=$2};
 Bool:
 | tTRUE {
 	symbol_t *s = allocTemp();
-	assemblyOutput("MOV %d %d", s->address, 1);
+	assemblyOutput(AFC" %d %d", s->address, 1);
 	pushSymbol(s);
 }
 | tFALSE {
 	symbol_t *s = allocTemp();
-	assemblyOutput("MOV %d %d", s->address, 0);
+	assemblyOutput(AFC" %d %d", s->address, 0);
 	pushSymbol(s);
 };
 
 
 Exp : Terme
-| Exp tPLUS Exp { binOp("ADD"); }
-| Exp tMOINS Exp { binOp("SUB"); }
-| Exp tMUL Exp { binOp("MUL"); }
-| Exp tDIV Exp { binOp("DIV"); }
+| Exp tPLUS Exp { binOp(ADD); }
+| Exp tMOINS Exp { binOp(SOU); }
+| Exp tMUL Exp { binOp(MUL); }
+| Exp tDIV Exp { binOp(DIV); }
 
-| Exp tET Exp { binOp("AND"); }
-| Exp tOU Exp { binOp("OR"); }
-| Exp tINF Exp { binOp("INF"); }
-| Exp tSUP Exp { binOp("SUP"); }
-| Exp tINFEGAL Exp { binOp("INE"); }
-| Exp tSUPEGAL Exp { binOp("SUE"); }
-| Exp tBOOLEGAL Exp { binOp("EQ"); }
+| Exp tET Exp {
+	symbol_t *zero = allocTemp();
+	assemblyOutput(AFC" %d %d", zero->address, 0);
+	pushSymbol(zero);
+	symbol_t *op1 = allocTemp();
+	pushSymbol(op1);
+	binOp(EQU);
+
+	/*binOp("AND");*/
+}
+| Exp tOU Exp { /*binOp("OR");*/ }
+| Exp tINF Exp { /*binOp("INF");*/ }
+| Exp tSUP Exp { /*binOp("SUP");*/ }
+| Exp tINFEGAL Exp { /*binOp("INE");*/ }
+| Exp tSUPEGAL Exp { /*binOp("SUE");*/ }
+| Exp tBOOLEGAL Exp { /*binOp("EQU");*/ }
 
 | tPO Exp tPF ;
 
