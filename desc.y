@@ -145,7 +145,7 @@
 %token tPO tPF tVIR tBO tBF
 %token tINT tCONST tTRUE tFALSE
 %token tPLUS tMOINS tDIV tMUL tEGAL
-%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU
+%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
 
 %token tF
 %token tMAIN tRETURN tPRINTF
@@ -192,9 +192,9 @@ Instruc : Exp tVIR Instruc
 | Exp tF
 | tID tEGAL Exp tVIR { affectation($1); } Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF Cond tBO Instrucs tBF 
-| tIF Cond tBO Instrucs tBF tELSE tBO Instrucs tBF
-| tWHILE Cond tBO Instrucs tBF 
+| tIF Cond tBO Instrucs FinIf 
+| tIF Cond tBO Instrucs FinIf Else Instrucs FinElse
+| tWHILE Cond tBO Instrucs FinWhile 
 | tDO tBO Instrucs tBF tWHILE Cond
 | tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
 | tPRINTF tPO Exp tPF tF {
@@ -203,6 +203,22 @@ Instruc : Exp tVIR Instruc
 	freeIfTemp(s);
 };
 
+
+FinIf : tBF {
+	label lIf = *popLabel() ;
+	setLabelSaut(lIf,numCharInstruc());} ;
+
+Else : tELSE tBO {
+	label lElse = makeLabel() ;
+	pushLabel(lElse) ;
+	assemblyOutput(JMP" %d",getAddLabel(lElse)) ;} ;
+
+FinElse : tBF {label lElse = *popLabel() ;
+	setLabelSaut(lElse,numCharInstruc());} ;
+
+FinWhile : tBF {label lWhile = *popLabel() ;
+	assemblyOutput(JMP" %d",getAddLabel(lWhile)) ;
+	setLabelSaut(lWhile,numCharInstruc());} ;
 
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp();
@@ -217,9 +233,10 @@ Terme :  tNOMBRE {
 
 Cond : tPO Exp tPF {
 	symbol_t *s = popSymbol() ;
-	label l = makeLabel(0) ;
+	label l = makeLabel() ;
 	pushLabel(l) ;
-	assemblyOutput(JMF" %d %d",s->address,getNameLabel(l)) ;} ;
+	assemblyOutput(JMF" %d %d",s->address,getAddLabel(l)) ;
+} ;
 
 Bool:
 | tTRUE {
@@ -288,7 +305,8 @@ Exp : Terme
 }
 | Exp tBOOLEGAL Exp { binOp(EQU); }
 
-| tPO Exp tPF ;
+| tPO Exp tPF 
+| Exp tDIFF Exp;
 
 
 

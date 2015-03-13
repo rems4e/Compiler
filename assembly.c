@@ -11,11 +11,13 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#define TAILLE_MAX 100
+
 
 static FILE *output = NULL;
+
 labels_stack labelsStack = {NULL,0} ;
 
-static int NAME_LABEL = 0 ;
 
 
 void initAssemblyOutput(char const *path) {
@@ -38,6 +40,7 @@ void assemblyOutput(char const *lineFormat, ...) {
 
 int numCharInstruc() {
 	int num = ftell(output) ;
+	return num ;
 }
 
 
@@ -49,23 +52,23 @@ void freeLabelStack(){
 		lab = temp->suiv ;
 		freeLabel(temp);
 	}
-	
-	freeLabel(lab) ;
-	freeLabel(temp);
-} 
+
+	free(lab) ;
+}
 
 void freeLabel(label* lab){
 	free(lab->suiv) ;
 	free(lab->name) ;
+	free(lab->adresseSaut) ;
 }
 
 
-label makeLabel(int saut){
+label makeLabel(){
 
-	char* name = malloc(100) ; 
-	sprintf(name,"toto%d",NAME_LABEL);  
-	label lab = {name,0,labelsStack.label} ;
-	
+	char* name = malloc(100) ;
+	sprintf(name,"toto%d",labelsStack.stackSize);
+	label lab = {name,0,numCharInstruc(),labelsStack.label} ;
+
 	return lab ;
 }
 
@@ -77,10 +80,10 @@ void pushLabel(label lab){
 
 label* popLabel(){
 	label* point = labelsStack.label ;
-	
+
 	labelsStack.label = point->suiv ;
 	labelsStack.stackSize -- ;
-	
+
 	point->suiv = NULL ;
 	return point ;
 }
@@ -105,12 +108,23 @@ label getLabel(char* name){
 
 int getAddSaut(char* name){
 	return (*(getLabel(name).adresseSaut)) ;
-	
+
 }
 
-void setLabelAdd (char* name, int saut){
-	label l = getLabel(name) ;
+int getAddLabel(label l){
+	return (l.adresseCourante) ;
+}
+
+void setLabelSaut (label l, int saut){
 
 	l.adresseSaut = &saut ;
+}
+
+void handleLabel(FILE* f){
+    char* chaine = malloc(TAILLE_MAX) ;
+    while(fgets(chaine,TAILLE_MAX,f)!=NULL){
+
+    }
+    free(chaine);
 }
 

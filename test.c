@@ -1,5 +1,5 @@
 int main { 
-	int i, j, k, r, l, a;
+	int i, j, k, r, l, a,b;
 	i = 3;
 	a = 0;
 	j = 4;
@@ -7,6 +7,9 @@ int main {
 
 	if(i > 0) {
 		l = 4;
+	}
+	else {
+		b=5 ;	
 	}
 	
 	while(a < 12) {

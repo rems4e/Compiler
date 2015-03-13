@@ -57,6 +57,7 @@ Delim	{ECHO;}
 ">="	{ECHO;return tSUPEGAL;}
 ">"	{ECHO;return tSUP;}
 "<"	{ECHO;return tINF;}
+"!="	{ECHO;return tDIFF;}
 
 
 
