@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-
 static symbolTable_t symbolTable;
 static char *tempSymbol;
 
@@ -26,7 +25,7 @@ void resetSymbolTable() {
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		symbolTable.symbols[i].affected = false;
 		symbolTable.symbols[i].name = NULL;
-		symbolTable.symbols[i].address = i;
+		symbolTable.symbols[i].address = i + 1;
 		symbolTable.symbols[i].constant = false;
 		symbolTable.symbols[i].refCount = 0;
 
@@ -44,6 +43,20 @@ void cleanSymbolTable() {
 	}
 
 	free(tempSymbol);
+}
+
+address_t getStackPointerAddress() {
+	return 0;
+}
+
+int getStackSize() {
+	for(int i = SYM_COUNT - 1; i >= 0; --i) {
+		if(symbolTable.symbols[i].name != NULL) {
+			return i + 1;
+		}
+	}
+
+	return 0;
 }
 
 symbol_t *getExistingSymbol(char const *name) {

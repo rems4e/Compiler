@@ -33,6 +33,9 @@ void initSymbolTable(void);
 void resetSymbolTable(void);
 void cleanSymbolTable(void);
 
+address_t getStackPointerAddress();
+int getStackSize();
+
 symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name);
 

@@ -127,6 +127,11 @@
 		negate();
 		negate();
 	}
+
+	void callFunction(char const *functionName) {
+
+	}
+
 	%}
 
 %union {int nb; char* var;}
@@ -338,6 +343,10 @@ int main(int argc, char const **argv) {
 
 	initAssemblyOutput(outputName);
 	free(outputName);
+
+	assemblyOutput(AFC" %d %d", getStackPointerAddress(), 0);
+	callFunction(" main");
+	assemblyOutput(JMP" EOF");
 
 	yyparse();
 	free(buf);
