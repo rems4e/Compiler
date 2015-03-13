@@ -16,7 +16,12 @@
 
 static FILE *output = NULL;
 
-labels_stack labelsStack = {NULL,0} ;
+typedef struct labels_stack {
+	struct label* label ;
+	int stackSize ;
+} labels_stack ;
+
+static labels_stack labelsStack = {NULL,0} ;
 
 
 

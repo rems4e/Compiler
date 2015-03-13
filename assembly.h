@@ -20,11 +20,6 @@ typedef struct label {
 	struct label* suiv ;
 } label ;
 
-typedef struct labels_stack {
-	struct label* label ;
-	int stackSize ;
-} labels_stack ;
-
 int numCharInstruc() ;
 void freeLabelStack() ;
 void pushLabel(label lab) ;
