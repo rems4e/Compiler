@@ -9,47 +9,7 @@
 	#include "symbol.h"
 	#include "assembly.h"
 
-//#define OPCODE_TEXT
-
-#ifdef OPCODE_TEXT
-
-#define ADD "ADD"
-#define SOU "SOU"
-#define MUL "MUL"
-#define DIV "DIV"
-
-#define EQU "EQU"
-#define INF "INF"
-#define SUP "SUP"
-
-#define COP "COP"
-#define AFC "AFC"
-
-#define JMP "JMP"
-#define JMF "JMF"
-
-#define PRI "PRI"
-
-#else
-
-#define ADD "1"
-#define SOU "3"
-#define MUL "2"
-#define DIV "4"
-
-#define EQU "B"
-#define INF "9"
-#define SUP "A"
-
-#define COP "5"
-#define AFC "6"
-
-#define JMP "7"
-#define JMF "8"
-
-#define PRI "C"
-
-#endif
+	#define YYERROR_VERBOSE
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
@@ -140,8 +100,6 @@
 %token <var> tID
 %token <var> tFCT
 
-%token tCOM
-
 %token tPO tPF tVIR tBO tBF
 %token tINT tCONST tTRUE tFALSE
 %token tPLUS tMOINS tDIV tMUL tEGAL
@@ -176,8 +134,8 @@ Defs :
 
 Def : Type TypedDef;
 
-Type : tINT  { printf("type reconnu\n"); }
-| tCONST { printf("type reconnu\n"); } ;
+Type : tINT;
+| tCONST;
         
         
 TypedDef : tID { declaration($1); } tVIR TypedDef
@@ -192,9 +150,9 @@ Instruc : Exp tVIR Instruc
 | Exp tF
 | tID tEGAL Exp tVIR { affectation($1); } Instruc
 | tID tEGAL Exp tF {affectation($1);}
-| tIF Cond tBO Instrucs FinIf 
-| tIF Cond tBO Instrucs FinIf Else Instrucs FinElse
-| tWHILE Cond tBO Instrucs FinWhile 
+| tIF Cond tBO Instrucs tBF { popLabel(); }
+| tIF Cond tBO Instrucs tBF { pushLabelLastButOne(); assemblyOutput(JMP_UNKNOWN" 0000"); } tELSE tBO { popLabel(); } Instrucs tBF { popLabel(); }
+| tWHILE { pushInstructionCount(); } Cond tBO Instrucs FinWhile
 | tDO tBO Instrucs tBF tWHILE Cond
 | tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
 | tPRINTF tPO Exp tPF tF {
@@ -203,22 +161,10 @@ Instruc : Exp tVIR Instruc
 	freeIfTemp(s);
 };
 
-
-FinIf : tBF {
-	label lIf = *popLabel() ;
-	setLabelSaut(lIf,numCharInstruc());} ;
-
-Else : tELSE tBO {
-	label lElse = makeLabel() ;
-	pushLabel(lElse) ;
-	assemblyOutput(JMP" %d",getAddLabel(lElse)) ;} ;
-
-FinElse : tBF {label lElse = *popLabel() ;
-	setLabelSaut(lElse,numCharInstruc());} ;
-
-FinWhile : tBF {label lWhile = *popLabel() ;
-	assemblyOutput(JMP" %d",getAddLabel(lWhile)) ;
-	setLabelSaut(lWhile,numCharInstruc());} ;
+FinWhile : tBF {
+	assemblyOutput(JMP" %d", popInstructionCount());
+	popLabel();
+};
 
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp();
@@ -226,16 +172,20 @@ Terme :  tNOMBRE {
 	pushSymbol(s);
 }
 | tID {
-	assert(isUsable($1));
-	pushSymbol(getExistingSymbol($1));
+	symbol_t *s = getExistingSymbol($1);
+
+	if(s == NULL) {
+		yyerror("Variable %s non déclarée!", $1);
+	}
+	pushSymbol(s);
 }
 | Bool ;
 
 Cond : tPO Exp tPF {
-	symbol_t *s = popSymbol() ;
-	label l = makeLabel() ;
-	pushLabel(l) ;
-	assemblyOutput(JMF" %d %d",s->address,getAddLabel(l)) ;
+	symbol_t *cond = popSymbol();
+	pushLabel();
+	assemblyOutput(JMF_UNKNOWN" %d 0000", cond->address);
+	freeIfTemp(cond);
 } ;
 
 Bool:
@@ -315,10 +265,13 @@ void yyerror(const char *s, ...) {
 	va_list args;
 	va_start(args, s);
 
-	fprintf(stderr, "Erreur :");
+	fprintf(stderr, "Erreur : ");
 	vfprintf(stderr, s, args);
+	fputc('\n', stderr);
 
 	va_end(args);
+
+	exit(1);
 }
 
 int main(int argc, char const **argv) {
@@ -363,12 +316,14 @@ int main(int argc, char const **argv) {
 	free(outputName);
 
 	assemblyOutput(AFC" %d %d", getStackPointerAddress(), 0);
-	callFunction(" main");
-	assemblyOutput(JMP" EOF");
+	/*callFunction(" main");
+	pushLabel();
+	assemblyOutput(JMP" 0000");*/
 
 	yyparse();
 	free(buf);
 
+	//popLabel();
 	closeAssemblyOutput();
 	cleanSymbolTable();
 

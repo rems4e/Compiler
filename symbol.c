@@ -66,10 +66,6 @@ symbol_t *getExistingSymbol(char const *name) {
 		if(symbols[i].name != NULL && strcmp(symbols[i].name, name) == 0) {
 			return &symbols[i];
 		}
-		else if(symbols[i].name == NULL) {
-			fprintf(stderr, "Symbol %s not found!\n", name);
-			break;
-		}
 	}
 
 	return NULL;

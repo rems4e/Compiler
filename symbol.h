@@ -33,8 +33,8 @@ void initSymbolTable(void);
 void resetSymbolTable(void);
 void cleanSymbolTable(void);
 
-address_t getStackPointerAddress();
-int getStackSize();
+address_t getStackPointerAddress(void);
+int getStackSize(void);
 
 symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name);
@@ -44,12 +44,12 @@ void freeIfTemp(symbol_t *s);
 
 void pushSymbol(symbol_t *s);
 symbol_t *popSymbol(void);
-void clearSymbolStack();
+void clearSymbolStack(void);
 
 bool symbolDeclared(char const *name);
 bool symbolAffected(char const *name);
 
-void printSymbolTable();
+void printSymbolTable(void);
 
 
 #endif /* defined(__Syste_me_Info__symbol__) */

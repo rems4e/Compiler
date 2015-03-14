@@ -11,25 +11,77 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#define TAILLE_MAX 100
 
+#define TAILLE_MAX 1000
 
+static char *buffer = NULL;
 static FILE *output = NULL;
 
-typedef struct labels_stack {
-	struct label* label ;
-	int stackSize ;
-} labels_stack ;
+typedef struct {
+	int adresseSaut;
+} label_t;
 
-static labels_stack labelsStack = {NULL,0} ;
+typedef struct {
+	label_t *labels[TAILLE_MAX];
+	int size;
+} labelStack_t;
 
+typedef struct  {
+	label_t labels[TAILLE_MAX];
+	int size;
+} labelList_t;
+
+typedef struct {
+	int address[TAILLE_MAX];
+	int size;
+} addressStack_t;
+
+static labelStack_t labelsStack;
+static labelList_t labelsList;
+static addressStack_t addressStack;
+static size_t linesCount = 0;
 
 
 void initAssemblyOutput(char const *path) {
 	output = fopen(path, "w+");
+	buffer = malloc(1);
+	buffer[0] = '\0';
+
+	labelsList.size = 0;
+	labelsStack.size = 0;
+	addressStack.size = 0;
+	for(int i = 0; i < TAILLE_MAX; ++i) {
+		labelsList.labels[i].adresseSaut = 0;
+		labelsStack.labels[i] = NULL;
+	}
 }
 
 void closeAssemblyOutput() {
+	char *pos = buffer;
+	char labelBuf[5];
+	int currentLabel = 0;
+	size_t length;
+
+	char const *labelPattern = "\n"UNKNOWN_PREFIX;
+	int const labelOffset = strlen("\n"JMP_UNKNOWN);
+
+	while((pos = strstr(pos, labelPattern)) != NULL) {
+		length = strlen(pos + 3);
+		memmove(pos + 1, pos + 3, length);
+		pos[length + 1] = 0;
+
+		pos = strstr(pos, "0000");
+
+		length = sprintf(labelBuf, "%d", labelsList.labels[currentLabel].adresseSaut);
+		memcpy(pos, labelBuf, length);
+		size_t length2 = strlen(pos + 4 - length);
+		memmove(pos + length, pos + 4, length2);
+		pos[4 - length + length2] = 0;
+		++currentLabel;
+	}
+	assert(currentLabel == labelsList.size);
+
+	fputs(buffer, output);
 	fclose(output);
 }
 
@@ -37,99 +89,52 @@ void assemblyOutput(char const *lineFormat, ...) {
 	va_list args;
 	va_start(args, lineFormat);
 
-	vfprintf(output, lineFormat, args);
-	fputc('\n', output);
+	char *buf1, *buf2;
+	vasprintf(&buf1, lineFormat, args);
+	asprintf(&buf2, "%s%s\n", buffer, buf1);
+	free(buf1);
+	free(buffer);
+	buffer = buf2;
 
 	va_end(args);
+
+	++linesCount;
 }
 
-int numCharInstruc() {
-	int num = ftell(output) ;
-	return num ;
+size_t instructionsCount() {
+	return linesCount;
 }
 
-
-void freeLabelStack(){
-	label* lab = labelsStack.label ;
-	label* temp ;
-	while(lab !=NULL){
-		temp = lab ;
-		lab = temp->suiv ;
-		freeLabel(temp);
-	}
-
-	free(lab) ;
+void pushInstructionCount() {
+	assert(addressStack.size < TAILLE_MAX - 1);
+	addressStack.address[addressStack.size++] = instructionsCount();
 }
 
-void freeLabel(label* lab){
-	free(lab->suiv) ;
-	free(lab->name) ;
-	free(lab->adresseSaut) ;
+int popInstructionCount() {
+	assert(addressStack.size > 0);
+	return addressStack.address[--addressStack.size];
 }
 
-
-label makeLabel(){
-
-	char* name = malloc(100) ;
-	sprintf(name,"toto%d",labelsStack.stackSize);
-	label lab = {name,0,numCharInstruc(),labelsStack.label} ;
-
-	return lab ;
+void pushLabel() {
+	assert(labelsList.size < TAILLE_MAX - 1);
+	labelsStack.labels[labelsStack.size++] = &labelsList.labels[labelsList.size++];
 }
 
-void pushLabel(label lab){
-	labelsStack.label = &lab ;
-	labelsStack.stackSize ++ ;
+void pushLabelLastButOne() {
+	assert(labelsList.size < TAILLE_MAX - 1);
+	assert(labelsList.size > 1);
+
+	labelsStack.labels[labelsStack.size] = labelsStack.labels[labelsStack.size - 1];
+	labelsStack.labels[labelsStack.size++ - 1] = &labelsList.labels[labelsList.size++];
 }
 
-
-label* popLabel(){
-	label* point = labelsStack.label ;
-
-	labelsStack.label = point->suiv ;
-	labelsStack.stackSize -- ;
-
-	point->suiv = NULL ;
-	return point ;
+void popLabel() {
+	popLabelWithAddress(instructionsCount());
 }
 
-char* getNameLabel(label lab){
-	return lab.name ;
+void popLabelWithAddress(int address) {
+	assert(labelsStack.size > 0);
+	--labelsStack.size;
+	labelsStack.labels[labelsStack.size]->adresseSaut = address;
+	labelsStack.labels[labelsStack.size] = NULL;
 }
-
-label getLabel(char* name){
-
-	label* lab = labelsStack.label ;
-	label* temp ;
-	while(lab !=NULL){
-		temp = lab ;
-		lab = temp->suiv ;
-		if(strcmp(name,getNameLabel(*temp))){
-			return (*temp) ;
-		}
-	}
-}
-
-
-int getAddSaut(char* name){
-	return (*(getLabel(name).adresseSaut)) ;
-
-}
-
-int getAddLabel(label l){
-	return (l.adresseCourante) ;
-}
-
-void setLabelSaut (label l, int saut){
-
-	l.adresseSaut = &saut ;
-}
-
-void handleLabel(FILE* f){
-    char* chaine = malloc(TAILLE_MAX) ;
-    while(fgets(chaine,TAILLE_MAX,f)!=NULL){
-
-    }
-    free(chaine);
-}
-

@@ -1,26 +1,42 @@
 int main { 
-	int i, j, k, r, l, a,b;
-	i = 3;
-	a = 0;
-	j = 4;
-	k = 8;
-
-	if(i > 0) {
-		l = 4;
+	/*if(0) {
+		printf(88888888);
+		if(1) {
+			printf(6666666);
+		}
+		else {
+			printf(7777777);
+		}
+		printf(5555555);
 	}
 	else {
-		b=5 ;	
+		printf(4444444);
+	}*/
+
+	int i = 0;
+	int j = 100;
+
+	while(j > 0) {
+		i = i + 1;
+		j = j - 1;
+		printf(i);
+		printf(j);
+		if(i > 20) {
+			printf(88888888);
+			if(i > 40) {
+				printf(6666666);
+			}
+			else {
+				printf(7777777);
+			}
+			printf(5555555);
+		}
+		printf(99999999);
 	}
-	
-	while(a < 12) {
-		a = a + 1;
-	}
-	
+	printf(99999999);
+	printf(99999999);
 	printf(i);
-	r = (i + j) * (i + k / j);
-	printf(r);
-	
-	
-	
+	printf(j);
+
 	return 0;
 }
