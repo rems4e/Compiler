@@ -153,8 +153,5 @@ void printSymbolTable() {
 		if(symbols[i].name != NULL) {
 			printf("%#x: \"%s\" affected: %s\n", symbols[i].address, symbols[i].name, (symbols[i].affected ? "true" : "false"));
 		}
-		else {
-			break;
-		}
 	}
 }

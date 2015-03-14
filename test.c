@@ -13,7 +13,7 @@ int main {
 		printf(4444444);
 	}*/
 
-	int i = 0;
+	/*int i = 0;
 	int j = 100;
 
 	while(j > 0) {
@@ -36,7 +36,21 @@ int main {
 	printf(99999999);
 	printf(99999999);
 	printf(i);
-	printf(j);
+	printf(j);*/
+
+	int i = 0;
+	int j = 1;
+
+	do {
+		if(i == 0) {
+			j = j + 1;
+			i = 1;
+		}
+
+		j = j - 1;
+		printf(4);
+	} while(j > 0);
+	printf(5);
 
 	return 0;
 }

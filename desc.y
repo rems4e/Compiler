@@ -153,7 +153,7 @@ Instruc : Exp tVIR Instruc
 | tIF Cond tBO Instrucs tBF { popLabel(); }
 | tIF Cond tBO Instrucs tBF { pushLabelLastButOne(); assemblyOutput(JMP_UNKNOWN" 0000"); } tELSE tBO { popLabel(); } Instrucs tBF { popLabel(); }
 | tWHILE { pushInstructionCount(); } Cond tBO Instrucs FinWhile
-| tDO tBO Instrucs tBF tWHILE Cond
+| tDO { pushInstructionCount(); } tBO Instrucs tBF tWHILE Cond tF { assemblyOutput(JMP" %d", popInstructionCount()); popLabel(); }
 | tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
 | tPRINTF tPO Exp tPF tF {
 	symbol_t *s = popSymbol();
