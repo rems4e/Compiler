@@ -4,7 +4,7 @@
 #include <string.h>
 #include "y.tab.h"
 
-#define ECHO /*fwrite(yytext, yyleng, 1, yyout)*/
+#define ECHO /*fprintf(yyout, "%s\n", yytext)*/
 
 %}
 
@@ -12,14 +12,23 @@ Delim	[ \t]+
 Nom	[a-zA-Z][_a-zA-Z0-9]*
 chiffre	[0-9]
 nombre	{chiffre}+(\.{chiffre}+)?(E[+\-]?{chiffre}+)?
-Comm	"/*".*"*/"
-Comml	"//"[^\n]*\n
 string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
+
+%x C_COMMENT
+%x C_COMMENTL
 
 %%
 
-Comm {return tCOM;}
-Comml {return tCOM;}
+
+
+"/*"            { BEGIN(C_COMMENT); }
+<C_COMMENT>"*/" { BEGIN(INITIAL); }
+<C_COMMENT>.    { }
+
+"//"            { BEGIN(C_COMMENTL); }
+<C_COMMENTL>"\n" { BEGIN(INITIAL); }
+<C_COMMENTL>.    { }
+
 
 "main"	{ECHO;return tMAIN;}
 "return"	{ECHO;return tRETURN;}
