@@ -19,6 +19,8 @@
 	int yylex();
 	YY_BUFFER_STATE yy_scan_string (const char *yy_str);
 
+	static int retourConditionFor;
+
 	void affectation(char const *nom) {
 		symbol_t *sym = getExistingSymbol(nom);
 		if(sym == NULL) {
@@ -28,7 +30,6 @@
 			yyerror("affectation d'une constante\n");
 		}
 
-		printf("Affectation de la variable %s.\n", nom);
 		sym->affected = true;
 		symbol_t *val = popSymbol();
 
@@ -44,8 +45,6 @@
 			yyerror("variable déjà déclarée\n");
 		}
 
-		printf("Déclaration de la variable %s.\n", nom);
-		
 		//printSymbolTable();
 	}
 
@@ -148,13 +147,31 @@ Instrucs:
 
 Instruc : Exp tVIR Instruc
 | Exp tF
-| tID tEGAL Exp tVIR { affectation($1); } Instruc
-| tID tEGAL Exp tF {affectation($1);}
 | tIF Cond tBO Instrucs tBF { popLabel(); }
 | tIF Cond tBO Instrucs tBF { pushLabelLastButOne(); assemblyOutput(JMP_UNKNOWN" 0000"); } tELSE tBO { popLabel(); } Instrucs tBF { popLabel(); }
 | tWHILE { pushInstructionCount(); } Cond tBO Instrucs FinWhile
 | tDO { pushInstructionCount(); } tBO Instrucs tBF tWHILE Cond tF { assemblyOutput(JMP" %d", popInstructionCount()); popLabel(); }
-| tFOR tPO Exp tF Exp tF Exp tPF tBO Instrucs tBF
+| tFOR tPO Exp { // Initialisation
+	pushInstructionCount();
+} tF Exp { // Condition
+	symbol_t *cond = popSymbol();
+	pushLabel();
+	assemblyOutput(JMF_UNKNOWN" %d 0000", cond->address);
+	freeIfTemp(cond);
+	pushLabel();
+	assemblyOutput(JMP_UNKNOWN" 0000");
+} tF { // Action en fin de boucle
+	retourConditionFor = popInstructionCount();
+	pushInstructionCount();
+} Exp {
+	assemblyOutput(JMP" %d", retourConditionFor);
+} tPF tBO {  // Corps de boucle
+	popLabel();
+} Instrucs { // Corps de boucle
+	assemblyOutput(JMP" %d", popInstructionCount()); // Action de fin de boucle
+} tBF {
+	popLabel();
+}
 | tPRINTF tPO Exp tPF tF {
 	symbol_t *s = popSymbol();
 	assemblyOutput(PRI" %d", s->address);
@@ -202,6 +219,8 @@ Bool:
 
 
 Exp : Terme
+| tID tEGAL Exp tVIR { affectation($1); } Exp
+| tID tEGAL Exp {affectation($1);}
 | Exp tPLUS Exp { binOp(ADD); }
 | Exp tMOINS Exp { binOp(SOU); }
 | Exp tMUL Exp { binOp(MUL); }

@@ -1,4 +1,10 @@
-int main { 
+int main {
+	int i = 100;
+
+	for(i = 0; i < 10; i = i + 2) {
+		printf(i);
+	}
+
 	/*if(0) {
 		printf(88888888);
 		if(1) {
@@ -38,7 +44,7 @@ int main {
 	printf(i);
 	printf(j);*/
 
-	int i = 0;
+	/*int i = 0;
 	int j = 1;
 
 	do {
@@ -50,7 +56,7 @@ int main {
 		j = j - 1;
 		printf(4);
 	} while(j > 0);
-	printf(5);
+	printf(5);*/
 
 	return 0;
 }
