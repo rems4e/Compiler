@@ -19,6 +19,8 @@
 
 	extern int const lineNumber;
 	static int retourConditionFor;
+	static int paramsCount;
+	static VarType lastVarType;
 	function_t *currentFunction = NULL;
 
 	void affectation(char const *nom) {
@@ -118,16 +120,24 @@
 S :
 | S Corps;
 
-Fonction : tINT tID tPO tPF { createFunction($2, false, 0); } tF;
-FonctionDef : tINT tID tPO tPF { createFunction($2, true, 0); } CorpsFonction { currentFunction = NULL; };
+//Fonction : tINT tID tPO { paramsCount = 0; } Params tPF { createFunction($2, false, paramsCount); } tF;
+FonctionDef : tINT tID tPO { paramsCount = 0; } Params tPF { createFunction($2, true, paramsCount); } CorpsFonction { currentFunction = NULL; };
 CorpsFonction : tBO Defs Instrucs Return tF tBF;
 
 Return : tRETURN Exp {
 	assemblyOutput(JMP" %d ; return de la fonction %s", currentFunction->address + 1, currentFunction->name);
 };
 
-Corps : Fonction
-| FonctionDef
+Params :
+| ParamsList;
+
+ParamsList : Param
+| ParamsList tVIR Param;
+
+Param : Type tID { ++paramsCount; pushParam($2, lastVarType); };
+
+Corps : /*Fonction
+| */FonctionDef
 | Corps;
 
 
@@ -136,8 +146,8 @@ Defs :
 
 Def : Type TypedDef;
 
-Type : tINT;
-| tCONST;
+Type : tINT { lastVarType = VarInt; }
+| tCONST { lastVarType = VarConst; };
         
         
 TypedDef : tID { declaration($1); } tVIR TypedDef
@@ -224,12 +234,13 @@ Bool:
 };
 
 Args :
-| Exp {
-};
+| ArgsList;
+
+ArgsList : Exp { ++paramsCount; }
+| ArgsList tVIR Exp { ++paramsCount; };
 
 Exp : Terme
-| Exp tVIR Exp
-| tID tPO Args tPF { callFunction($1, 0); }
+| tID { paramsCount = 0; } tPO Args tPF { callFunction($1, paramsCount); }
 | tID tEGAL Exp { affectation($1); }
 | Exp tPLUS Exp { binOp(ADD); }
 | Exp tMOINS Exp { binOp(SOU); }

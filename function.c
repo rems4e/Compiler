@@ -66,6 +66,9 @@ void freeFunctionTable() {
 
 void initSymbolTable(function_t *function) {
 	resetSymbolTable();
+	for(int i = 0; i < function->paramsCount; ++i) {
+		createSymbol(function->params[i].name);
+	}
 }
 
 void pushParam(char const *name, VarType type) {
@@ -95,9 +98,6 @@ void callFunction(char const *name, int argsCount) {
 	if(currentFunction != NULL) {
 		assemblyOutput(COP" %d 1 ; Sauvegarde ancienne adresse retour", RETURN_ADDRESS); // Sauvegarde adresse de retour
 	}
-	assemblyOutput(AFC" %d %d ; taille de la pile", STACK_SIZE_ADDRESS + stackSize, stackSize);
-	assemblyOutput(ADD" 0 0 %d ; Incrémentation stack pointer", STACK_SIZE_ADDRESS + 2); // Incrémentation stack pointer
-
 	function_t *function = NULL;
 	for(int i = 0; (i < functionTable.size) && (functionTable.functions[i].name != NULL); ++i) {
 		if(strcmp(functionTable.functions[i].name, name) == 0) {
@@ -112,16 +112,17 @@ void callFunction(char const *name, int argsCount) {
 	if(function->paramsCount != argsCount) {
 		yyerror("Nombre d'arguments passés à la fonction %s invalide (%d au lieu de %d) !\n", name, argsCount, function->paramsCount);
 	}
-
 	for(int i = 0; i < argsCount; ++i) {
-		symbol_t *param = createSymbol(function->params[i].name);
+		symbol_t *param = allocTemp();
 		symbol_t *arg = popSymbol();
 		if(!paramAndArgCompatible(&function->params[i], arg)) {
 			yyerror("Type de l'argument %d passé à la fonction %s invalide !\n", i + 1, name);
 		}
 
-		assemblyOutput(COP" %d %d ; Copie de l'argument %s lors de l'appel de %s", param->address, arg->address, arg->name, function->name); // Copie des arguments
+		assemblyOutput(COP" %d %d ; Copie de l'argument %s lors de l'appel de %s", param->address, arg->address, function->params[i].name, function->name); // Copie des arguments
 	}
+	assemblyOutput(AFC" %d %d ; Taille de la pile", STACK_SIZE_ADDRESS + stackSize, stackSize);
+	assemblyOutput(ADD" 0 0 %d ; Incrémentation stack pointer", STACK_SIZE_ADDRESS + stackSize); // Incrémentation stack pointer
 
 	assemblyOutput(AFC" 1 %d ; Sauvegarde adresse retour %s", instructionsCount() + 2, currentFunction ? currentFunction->name : "<NULL>"); // Sauvegarde adresse de retour
 	if(currentFunction == NULL) {
@@ -151,7 +152,9 @@ void createFunction(char const *name, bool definition, int paramsCount) {
 		function->paramsCount = paramsCount;
 
 		for(int i = 0; i < paramsCount; ++i) {
-			function->params[i] = popParam();
+			param_t p = popParam();
+			function->params[i].name = strdup(p.name);
+			function->params[i].type = p.type;
 		}
 	}
 	else { // Fonction déjà déclarée ou définie
