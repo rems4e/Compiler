@@ -78,11 +78,12 @@ void initAssemblyOutput(char const *path) {
 void closeAssemblyOutput() {
 	int returnAddress = instructionsCount();
 
+	symbol_t *s1 = allocTemp(), *s2 = allocTemp();
 	for(int i = 0; i < returnAddressStack.size; ++i) {
-		symbol_t *s = allocTemp();
-		assemblyOutput(EQU" %d 1 %s ; Adresse de retour pour l'appel de fonction %d", s->address, returnAddressStack.address[i], i);
-		assemblyOutput(EQU" %d 0 %d", s->address, s->address);
-		assemblyOutput(JMF" %d %s", s->address, returnAddressStack.address[i]);
+		assemblyOutput(AFC" %d %s ; Adresse de retour pour l'appel de fonction %d", s1->address, returnAddressStack.address[i], i);
+		assemblyOutput(EQU" %d 1 %d", s2->address, s1->address);
+		assemblyOutput(EQU" %d 0 %d", s2->address, s2->address);
+		assemblyOutput(JMF" %d %s", s2->address, returnAddressStack.address[i]);
 	}
 
 	char *pos = buffer;

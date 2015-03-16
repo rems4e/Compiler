@@ -43,7 +43,7 @@ void resetSymbolTable() {
 			free(symbolTable.symbols[i].name);
 		}
 		symbolTable.symbols[i].name = NULL;
-		symbolTable.symbols[i].address = i + 2;
+		symbolTable.symbols[i].address = i + 4;
 		symbolTable.symbols[i].type = VarInt;
 
 		symbolTable.symbolsStack[i] = NULL;

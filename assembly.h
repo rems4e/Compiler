@@ -12,7 +12,7 @@
 
 //#define STRIP_COMMENTS
 
-#define OPCODE_TEXT
+//#define OPCODE_TEXT
 
 #define UNKNOWN_PREFIX "U_"
 #define UNKNOWN_ADDRESS "00000"

@@ -1,10 +1,21 @@
-int func() {
+int func2() {
+	printf(222222);
+	return 2;
 
-	return 4;
+}
+int func() {
+	printf(1111111);
+	func2();
+	printf(000000);
+	func2();
+	printf(111);
+	return 1;
 }
 
 int main() {
+	printf(77777);
 	func();
+	printf(888888);
 	/*int i = 100;
 	int k = 0;
 	int j = 100;
@@ -63,8 +74,6 @@ int main() {
 		printf(4);
 	} while(j > 0);
 	printf(5);*/
-
-	printf(77777);
 
 	return 0;
 }
