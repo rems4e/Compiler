@@ -14,8 +14,8 @@
 
 #define FUN_COUNT 1000
 
-#define STACK_SIZE_ADDRESS 2
-#define RETURN_ADDRESS 3
+#define STACK_SIZE_ADDRESS 3
+#define RETURN_ADDRESS 4
 
 void resetSymbolTable();
 

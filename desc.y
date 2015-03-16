@@ -125,6 +125,9 @@ FonctionDef : tINT tID tPO { paramsCount = 0; } Params tPF { createFunction($2, 
 CorpsFonction : tBO Defs Instrucs Return tF tBF;
 
 Return : tRETURN Exp {
+	symbol_t *returnValue = popSymbol();
+	assemblyOutput(COP" 2 %d ; Copie de la valeur de retour pour récupération par l'appelant", returnValue->address);
+	freeIfTemp(returnValue);
 	assemblyOutput(JMP" %d ; return de la fonction %s", currentFunction->address + 1, currentFunction->name);
 };
 
@@ -240,7 +243,12 @@ ArgsList : Exp { ++paramsCount; }
 | ArgsList tVIR Exp { ++paramsCount; };
 
 Exp : Terme
-| tID { paramsCount = 0; } tPO Args tPF { callFunction($1, paramsCount); }
+| tID { paramsCount = 0; } tPO Args tPF {
+	symbol_t *returnValue = allocTemp();
+	callFunction($1, paramsCount);
+	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
+	pushSymbol(returnValue);
+}
 | tID tEGAL Exp { affectation($1); }
 | Exp tPLUS Exp { binOp(ADD); }
 | Exp tMOINS Exp { binOp(SOU); }

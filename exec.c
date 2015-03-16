@@ -68,7 +68,7 @@ int pop(void) {
 #define SCAN_THREE { sscanf(line, "%d %d %d", &op1, &op2, &op3); }
 
 int *getMemory(int address) {
-	if(address > 1)
+	if(address > 2)
 		address += memory[0];
 
 	return &memory[address];
