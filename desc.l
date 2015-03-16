@@ -11,7 +11,7 @@ int lineNumber = 1;
 %}
 
 Delim	[ \t\n]+
-Nom	[a-zA-Z][_a-zA-Z0-9]*
+Nom	[_a-zA-Z][_a-zA-Z0-9]*
 chiffre	[0-9]
 nombre	{chiffre}+(\.{chiffre}+)?(E[+\-]?{chiffre}+)?
 string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""

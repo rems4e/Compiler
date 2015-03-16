@@ -25,13 +25,13 @@ int fib(int n) {
 	return 0;
 }
 
-/*int func3(int a, int b, int d) {
+int func3(int a, int b, int d) {
 	int c = d * a + b;
 	printf(c);
-	f(b, a);
+	f(b, a, 1);
 	return a + b;
-}*/
-/*int func2() {
+}
+int func2() {
 	printf(222222);
 	return 2;
 
@@ -43,17 +43,16 @@ int func() {
 	func2();
 	printf(111);
 	return 1;
-}*/
+}
 
 int main() {
-	/*printf(77777);*/
-	//func();
-	/*int a;
+	int a;
+	printf(77777);
 	printf(888888);
 
 	func3(2, 8, 100);
 	a = func3(100, 2, 8);
-	printf(a);*/
+	printf(a);
 	
 	printf(f(3, 4, 1));
 	printf(fact(10));

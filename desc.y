@@ -243,7 +243,13 @@ ArgsList : Exp { ++paramsCount; }
 | ArgsList tVIR Exp { ++paramsCount; };
 
 Exp : Terme
-| tID { paramsCount = 0; } tPO Args tPF {
+| tID tPO { paramsCount = 0; } tPF {
+	symbol_t *returnValue = allocTemp();
+	callFunction($1, paramsCount);
+	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
+	pushSymbol(returnValue);
+}
+| tID tPO { paramsCount = 0; } Args tPF {
 	symbol_t *returnValue = allocTemp();
 	callFunction($1, paramsCount);
 	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
