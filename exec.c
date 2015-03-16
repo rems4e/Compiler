@@ -51,6 +51,7 @@ int main(int argc, char const **argv) {
 
 static int stackSize = 0;
 static int stack[STACK_CAPACITY];
+static int *memory;
 
 void push(int val) {
 	assert(stackSize < STACK_CAPACITY - 1);
@@ -65,6 +66,13 @@ int pop(void) {
 #define SCAN_ONE { sscanf(line, "%d", &op1); }
 #define SCAN_TWO { sscanf(line, "%d %d", &op1, &op2); }
 #define SCAN_THREE { sscanf(line, "%d %d %d", &op1, &op2, &op3); }
+
+int *getMemory(int address) {
+	if(address > 1)
+		address += memory[0];
+
+	return &memory[address];
+}
 
 void exec(char const *sourcePath) {
 	FILE *sourceFile = fopen(sourcePath, "rb");
@@ -93,7 +101,7 @@ void exec(char const *sourcePath) {
 		return;
 	}
 
-	int *memory = malloc(MEMORY_SIZE * sizeof(int));
+	memory = malloc(MEMORY_SIZE * sizeof(int));
 
 	int opcode, op1, op2, op3, val1, val2;
 	int pc = 0;
@@ -109,41 +117,41 @@ void exec(char const *sourcePath) {
 		switch(opcode) {
 			case ADD:
 				SCAN_THREE;
-				memory[op1] = memory[op2] + memory[op3];
+				*getMemory(op1) = *getMemory(op2) + *getMemory(op3);
 				break;
 			case SOU:
 				SCAN_THREE;
-				memory[op1] = memory[op2] - memory[op3];
+				*getMemory(op1) = *getMemory(op2) - *getMemory(op3);
 				break;
 			case MUL:
 				SCAN_THREE;
-				memory[op1] = memory[op2] * memory[op3];
+				*getMemory(op1) = *getMemory(op2) * *getMemory(op3);
 				break;
 			case DIV:
 				SCAN_THREE;
-				 memory[op1] = memory[op2] / memory[op3];
+				 *getMemory(op1) = *getMemory(op2) / *getMemory(op3);
 				break;
 			case EQU:
 				SCAN_THREE;
-				memory[op1] = memory[op2] == memory[op3];
+				*getMemory(op1) = *getMemory(op2) == *getMemory(op3);
 				break;
 			case INF:
 				SCAN_THREE;
-				memory[op1] = memory[op2] < memory[op3];
+				*getMemory(op1) = *getMemory(op2) < *getMemory(op3);
 				break;
 			case SUP:
 				SCAN_THREE;
-				memory[op1] = memory[op2] > memory[op3];
+				*getMemory(op1) = *getMemory(op2) > *getMemory(op3);
 				break;
 
 			case COP:
 				SCAN_TWO;
-				memory[op1] = memory[op2];
+				*getMemory(op1) = *getMemory(op2);
 				break;
 
 			case AFC:
 				SCAN_TWO;
-				memory[op1] = op2;
+				*getMemory(op1) = op2;
 				break;
 
 			case JMP:
@@ -152,7 +160,7 @@ void exec(char const *sourcePath) {
 				continue;
 			case JMF:
 				SCAN_TWO;
-				if(!memory[op1]) {
+				if(!*getMemory(op1)) {
 					pc = op2;
 					continue;
 				}
@@ -160,7 +168,7 @@ void exec(char const *sourcePath) {
 				
 			case PRI:
 				SCAN_ONE;
-				printf("%d\n", memory[op1]);
+				printf("%d\n", *getMemory(op1));
 				break;
 		}
 

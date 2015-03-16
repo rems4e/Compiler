@@ -10,43 +10,50 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "assembly.h"
+
+#define SYM_COUNT 1000
+
+typedef struct {
+	symbol_t symbols[SYM_COUNT];
+	symbol_t *symbolsStack[SYM_COUNT];
+	int stackSize;
+} symbolTable_t;
+
 
 static symbolTable_t symbolTable;
 static char *tempSymbol;
+void resetSymbolTable();
+void initFunctionTable();
+void freeFunctionTable();
 
-void initSymbolTable() {
+void initSymbols() {
 	tempSymbol = strdup("__temp__");
+
 	resetSymbolTable();
+	initFunctionTable();
 }
 
 void resetSymbolTable() {
 	symbolTable.stackSize = 0;
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
-		symbolTable.symbols[i].affected = false;
+		symbolTable.symbols[i].initialized = false;
+		if(symbolTable.symbols[i].name != tempSymbol) {
+			free(symbolTable.symbols[i].name);
+		}
 		symbolTable.symbols[i].name = NULL;
-		symbolTable.symbols[i].address = i + 1;
-		symbolTable.symbols[i].constant = false;
-		symbolTable.symbols[i].refCount = 0;
+		symbolTable.symbols[i].address = i + 2;
+		symbolTable.symbols[i].type = VarInt;
 
 		symbolTable.symbolsStack[i] = NULL;
 	}
 }
 
-void cleanSymbolTable() {
-	symbol_t *symbols = symbolTable.symbols;
-
-	for(int i = 0; i < SYM_COUNT; ++i) {
-		if(symbols[i].name != tempSymbol) {
-			free(symbols[i].name);
-		}
-	}
-
+void cleanSymbols() {
+	resetSymbolTable();
 	free(tempSymbol);
-}
-
-address_t getStackPointerAddress() {
-	return 0;
+	freeFunctionTable();
 }
 
 int getStackSize() {
@@ -76,7 +83,7 @@ symbol_t *createSymbol(char const *name) {
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name != NULL && strcmp(symbols[i].name, name) == 0) {
-			fprintf(stderr, "Symbol %s already exists!\n", name);
+			yyerror("La variable %s existe déjà !\n", name);
 			return NULL;
 		}
 		else if(symbols[i].name == NULL) {
@@ -95,7 +102,6 @@ symbol_t *allocTemp() {
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name == NULL) {
 			symbols[i].name = tempSymbol;
-			symbols[i].refCount = 1;
 			return &symbols[i];
 		}
 	}
@@ -107,11 +113,7 @@ symbol_t *allocTemp() {
 
 void freeIfTemp(symbol_t *s) {
 	if(s->name == tempSymbol) {
-		assert(s->refCount > 0);
-		--s->refCount;
-		if(s->refCount == 0) {
-			s->name = NULL;
-		}
+		s->name = NULL;
 	}
 }
 
@@ -141,9 +143,9 @@ bool symbolDeclared(char const *name) {
 	return getExistingSymbol(name) != NULL;
 }
 
-bool symbolAffected(char const *name) {
+bool symbolInitialized(char const *name) {
 	symbol_t *s = getExistingSymbol(name);
-	return s != NULL && s->affected;
+	return s != NULL && s->initialized;
 }
 
 void printSymbolTable() {
@@ -151,7 +153,7 @@ void printSymbolTable() {
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name != NULL) {
-			printf("%#x: \"%s\" affected: %s\n", symbols[i].address, symbols[i].name, (symbols[i].affected ? "true" : "false"));
+			printf("%#x: \"%s\" affected: %s\n", symbols[i].address, symbols[i].name, (symbols[i].initialized ? "true" : "false"));
 		}
 	}
 }

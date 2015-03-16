@@ -6,6 +6,9 @@
 //
 
 #include "assembly.h"
+#include "symbol.h"
+#include "function.h"
+#include "utility.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -36,9 +39,16 @@ typedef struct {
 	int size;
 } addressStack_t;
 
+typedef struct {
+	char *address[TAILLE_MAX];
+	int size;
+} returnStack_t;
+
 static labelStack_t labelsStack;
 static labelList_t labelsList;
 static addressStack_t addressStack;
+static returnStack_t returnAddressStack;
+
 static size_t linesCount = 0;
 
 
@@ -53,36 +63,95 @@ void initAssemblyOutput(char const *path) {
 	for(int i = 0; i < TAILLE_MAX; ++i) {
 		labelsList.labels[i].adresseSaut = 0;
 		labelsStack.labels[i] = NULL;
+		returnAddressStack.address[i] = NULL;
 	}
+
+	returnAddressStack.size = 1;
+	returnAddressStack.address[0] = strdup("EOF"UNKNOWN_ADDRESS);
+
+	assemblyOutput(AFC" 0 0 ; Initialisation stack pointer");
+	assemblyOutput(AFC" 1 EOF%s ; Initialisation adresse de retour", UNKNOWN_ADDRESS);
+
+	callFunction("main", 0);
 }
 
 void closeAssemblyOutput() {
+	int returnAddress = instructionsCount();
+
+	for(int i = 0; i < returnAddressStack.size; ++i) {
+		symbol_t *s = allocTemp();
+		assemblyOutput(EQU" %d 1 %s ; Adresse de retour pour l'appel de fonction %d", s->address, returnAddressStack.address[i], i);
+		assemblyOutput(EQU" %d 0 %d", s->address, s->address);
+		assemblyOutput(JMF" %d %s", s->address, returnAddressStack.address[i]);
+	}
+
 	char *pos = buffer;
 	char labelBuf[5];
 	int currentLabel = 0;
+	int unknownLength = strlen(UNKNOWN_ADDRESS);
 	size_t length;
 
-	char const *labelPattern = "\n"UNKNOWN_PREFIX;
-	int const labelOffset = strlen("\n"JMP_UNKNOWN);
+#ifdef STRIP_COMMENTS
+	while((pos = strstr(pos, ";")) != NULL) {
+		if(pos[-1] == ' ')
+			--pos;
+		char *pos2 = strstr(pos, "\n");
+		size_t length = pos2 - pos;
+		stringReplaceWithShorter(pos, length, "", 0);
+	}
 
+#endif
+
+	pos = buffer;
+	length = sprintf(labelBuf, "%zu", instructionsCount());
+	while((pos = strstr(pos, "EOF"UNKNOWN_ADDRESS)) != NULL) {
+		stringReplaceWithShorter(pos, 3 + unknownLength, labelBuf, length);
+	}
+
+	pos = buffer;
+	while((pos = strstr(pos, "FUN"UNKNOWN_ADDRESS)) != NULL) {
+		int functionIndex;
+		int charatersConsumed;
+		sscanf(pos + strlen("FUN"UNKNOWN_ADDRESS), "%d%n", &functionIndex, &charatersConsumed);
+
+		function_t *function = getFunction(functionIndex);
+		if(function->address == 0) {
+			yyerror("La fonction %s n'a pas été définie !\n", function->name);
+		}
+		length = sprintf(labelBuf, "%d", function->address);
+		stringReplaceWithShorter(pos, strlen("FUN"UNKNOWN_ADDRESS) + charatersConsumed, labelBuf, length);
+	}
+
+	pos = buffer;
+	length = sprintf(labelBuf, "%d", returnAddress);
+
+	while((pos = strstr(pos, "FUN_RET")) != NULL) {
+		stringReplaceWithShorter(pos, strlen("FUN_RET"), labelBuf, length);
+	}
+
+	pos = buffer;
+
+	char const *labelPattern = "\n"UNKNOWN_PREFIX;
 	while((pos = strstr(pos, labelPattern)) != NULL) {
 		length = strlen(pos + 3);
 		memmove(pos + 1, pos + 3, length);
 		pos[length + 1] = 0;
 
-		pos = strstr(pos, "0000");
+		pos = strstr(pos, UNKNOWN_ADDRESS);
 
 		length = sprintf(labelBuf, "%d", labelsList.labels[currentLabel].adresseSaut);
-		memcpy(pos, labelBuf, length);
-		size_t length2 = strlen(pos + 4 - length);
-		memmove(pos + length, pos + 4, length2);
-		pos[4 - length + length2] = 0;
+		
+		stringReplaceWithShorter(pos, unknownLength, labelBuf, length);
 		++currentLabel;
 	}
 	assert(currentLabel == labelsList.size);
 
 	fputs(buffer, output);
 	fclose(output);
+
+	for(int i = 0; i < TAILLE_MAX; ++i) {
+		free(returnAddressStack.address[i]);
+	}
 }
 
 void assemblyOutput(char const *lineFormat, ...) {
@@ -138,3 +207,11 @@ void popLabelWithAddress(int address) {
 	labelsStack.labels[labelsStack.size]->adresseSaut = address;
 	labelsStack.labels[labelsStack.size] = NULL;
 }
+
+void addFunctionReturnAddress(int returnAddress) {
+	assert(returnAddressStack.size < TAILLE_MAX - 1);
+	char *buf;
+	asprintf(&buf, "%d", returnAddress);
+	returnAddressStack.address[returnAddressStack.size++] = buf;
+}
+

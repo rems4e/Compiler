@@ -6,9 +6,11 @@
 
 #define ECHO /*fprintf(yyout, "%s\n", yytext)*/
 
+int lineNumber = 1;
+
 %}
 
-Delim	[ \t]+
+Delim	[ \t\n]+
 Nom	[a-zA-Z][_a-zA-Z0-9]*
 chiffre	[0-9]
 nombre	{chiffre}+(\.{chiffre}+)?(E[+\-]?{chiffre}+)?
@@ -23,14 +25,14 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 
 "/*"            { BEGIN(C_COMMENT); }
 <C_COMMENT>"*/" { BEGIN(INITIAL); }
+<C_COMMENT>"\n"    { ++lineNumber; }
 <C_COMMENT>.    { }
 
 "//"            { BEGIN(C_COMMENTL); }
-<C_COMMENTL>"\n" { BEGIN(INITIAL); }
+<C_COMMENTL>"\n" { BEGIN(INITIAL); ++lineNumber; }
 <C_COMMENTL>.    { }
 
 
-"main"	{ECHO;return tMAIN;}
 "return"	{ECHO;return tRETURN;}
 "printf"	{ECHO;return tPRINTF;}
 
@@ -52,8 +54,8 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "{"	{ECHO;return tBO;}
 "}"	{ECHO;return tBF;}
 ","	{ECHO;return tVIR;}
+\n	{ECHO; ++lineNumber;}
 Delim	{ECHO;}
-\n	{ECHO;}
 "/"	{ECHO;return tDIV;}
 "*"	{ECHO;return tMUL;}
 "-"	{ECHO;return tMOINS;}

@@ -10,30 +10,23 @@
 
 #include "constants.h"
 
-#define SYM_COUNT 100
-
 typedef unsigned int address_t;
 
+typedef enum {
+	VarInt,
+	VarConst
+} VarType;
+
 typedef struct {
-	bool affected;
+	bool initialized;
 	char *name;
 	address_t address;
-	bool constant;
-	int refCount;
+	VarType type;
 } symbol_t;
 
-typedef struct {
-	symbol_t symbols[SYM_COUNT];
-	symbol_t *symbolsStack[SYM_COUNT];
-	int stackSize;
-} symbolTable_t;
+void initSymbols(void);
+void cleanSymbols(void);
 
-
-void initSymbolTable(void);
-void resetSymbolTable(void);
-void cleanSymbolTable(void);
-
-address_t getStackPointerAddress(void);
 int getStackSize(void);
 
 symbol_t *getExistingSymbol(char const *name);
@@ -47,7 +40,7 @@ symbol_t *popSymbol(void);
 void clearSymbolStack(void);
 
 bool symbolDeclared(char const *name);
-bool symbolAffected(char const *name);
+bool symbolInitialized(char const *name);
 
 void printSymbolTable(void);
 

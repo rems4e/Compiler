@@ -9,6 +9,7 @@
 #ifndef Syste_me_Info_constants_h
 #define Syste_me_Info_constants_h
 
+void yyerror(char const *s, ...);
 #include <stdbool.h>
 
 #endif

@@ -1,11 +1,19 @@
-int main {
-	int i = 100;
+int func() {
+
+	return 4;
+}
+
+int main() {
+	func();
+	/*int i = 100;
+	int k = 0;
+	int j = 100;
 
 	for(i = 0; i < 10; i = i + 2) {
 		printf(i);
 	}
 
-	/*if(0) {
+	if(3 < 4) {
 		printf(88888888);
 		if(1) {
 			printf(6666666);
@@ -17,10 +25,8 @@ int main {
 	}
 	else {
 		printf(4444444);
-	}*/
+	}
 
-	/*int i = 0;
-	int j = 100;
 
 	while(j > 0) {
 		i = i + 1;
@@ -57,6 +63,8 @@ int main {
 		printf(4);
 	} while(j > 0);
 	printf(5);*/
+
+	printf(77777);
 
 	return 0;
 }

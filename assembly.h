@@ -10,9 +10,12 @@
 
 #include <stdlib.h>
 
-//#define OPCODE_TEXT
+//#define STRIP_COMMENTS
+
+#define OPCODE_TEXT
 
 #define UNKNOWN_PREFIX "U_"
+#define UNKNOWN_ADDRESS "00000"
 
 #ifdef OPCODE_TEXT
 
@@ -72,5 +75,7 @@ void pushLabel(void);
 void pushLabelLastButOne(void);
 void popLabel(void);
 void popLabelWithAddress(int address);
+
+void addFunctionReturnAddress(int returnAddress);
 
 #endif /* defined(__Syste_me_Info__assembly__) */

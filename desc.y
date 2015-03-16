@@ -8,29 +8,29 @@
 	#include "constants.h"
 	#include "symbol.h"
 	#include "assembly.h"
+	#include "function.h"
 
 	#define YYERROR_VERBOSE
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
-
-	void yyerror(char const *s, ...);
-
 	int yylex();
-	YY_BUFFER_STATE yy_scan_string (const char *yy_str);
+	YY_BUFFER_STATE yy_scan_string(const char *yy_str);
 
+	extern int const lineNumber;
 	static int retourConditionFor;
+	function_t *currentFunction = NULL;
 
 	void affectation(char const *nom) {
 		symbol_t *sym = getExistingSymbol(nom);
 		if(sym == NULL) {
 			yyerror("variable %s non déclarée\n", nom);
 		}
-		else if(sym->constant) {
+		else if(sym->type == VarConst) {
 			yyerror("affectation d'une constante\n");
 		}
 
-		sym->affected = true;
+		sym->initialized = true;
 		symbol_t *val = popSymbol();
 
 		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, nom);
@@ -53,7 +53,7 @@
 	}
  
 	bool isUsable(char* nom) {
-		bool d = symbolDeclared(nom), a = symbolAffected(nom);
+		bool d = symbolDeclared(nom), a = symbolInitialized(nom);
 		if(!d) {
 			yyerror("affectation avec %s , variable non déclarée \n", nom);
 		}
@@ -76,7 +76,7 @@
 
 	void negate() {
 		symbol_t *zero = allocTemp();
-		assemblyOutput(AFC" %d %d", zero->address, 0);
+		assemblyOutput(AFC" %d %d ; negate", zero->address, 0);
 
 		pushSymbol(zero);
 		binOp(EQU);
@@ -85,10 +85,6 @@
 	void toBoolean() {
 		negate();
 		negate();
-	}
-
-	void callFunction(char const *functionName) {
-
 	}
 
 	%}
@@ -105,7 +101,7 @@
 %token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
 
 %token tF
-%token tMAIN tRETURN tPRINTF
+%token tRETURN tPRINTF
 %token tIF tELSE tWHILE tFOR tDO
 %token END_OF_FILE
 
@@ -122,11 +118,18 @@
 S :
 | S Corps;
 
-Corps :	tINT tMAIN Suite;
+Fonction : tINT tID tPO tPF { createFunction($2, false, 0); } tF;
+FonctionDef : tINT tID tPO tPF { createFunction($2, true, 0); } CorpsFonction { currentFunction = NULL; };
+CorpsFonction : tBO Defs Instrucs Return tF tBF;
 
-//Deb : tINT tMAIN ;
+Return : tRETURN Exp {
+	assemblyOutput(JMP" %d ; return de la fonction %s", currentFunction->address + 1, currentFunction->name);
+};
 
-Suite : tBO Defs Instrucs tRETURN Exp tF tBF ;
+Corps : Fonction
+| FonctionDef
+| Corps;
+
 
 Defs :
 | Defs Def;
@@ -147,19 +150,21 @@ Instrucs:
 
 Instruc : Exp tVIR Instruc
 | Exp tF
+| Return tF
 | tIF Cond tBO Instrucs tBF { popLabel(); }
-| tIF Cond tBO Instrucs tBF { pushLabelLastButOne(); assemblyOutput(JMP_UNKNOWN" 0000"); } tELSE tBO { popLabel(); } Instrucs tBF { popLabel(); }
+| tIF Cond tBO Instrucs tBF { pushLabelLastButOne(); assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS); } tELSE tBO { popLabel(); } Instrucs tBF { popLabel(); }
 | tWHILE { pushInstructionCount(); } Cond tBO Instrucs FinWhile
 | tDO { pushInstructionCount(); } tBO Instrucs tBF tWHILE Cond tF { assemblyOutput(JMP" %d", popInstructionCount()); popLabel(); }
+
 | tFOR tPO Exp { // Initialisation
 	pushInstructionCount();
 } tF Exp { // Condition
 	symbol_t *cond = popSymbol();
 	pushLabel();
-	assemblyOutput(JMF_UNKNOWN" %d 0000", cond->address);
+	assemblyOutput(JMF_UNKNOWN" %d "UNKNOWN_ADDRESS, cond->address);
 	freeIfTemp(cond);
 	pushLabel();
-	assemblyOutput(JMP_UNKNOWN" 0000");
+	assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS);
 } tF { // Action en fin de boucle
 	retourConditionFor = popInstructionCount();
 	pushInstructionCount();
@@ -172,6 +177,7 @@ Instruc : Exp tVIR Instruc
 } tBF {
 	popLabel();
 }
+
 | tPRINTF tPO Exp tPF tF {
 	symbol_t *s = popSymbol();
 	assemblyOutput(PRI" %d", s->address);
@@ -201,26 +207,30 @@ Terme :  tNOMBRE {
 Cond : tPO Exp tPF {
 	symbol_t *cond = popSymbol();
 	pushLabel();
-	assemblyOutput(JMF_UNKNOWN" %d 0000", cond->address);
+	assemblyOutput(JMF_UNKNOWN" %d "UNKNOWN_ADDRESS, cond->address);
 	freeIfTemp(cond);
 } ;
 
 Bool:
 | tTRUE {
 	symbol_t *s = allocTemp();
-	assemblyOutput(AFC" %d %d", s->address, 1);
+	assemblyOutput(AFC" %d 1", s->address);
 	pushSymbol(s);
 }
 | tFALSE {
 	symbol_t *s = allocTemp();
-	assemblyOutput(AFC" %d %d", s->address, 0);
+	assemblyOutput(AFC" %d 0", s->address);
 	pushSymbol(s);
 };
 
+Args :
+| Exp {
+};
 
 Exp : Terme
-| tID tEGAL Exp tVIR { affectation($1); } Exp
-| tID tEGAL Exp {affectation($1);}
+| Exp tVIR Exp
+| tID tPO Args tPF { callFunction($1, 0); }
+| tID tEGAL Exp { affectation($1); }
 | Exp tPLUS Exp { binOp(ADD); }
 | Exp tMOINS Exp { binOp(SOU); }
 | Exp tMUL Exp { binOp(MUL); }
@@ -284,7 +294,7 @@ void yyerror(const char *s, ...) {
 	va_list args;
 	va_start(args, s);
 
-	fprintf(stderr, "Erreur : ");
+	fprintf(stderr, "Erreur ligne %d : ", lineNumber);
 	vfprintf(stderr, s, args);
 	fputc('\n', stderr);
 
@@ -296,8 +306,7 @@ void yyerror(const char *s, ...) {
 int main(int argc, char const **argv) {
 	char *outputName = strdup("a.s");
 
-	initSymbolTable();
-
+	initSymbols();
 	char *buf;
 	if(argc > 1) {
 		long len = strlen(argv[1]);
@@ -334,17 +343,11 @@ int main(int argc, char const **argv) {
 	initAssemblyOutput(outputName);
 	free(outputName);
 
-	assemblyOutput(AFC" %d %d", getStackPointerAddress(), 0);
-	/*callFunction(" main");
-	pushLabel();
-	assemblyOutput(JMP" 0000");*/
-
 	yyparse();
 	free(buf);
 
-	//popLabel();
 	closeAssemblyOutput();
-	cleanSymbolTable();
+	cleanSymbols();
 
 	return 0;
 }
