@@ -92,11 +92,11 @@ void callFunction(char const *name, int argsCount) {
 	if(currentFunction != NULL) {
 		stackSize += 2;
 	}
-	assemblyOutput(AFC" %d %d ; taille de la pile", STACK_SIZE_ADDRESS + stackSize, stackSize);
-	assemblyOutput(ADD" 0 0 %d ; Incrémentation stack pointer", STACK_SIZE_ADDRESS + 2); // Incrémentation stack pointer
 	if(currentFunction != NULL) {
 		assemblyOutput(COP" %d 1 ; Sauvegarde ancienne adresse retour", RETURN_ADDRESS); // Sauvegarde adresse de retour
 	}
+	assemblyOutput(AFC" %d %d ; taille de la pile", STACK_SIZE_ADDRESS + stackSize, stackSize);
+	assemblyOutput(ADD" 0 0 %d ; Incrémentation stack pointer", STACK_SIZE_ADDRESS + 2); // Incrémentation stack pointer
 
 	function_t *function = NULL;
 	for(int i = 0; (i < functionTable.size) && (functionTable.functions[i].name != NULL); ++i) {

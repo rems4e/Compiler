@@ -79,12 +79,17 @@ void closeAssemblyOutput() {
 	int returnAddress = instructionsCount();
 
 	symbol_t *s1 = allocTemp(), *s2 = allocTemp();
+	symbol_t *zero = allocTemp();
+	assemblyOutput(AFC" %d 0 ; Table des adresses de retour de fonction", zero->address);
 	for(int i = 0; i < returnAddressStack.size; ++i) {
 		assemblyOutput(AFC" %d %s ; Adresse de retour pour l'appel de fonction %d", s1->address, returnAddressStack.address[i], i);
 		assemblyOutput(EQU" %d 1 %d", s2->address, s1->address);
-		assemblyOutput(EQU" %d 0 %d", s2->address, s2->address);
+		assemblyOutput(EQU" %d %d %d", s2->address, zero->address, s2->address);
 		assemblyOutput(JMF" %d %s", s2->address, returnAddressStack.address[i]);
 	}
+	freeIfTemp(s1);
+	freeIfTemp(s2);
+	freeIfTemp(zero);
 
 	char *pos = buffer;
 	char labelBuf[5];

@@ -114,11 +114,11 @@ void exec(char const *sourcePath) {
 		}
 		++line;
 
-		printf("Ligne : %d\n", pc + 1);
-		for(int i = 0; i < 10; ++i) {
+		/*printf("Ligne : %d\n", pc + 1);
+		for(int i = 0; i < 20; ++i) {
 			printf("\tmemory[%d]: %d\n", i, memory[i]);
 		}
-		putc('\n', stdout);
+		putc('\n', stdout);*/
 		switch(opcode) {
 			case ADD:
 				SCAN_THREE;
