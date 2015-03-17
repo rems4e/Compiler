@@ -25,10 +25,7 @@
 
 	void affectation(char const *nom, bool allowConst) {
 		symbol_t *sym = getExistingSymbol(nom);
-		if(sym == NULL) {
-			yyerror("variable %s non déclarée\n", nom);
-		}
-		else if(!allowConst && sym->type == VarConst) {
+		if(!allowConst && sym->type == VarConst) {
 			yyerror("affectation d'une constante\n");
 		}
 
@@ -49,17 +46,6 @@
 	void print(int val){
 		printf("%d", val) ;
 	}
- 
-	bool isUsable(char* nom) {
-		bool d = symbolDeclared(nom), a = symbolInitialized(nom);
-		if(!d) {
-			yyerror("affectation avec %s , variable non déclarée \n", nom);
-		}
-		else if(!a) {
-			printf("affectation avec %s, variable non affectée \n", nom);
-		}
-		return d && a;
-	}
 
 	void binOp(char const *op) {
 		symbol_t *s2 = popSymbol();
@@ -70,6 +56,19 @@
 		assemblyOutput("%s %d %d %d", op, res->address, s1->address, s2->address);
 		freeIfTemp(s2);
 		freeIfTemp(s1);
+	}
+
+	void binOpEq(char const *op) {
+		symbol_t *r = popSymbol();
+		symbol_t *s = popSymbol();
+		pushSymbol(r);
+
+		if(r->type == VarConst) {
+			yyerror("affectation d'une constante\n");
+		}
+
+		assemblyOutput("%s %d %d %d", op, r->address, r->address, s->address);
+		freeIfTemp(s);
 	}
 
 	void negate() {
@@ -95,6 +94,8 @@
 
 %token tPO tPF tVIR tBO tBF
 %token tINT tCONST tTRUE tFALSE
+%token tINCR tDECR
+%token tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
 %token tPLUS tMOINS tDIV tMUL tEGAL
 %token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
 
@@ -256,10 +257,51 @@ Exp : Terme
 	pushSymbol(returnValue);
 }
 | tID tEGAL Exp { affectation($1, false); }
+| tINCR tID {
+	symbol_t *one = allocTemp();
+	assemblyOutput(AFC" %d 1", one->address);
+	pushSymbol(one);
+	pushSymbol(getExistingSymbol($2));
+	binOpEq(ADD);
+}
+| tID tINCR {
+	symbol_t *one = allocTemp(), *result = getExistingSymbol($1);
+	symbol_t *copy = allocTemp();
+	assemblyOutput(COP" %d %d", copy->address, result->address);
+	assemblyOutput(AFC" %d 1", one->address);
+	pushSymbol(one);
+	pushSymbol(result);
+	binOpEq(ADD);
+	freeIfTemp(popSymbol());
+	pushSymbol(copy);
+}
+| tDECR tID {
+	symbol_t *one = allocTemp();
+	assemblyOutput(AFC" %d 1", one->address);
+	pushSymbol(one);
+	pushSymbol(getExistingSymbol($2));
+	binOpEq(SOU);
+}
+| tID tDECR {
+	symbol_t *one = allocTemp(), *result = getExistingSymbol($1);
+	symbol_t *copy = allocTemp();
+	assemblyOutput(COP" %d %d", copy->address, result->address);
+	assemblyOutput(AFC" %d 1", one->address);
+	pushSymbol(one);
+	pushSymbol(result);
+	binOpEq(SOU);
+	freeIfTemp(popSymbol());
+	pushSymbol(copy);
+}
 | Exp tPLUS Exp { binOp(ADD); }
 | Exp tMOINS Exp { binOp(SOU); }
 | Exp tMUL Exp { binOp(MUL); }
 | Exp tDIV Exp { binOp(DIV); }
+
+| tID tPLUSEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(ADD); }
+| tID tMOINSEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(SOU); }
+| tID tDIVEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(DIV); }
+| tID tMULEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(MUL); }
 
 | Exp tET Exp {
 	toBoolean();
@@ -379,5 +421,3 @@ int main(int argc, char const **argv) {
 
 	return 0;
 }
-
-//http://langevin.univ-tln.fr/CDE/LEXYACC/Lex-Yacc3.html

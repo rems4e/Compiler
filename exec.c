@@ -70,6 +70,7 @@ int pop(void) {
 int *getMemory(int address) {
 	if(address > 2)
 		address += memory[0];
+	assert(address >= 0 && address < MEMORY_SIZE);
 
 	return &memory[address];
 }

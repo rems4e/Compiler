@@ -58,6 +58,15 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 ","	{ECHO;return tVIR;}
 \n	{ECHO; ++lineNumber;}
 Delim	{ECHO;}
+
+"++"	{ECHO;return tINCR;}
+"--"	{ECHO;return tDECR;}
+
+"/="	{ECHO;return tDIVEQ;}
+"*="	{ECHO;return tMULEQ;}
+"-="	{ECHO;return tMOINSEQ;}
+"+="	{ECHO;return tPLUSEQ;}
+
 "/"	{ECHO;return tDIV;}
 "*"	{ECHO;return tMUL;}
 "-"	{ECHO;return tMOINS;}

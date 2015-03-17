@@ -75,6 +75,8 @@ symbol_t *getExistingSymbol(char const *name) {
 		}
 	}
 
+	yyerror("variable %s non déclarée\n", name);
+
 	return NULL;
 }
 

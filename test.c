@@ -52,7 +52,16 @@ int testConst(const a, int b) {
 }
 
 int main() {
-	testConst(3, 4);
+	int i, j;
+	int res = 0;
+	for(j = 0; j < 20; ++j) {
+		for(i = 0; i < 100; ++i) {
+			res += i;
+		}
+	}
+	printf(res);
+
+	/*testConst(3, 4);
 	printf(77777);
 	printf(888888);
 
@@ -62,7 +71,7 @@ int main() {
 	
 	printf(f(3, 4, 1));
 	printf(fact(10));
-	printf(fib(13));
+	printf(fib(13));*/
 
 
 	return 0;
