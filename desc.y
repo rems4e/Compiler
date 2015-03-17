@@ -310,7 +310,10 @@ Exp : Terme
 | Exp tBOOLEGAL Exp { binOp(EQU); }
 
 | tPO Exp tPF 
-| Exp tDIFF Exp;
+| Exp tDIFF Exp {
+	binOp(EQU);
+	negate();
+}
 
 
 
