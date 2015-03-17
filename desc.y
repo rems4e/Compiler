@@ -23,12 +23,12 @@
 	static VarType lastVarType;
 	function_t *currentFunction = NULL;
 
-	void affectation(char const *nom) {
+	void affectation(char const *nom, bool allowConst) {
 		symbol_t *sym = getExistingSymbol(nom);
 		if(sym == NULL) {
 			yyerror("variable %s non déclarée\n", nom);
 		}
-		else if(sym->type == VarConst) {
+		else if(!allowConst && sym->type == VarConst) {
 			yyerror("affectation d'une constante\n");
 		}
 
@@ -37,17 +37,13 @@
 
 		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, nom);
 		freeIfTemp(val);
-
-		//printSymbolTable();
 	}
 
 	void declaration(char const *nom) {
-		symbol_t *sym = createSymbol(nom);
+		symbol_t *sym = createSymbol(nom, lastVarType);
 		if(sym == NULL) {
 			yyerror("variable déjà déclarée\n");
 		}
-
-		//printSymbolTable();
 	}
 
 	void print(int val){
@@ -153,10 +149,10 @@ Type : tINT { lastVarType = VarInt; }
 | tCONST { lastVarType = VarConst; };
         
         
-TypedDef : tID { declaration($1); } tVIR TypedDef
-| tID { declaration($1); } tF
-| tID  tEGAL Exp { declaration($1); affectation($1); } tVIR TypedDef
-| tID tEGAL Exp { declaration($1); affectation($1); } tF;
+TypedDef : tID { if(lastVarType == VarConst) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tVIR TypedDef
+| tID { if(lastVarType == VarConst) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tF
+| tID  tEGAL Exp { declaration($1); affectation($1, true); } tVIR TypedDef
+| tID tEGAL Exp { declaration($1); affectation($1, true); } tF;
 
 Instrucs:
 | Instrucs Instruc { clearSymbolStack(); };
@@ -213,6 +209,10 @@ Terme :  tNOMBRE {
 	if(s == NULL) {
 		yyerror("Variable %s non déclarée!", $1);
 	}
+	else if(!s->initialized) {
+		yyerror("Variable %s non initialisée avant utilisation!", $1);
+	}
+
 	pushSymbol(s);
 }
 | Bool ;
@@ -255,7 +255,7 @@ Exp : Terme
 	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
 	pushSymbol(returnValue);
 }
-| tID tEGAL Exp { affectation($1); }
+| tID tEGAL Exp { affectation($1, false); }
 | Exp tPLUS Exp { binOp(ADD); }
 | Exp tMOINS Exp { binOp(SOU); }
 | Exp tMUL Exp { binOp(MUL); }

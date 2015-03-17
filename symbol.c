@@ -78,7 +78,7 @@ symbol_t *getExistingSymbol(char const *name) {
 	return NULL;
 }
 
-symbol_t *createSymbol(char const *name) {
+symbol_t *createSymbol(char const *name, VarType type) {
 	symbol_t *symbols = symbolTable.symbols;
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
@@ -88,6 +88,7 @@ symbol_t *createSymbol(char const *name) {
 		}
 		else if(symbols[i].name == NULL) {
 			symbols[i].name = strdup(name);
+			symbols[i].type = type;
 			return &symbols[i];
 		}
 	}

@@ -38,6 +38,8 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 
 "true"	{ECHO;return tTRUE;}
 "false"	{ECHO;return tFALSE;}
+"int const"	{ECHO;return tCONST;}
+"const int"	{ECHO;return tCONST;}
 "int"	{ECHO;return tINT;}
 "const"	{ECHO;return tCONST;}
 

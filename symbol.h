@@ -30,7 +30,7 @@ void cleanSymbols(void);
 int getStackSize(void);
 
 symbol_t *getExistingSymbol(char const *name);
-symbol_t *createSymbol(char const *name);
+symbol_t *createSymbol(char const *name, VarType type);
 
 symbol_t *allocTemp(void);
 void freeIfTemp(symbol_t *s);

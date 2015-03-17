@@ -45,8 +45,14 @@ int func() {
 	return 1;
 }
 
+int testConst(const a, int b) {
+	printf(b);
+
+	return 0;
+}
+
 int main() {
-	int a;
+	testConst(3, 4);
 	printf(77777);
 	printf(888888);
 

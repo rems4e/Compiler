@@ -67,7 +67,8 @@ void freeFunctionTable() {
 void initSymbolTable(function_t *function) {
 	resetSymbolTable();
 	for(int i = 0; i < function->paramsCount; ++i) {
-		createSymbol(function->params[i].name);
+		symbol_t *s = createSymbol(function->params[i].name, function->params[i].type);
+		s->initialized = true;
 	}
 }
 
