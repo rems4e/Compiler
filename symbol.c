@@ -44,6 +44,7 @@ void resetSymbolTable() {
 		}
 		symbolTable.symbols[i].name = NULL;
 		symbolTable.symbols[i].address = i + 5;
+		symbolTable.symbols[i].pointedAddress = 0;
 		symbolTable.symbols[i].type.constMask = 0;
 		symbolTable.symbols[i].type.indirectionCount = 0;
 		symbolTable.symbols[i].type.topLevelConst = false;

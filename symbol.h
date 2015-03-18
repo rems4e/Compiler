@@ -23,6 +23,7 @@ typedef struct {
 	bool initialized;
 	char *name;
 	address_t address;
+	address_t pointedAddress;
 	VarType type;
 } symbol_t;
 

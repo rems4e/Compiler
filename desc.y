@@ -31,6 +31,7 @@
 		sym->initialized = true;
 
 		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, nom);
+		sym->pointedAddress = val->pointedAddress;
 		freeIfTemp(val);
 	}
 
@@ -109,6 +110,7 @@
 %token tPLUS tMOINS tDIV tSTAR tEGAL
 %token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
 
+%token tNULL
 %token tAMP
 
 %token tF
@@ -148,8 +150,7 @@ ParamsList : Param
 
 Param : Type tID { ++paramsCount; pushParam($2, lastVarType); };
 
-Corps : /*Fonction
-| */FonctionDef
+Corps : FonctionDef
 | Corps;
 
 
@@ -159,9 +160,16 @@ Defs :
 Def : Type TypedDef;
 
 Indirections :
-| Indirections
-| tSTAR tCONST
-| tCONST
+| Indirection;
+
+Indirection :
+| tSTAR tCONST {
+	lastVarType.constMask |= 1 << lastVarType.indirectionCount;
+	++lastVarType.indirectionCount;
+}
+| tSTAR {
+	++lastVarType.indirectionCount;
+}
 
 Type : tINT {
 	lastVarType.constMask = 0;
@@ -241,7 +249,17 @@ Terme :  tNOMBRE {
 
 	pushSymbol(s);
 }
-| Bool ;
+| Bool
+| tNULL {
+	int ind = lastVarType.indirectionCount;
+	if(ind == 0) {
+		ind = 1;
+	}
+	symbol_t *s = allocTemp(ind);
+	s->pointedAddress = 0;
+	pushSymbol(s);
+	assemblyOutput(AFC" %d 0", s->address);
+};
 
 Cond : tPO Exp tPF {
 	symbol_t *cond = popSymbol();
@@ -286,8 +304,9 @@ Exp : Terme
 | tAMP tID {
 	symbol_t *s = getExistingSymbol($2);
 	symbol_t *a = allocTemp(s->type.indirectionCount + 1);
+	a->pointedAddress = s->address;
 	assemblyOutput(AFC" %d %d", a->address, s->address);
-	pushSymbol(s);
+	pushSymbol(a);
 }
 | tSTAR tID {
 	symbol_t *s = getExistingSymbol($2);
@@ -296,7 +315,7 @@ Exp : Terme
 	}
 	else {
 		symbol_t *i = allocTemp(s->type.indirectionCount - 1);
-		assemblyOutput(COP" %d %d", i->address, s->address);
+		assemblyOutput(COP" %d %d", i->address, s->pointedAddress);
 		pushSymbol(i);
 	}
 }

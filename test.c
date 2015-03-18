@@ -1,4 +1,4 @@
-int f(int p1, int p2, int p3) {
+/*int f(int p1, int p2, int p3) {
 	if(p3 > 0) {
 		return p1 + p2;
 	}
@@ -49,17 +49,17 @@ int testConst(const a, int b) {
 	printf(b);
 
 	return 0;
-}
+}*/
 
 int main() {
-	int i, j;
+	/*int i, j;
 	int res = 0;
 	for(j = 0; j < 20; ++j) {
 		for(i = 0; i < 100; ++i) {
 			res += i;
 		}
 	}
-	printf(res);
+	printf(res);*/
 
 	/*testConst(3, 4);
 	printf(77777);
@@ -72,6 +72,15 @@ int main() {
 	printf(f(3, 4, 1));
 	printf(fact(10));
 	printf(fib(13));*/
+
+	int val1 = 3;
+	int val2 = 4;
+	int *p1 = &val1;
+	int *p2 = &val2;
+	//int *p
+	printf(*p1);
+	printf(p1);
+	printf(p2);
 
 
 	return 0;

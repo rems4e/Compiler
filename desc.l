@@ -51,6 +51,7 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "for"				{ECHO;return tFOR;}
 "do"				{ECHO;return tDO;}
 
+"NULL"				{ECHO;return tNULL;}
 "&"                 {ECHO;return tAMP;}
 
 "("					{ECHO;return tPO;}
