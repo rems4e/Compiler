@@ -39,6 +39,9 @@ void initFunctionTable() {
 		functionTable.functions[i].name = NULL;
 		functionTable.functions[i].address = 0;
 		functionTable.functions[i].paramsCount = 0;
+		functionTable.functions[i].returnType.indirectionCount = 0;
+		functionTable.functions[i].returnType.constMask = 0;
+		functionTable.functions[i].returnType.topLevelConst = false;
 		for(int j = 0; j < MAX_PARAMS; ++j) {
 			functionTable.functions[i].params[j].name = NULL;
 		}
@@ -49,7 +52,8 @@ void initFunctionTable() {
 		paramList.params[i].name = NULL;
 	}
 
-	createFunction("main", false, 0);
+	VarType type = {.indirectionCount = 0, .constMask = 0, .topLevelConst = false};
+	createFunction(&type, "main", false, 0);
 }
 
 void freeFunctionTable() {
@@ -89,9 +93,9 @@ param_t popParam() {
 	return retVal;
 }
 
-void callFunction(char const *name, int argsCount) {
+void callFunction(function_t *function, int argsCount) {
 	int stackSize = getStackSize();
-	allocTemp(), allocTemp();
+	allocTemp(0), allocTemp(0);
 	int returnAddress = instructionsCount();
 	if(currentFunction != NULL) {
 		stackSize += 2;
@@ -99,25 +103,15 @@ void callFunction(char const *name, int argsCount) {
 	if(currentFunction != NULL) {
 		assemblyOutput(COP" %d 1 ; Sauvegarde ancienne adresse retour", RETURN_ADDRESS); // Sauvegarde adresse de retour
 	}
-	function_t *function = NULL;
-	for(int i = 0; (i < functionTable.size) && (functionTable.functions[i].name != NULL); ++i) {
-		if(strcmp(functionTable.functions[i].name, name) == 0) {
-			function = &functionTable.functions[i];
-			break;
-		}
-	}
 
-	if(function == NULL) {
-		yyerror("La fonction %s n'a pas été déclarée !\n", name);
-	}
 	if(function->paramsCount != argsCount) {
-		yyerror("Nombre d'arguments passés à la fonction %s invalide (%d au lieu de %d) !\n", name, argsCount, function->paramsCount);
+		yyerror("Nombre d'arguments passés à la fonction %s invalide (%d au lieu de %d) !\n", function->name, argsCount, function->paramsCount);
 	}
 	for(int i = 0; i < argsCount; ++i) {
-		symbol_t *param = allocTemp();
 		symbol_t *arg = popSymbol();
-		if(!paramAndArgCompatible(&function->params[i], arg)) {
-			yyerror("Type de l'argument %d passé à la fonction %s invalide !\n", i + 1, name);
+		symbol_t *param = allocTemp(arg->type.indirectionCount);
+		if(!compatibleForAffectation(&function->params[i].type, &arg->type, true)) {
+			yyerror("Type de l'argument %d passé à la fonction %s invalide !\n", i + 1, function->name);
 		}
 
 		assemblyOutput(COP" %d %d ; Copie de l'argument %s lors de l'appel de %s", param->address, arg->address, function->params[i].name, function->name); // Copie des arguments
@@ -138,7 +132,7 @@ void callFunction(char const *name, int argsCount) {
 	assemblyOutput(COP" 1 %d ; Récupération adresse de retour", RETURN_ADDRESS); // Récupération adresse de retour
 }
 
-void createFunction(char const *name, bool definition, int paramsCount) {
+void createFunction(VarType *returnType, char const *name, bool definition, int paramsCount) {
 	function_t *function = &functionTable.functions[functionTable.size];
 	for(int i = 0; (i < functionTable.size) && (functionTable.functions[i].name != NULL); ++i) {
 		if(strcmp(functionTable.functions[i].name, name) == 0) {
@@ -166,8 +160,10 @@ void createFunction(char const *name, bool definition, int paramsCount) {
 			bool ok = function->paramsCount == paramsCount;
 			for(int i = 0; ok && i < paramsCount; ++i) {
 				param_t param = popParam();
-				ok = paramsEquivalent(&param, &function->params[i]);
+				ok = sameType(&param.type, &function->params[i].type);
 			}
+
+			ok = sameType(&function->returnType, returnType);
 
 			if(!ok) {
 				yyerror("Les paramètres de la fontion %s ne sont pas compatibles avec une déclaration antérieure !\n", name);
@@ -190,15 +186,22 @@ void createFunction(char const *name, bool definition, int paramsCount) {
 	}
 }
 
-function_t *getFunction(int functionIndex) {
+function_t *getFunction(char const *name) {
+	function_t *function = NULL;
+	for(int i = 0; (i < functionTable.size) && (functionTable.functions[i].name != NULL); ++i) {
+		if(strcmp(functionTable.functions[i].name, name) == 0) {
+			function = &functionTable.functions[i];
+			break;
+		}
+	}
+
+	if(function == NULL) {
+		yyerror("La fonction %s n'a pas été déclarée !\n", name);
+	}
+
+	return function;
+}
+
+function_t *getFunctionWithIndex(int functionIndex) {
 	return &functionTable.functions[functionIndex];
 }
-
-bool paramsEquivalent(param_t *p1, param_t *p2) {
-	return p1->type == p2->type;
-}
-
-bool paramAndArgCompatible(param_t *param, symbol_t *arg) {
-	return true;
-}
-

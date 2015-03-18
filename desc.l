@@ -23,72 +23,72 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 
 
 
-"/*"            { BEGIN(C_COMMENT); }
-<C_COMMENT>"*/" { BEGIN(INITIAL); }
-<C_COMMENT>"\n"    { ++lineNumber; }
-<C_COMMENT>.    { }
+"/*"            	{ BEGIN(C_COMMENT); }
+<C_COMMENT>"*/" 	{ BEGIN(INITIAL); }
+<C_COMMENT>"\n"    	{ ++lineNumber; }
+<C_COMMENT>.    	{ }
 
-"//"            { BEGIN(C_COMMENTL); }
-<C_COMMENTL>"\n" { BEGIN(INITIAL); ++lineNumber; }
-<C_COMMENTL>.    { }
-
-
-"return"	{ECHO;return tRETURN;}
-"printf"	{ECHO;return tPRINTF;}
-
-"true"	{ECHO;return tTRUE;}
-"false"	{ECHO;return tFALSE;}
-"int const"	{ECHO;return tCONST;}
-"const int"	{ECHO;return tCONST;}
-"int"	{ECHO;return tINT;}
-"const"	{ECHO;return tCONST;}
-
-"if"	{ECHO;return tIF;}
-"else"	{ECHO;return tELSE;}
-"&&"	{ECHO;return tET;}
-"||"	{ECHO;return tOU;}
-"while"	{ECHO;return tWHILE;}
-"for"	{ECHO;return tFOR;}
-"do"	{ECHO;return tDO;}
-
-"("	{ECHO;return tPO;}
-")"	{ECHO;return tPF;}
-"{"	{ECHO;return tBO;}
-"}"	{ECHO;return tBF;}
-","	{ECHO;return tVIR;}
-\n	{ECHO; ++lineNumber;}
-Delim	{ECHO;}
-
-"++"	{ECHO;return tINCR;}
-"--"	{ECHO;return tDECR;}
-
-"/="	{ECHO;return tDIVEQ;}
-"*="	{ECHO;return tMULEQ;}
-"-="	{ECHO;return tMOINSEQ;}
-"+="	{ECHO;return tPLUSEQ;}
-
-"/"	{ECHO;return tDIV;}
-"*"	{ECHO;return tMUL;}
-"-"	{ECHO;return tMOINS;}
-"+"	{ECHO;return tPLUS;}
-"="	{ECHO;return tEGAL ;}
-";"	{ECHO;return tF;}
-
-"=="	{ECHO;return tBOOLEGAL;}
-"<="	{ECHO;return tINFEGAL;}
-">="	{ECHO;return tSUPEGAL;}
-">"	{ECHO;return tSUP;}
-"<"	{ECHO;return tINF;}
-"!="	{ECHO;return tDIFF;}
+"//"            	{ BEGIN(C_COMMENTL); }
+<C_COMMENTL>"\n" 	{ BEGIN(INITIAL); ++lineNumber; }
+<C_COMMENTL>.    	{ }
 
 
+"return"			{ECHO;return tRETURN;}
+"printf"			{ECHO;return tPRINTF;}
+
+"true"				{ECHO;return tTRUE;}
+"false"				{ECHO;return tFALSE;}
+"int const"			{ECHO;return tCONST;}
+"const int"			{ECHO;return tCONST;}
+"int"				{ECHO;return tINT;}
+"const"				{ECHO;return tCONST;}
+
+"if"				{ECHO;return tIF;}
+"else"				{ECHO;return tELSE;}
+"&&"				{ECHO;return tET;}
+"||"				{ECHO;return tOU;}
+"while"				{ECHO;return tWHILE;}
+"for"				{ECHO;return tFOR;}
+"do"				{ECHO;return tDO;}
+
+"&"                 {ECHO;return tAMP;}
+
+"("					{ECHO;return tPO;}
+")"					{ECHO;return tPF;}
+"{"					{ECHO;return tBO;}
+"}"					{ECHO;return tBF;}
+","					{ECHO;return tVIR;}
+\n					{ECHO; ++lineNumber;}
+Delim				{ECHO;}
+
+"++"				{ECHO;return tINCR;}
+"--"				{ECHO;return tDECR;}
+
+"/="				{ECHO;return tDIVEQ;}
+"*="				{ECHO;return tMULEQ;}
+"-="				{ECHO;return tMOINSEQ;}
+"+="				{ECHO;return tPLUSEQ;}
+
+"/"					{ECHO;return tDIV;}
+"*"					{ECHO;return tSTAR;}
+"-"					{ECHO;return tMOINS;}
+"+"					{ECHO;return tPLUS;}
+"="					{ECHO;return tEGAL ;}
+";"					{ECHO;return tF;}
+
+"=="				{ECHO;return tBOOLEGAL;}
+"<="				{ECHO;return tINFEGAL;}
+">="				{ECHO;return tSUPEGAL;}
+">"					{ECHO;return tSUP;}
+"<"					{ECHO;return tINF;}
+"!="				{ECHO;return tDIFF;}
 
 
-{Nom}	{yylval.var= strdup(yytext) ;
-	return tID;}
 
-{nombre}	{yylval.nb=atoi(yytext);
-		return tNOMBRE;}
+
+{Nom}				{yylval.var = strdup(yytext); return tID;}
+
+{nombre}			{yylval.nb=atoi(yytext); return tNOMBRE;}
 
 %%
 

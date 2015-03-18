@@ -25,12 +25,10 @@
 
 	void affectation(char const *nom, bool allowConst) {
 		symbol_t *sym = getExistingSymbol(nom);
-		if(!allowConst && sym->type == VarConst) {
-			yyerror("affectation d'une constante\n");
-		}
-
-		sym->initialized = true;
 		symbol_t *val = popSymbol();
+
+		checkCompatibilityForAffectation(sym, val, allowConst);
+		sym->initialized = true;
 
 		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, nom);
 		freeIfTemp(val);
@@ -43,14 +41,28 @@
 		}
 	}
 
-	void print(int val){
-		printf("%d", val) ;
-	}
-
 	void binOp(char const *op) {
 		symbol_t *s2 = popSymbol();
 		symbol_t *s1 = popSymbol();
-		symbol_t *res = allocTemp();
+
+		if(op == EQU || op == INF || op == SUP) {
+			checkIndirectionLevel(s1, s2);
+		}
+		else if(op == SOU) {
+			if(s1->type.indirectionCount != s2->type.indirectionCount && s2->type.indirectionCount > 0) {
+				yyerror("Opérandes invalide pour l'opérateur de soustraction");
+			}
+
+		}
+		else if(op == ADD) {
+			checkScalar(s2);
+		}
+		else if(op == MUL || op == DIV) {
+			checkScalar(s1);
+			checkScalar(s2);
+		}
+
+		symbol_t *res = allocTemp(s1->type.indirectionCount);
 		pushSymbol(res);
 
 		assemblyOutput("%s %d %d %d", op, res->address, s1->address, s2->address);
@@ -63,16 +75,14 @@
 		symbol_t *s = popSymbol();
 		pushSymbol(r);
 
-		if(r->type == VarConst) {
-			yyerror("affectation d'une constante\n");
-		}
+		checkCompatibilityForAffectation(r, s, false);
 
 		assemblyOutput("%s %d %d %d", op, r->address, r->address, s->address);
 		freeIfTemp(s);
 	}
 
 	void negate() {
-		symbol_t *zero = allocTemp();
+		symbol_t *zero = allocTemp(0);
 		assemblyOutput(AFC" %d %d ; negate", zero->address, 0);
 
 		pushSymbol(zero);
@@ -96,8 +106,10 @@
 %token tINT tCONST tTRUE tFALSE
 %token tINCR tDECR
 %token tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
-%token tPLUS tMOINS tDIV tMUL tEGAL
+%token tPLUS tMOINS tDIV tSTAR tEGAL
 %token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
+
+%token tAMP
 
 %token tF
 %token tRETURN tPRINTF
@@ -118,7 +130,7 @@ S :
 | S Corps;
 
 //Fonction : tINT tID tPO { paramsCount = 0; } Params tPF { createFunction($2, false, paramsCount); } tF;
-FonctionDef : tINT tID tPO { paramsCount = 0; } Params tPF { createFunction($2, true, paramsCount); } CorpsFonction { currentFunction = NULL; };
+FonctionDef : Type tID tPO { paramsCount = 0; } Params tPF { createFunction(&lastVarType, $2, true, paramsCount); } CorpsFonction { currentFunction = NULL; };
 CorpsFonction : tBO Defs Instrucs Return tF tBF;
 
 Return : tRETURN Exp {
@@ -146,12 +158,25 @@ Defs :
 
 Def : Type TypedDef;
 
-Type : tINT { lastVarType = VarInt; }
-| tCONST { lastVarType = VarConst; };
+Indirections :
+| Indirections
+| tSTAR tCONST
+| tCONST
+
+Type : tINT {
+	lastVarType.constMask = 0;
+	lastVarType.indirectionCount = 0;
+	lastVarType.topLevelConst = false;
+} Indirections
+| tCONST {
+	lastVarType.constMask = 1;
+	lastVarType.indirectionCount = 0;
+	lastVarType.topLevelConst = true;
+} Indirections;
         
         
-TypedDef : tID { if(lastVarType == VarConst) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tVIR TypedDef
-| tID { if(lastVarType == VarConst) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tF
+TypedDef : tID { if(lastVarType.topLevelConst) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tVIR TypedDef
+| tID { if(lastVarType.topLevelConst) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tF
 | tID  tEGAL Exp { declaration($1); affectation($1, true); } tVIR TypedDef
 | tID tEGAL Exp { declaration($1); affectation($1, true); } tF;
 
@@ -200,7 +225,7 @@ FinWhile : tBF {
 };
 
 Terme :  tNOMBRE {
-	symbol_t *s = allocTemp();
+	symbol_t *s = allocTemp(0);
 	assemblyOutput(AFC" %d %d", s->address, $1);
 	pushSymbol(s);
 }
@@ -227,12 +252,12 @@ Cond : tPO Exp tPF {
 
 Bool:
 | tTRUE {
-	symbol_t *s = allocTemp();
+	symbol_t *s = allocTemp(0);
 	assemblyOutput(AFC" %d 1", s->address);
 	pushSymbol(s);
 }
 | tFALSE {
-	symbol_t *s = allocTemp();
+	symbol_t *s = allocTemp(0);
 	assemblyOutput(AFC" %d 0", s->address);
 	pushSymbol(s);
 };
@@ -245,28 +270,47 @@ ArgsList : Exp { ++paramsCount; }
 
 Exp : Terme
 | tID tPO { paramsCount = 0; } tPF {
-	symbol_t *returnValue = allocTemp();
-	callFunction($1, paramsCount);
+	function_t *function = getFunction($1);
+	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount);
+	callFunction(function, paramsCount);
 	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
 	pushSymbol(returnValue);
 }
 | tID tPO { paramsCount = 0; } Args tPF {
-	symbol_t *returnValue = allocTemp();
-	callFunction($1, paramsCount);
+	function_t *function = getFunction($1);
+	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount);
+	callFunction(function, paramsCount);
 	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
 	pushSymbol(returnValue);
 }
+| tAMP tID {
+	symbol_t *s = getExistingSymbol($2);
+	symbol_t *a = allocTemp(s->type.indirectionCount + 1);
+	assemblyOutput(AFC" %d %d", a->address, s->address);
+	pushSymbol(s);
+}
+| tSTAR tID {
+	symbol_t *s = getExistingSymbol($2);
+	if(s->type.indirectionCount == 0) {
+		yyerror("La variable %s n'est pas un pointeur.", $2);
+	}
+	else {
+		symbol_t *i = allocTemp(s->type.indirectionCount - 1);
+		assemblyOutput(COP" %d %d", i->address, s->address);
+		pushSymbol(i);
+	}
+}
 | tID tEGAL Exp { affectation($1, false); }
 | tINCR tID {
-	symbol_t *one = allocTemp();
+	symbol_t *one = allocTemp(0);
 	assemblyOutput(AFC" %d 1", one->address);
 	pushSymbol(one);
 	pushSymbol(getExistingSymbol($2));
 	binOpEq(ADD);
 }
 | tID tINCR {
-	symbol_t *one = allocTemp(), *result = getExistingSymbol($1);
-	symbol_t *copy = allocTemp();
+	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1);
+	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
 	pushSymbol(one);
@@ -276,15 +320,15 @@ Exp : Terme
 	pushSymbol(copy);
 }
 | tDECR tID {
-	symbol_t *one = allocTemp();
+	symbol_t *one = allocTemp(0);
 	assemblyOutput(AFC" %d 1", one->address);
 	pushSymbol(one);
 	pushSymbol(getExistingSymbol($2));
 	binOpEq(SOU);
 }
 | tID tDECR {
-	symbol_t *one = allocTemp(), *result = getExistingSymbol($1);
-	symbol_t *copy = allocTemp();
+	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1);
+	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
 	pushSymbol(one);
@@ -295,7 +339,7 @@ Exp : Terme
 }
 | Exp tPLUS Exp { binOp(ADD); }
 | Exp tMOINS Exp { binOp(SOU); }
-| Exp tMUL Exp { binOp(MUL); }
+| Exp tSTAR Exp { binOp(MUL); }
 | Exp tDIV Exp { binOp(DIV); }
 
 | tID tPLUSEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(ADD); }
@@ -313,7 +357,7 @@ Exp : Terme
 	pushSymbol(op2);
 	binOp(ADD);
 
-	symbol_t *deux = allocTemp();
+	symbol_t *deux = allocTemp(0);
 	assemblyOutput(AFC" %d %d", deux->address, 2);
 	pushSymbol(deux);
 	binOp(EQU);
@@ -328,7 +372,7 @@ Exp : Terme
 	pushSymbol(op2);
 	binOp(ADD);
 
-	symbol_t *zero = allocTemp();
+	symbol_t *zero = allocTemp(0);
 	assemblyOutput(AFC" %d %d", zero->address, 0);
 	pushSymbol(zero);
 	binOp(SUP);
@@ -337,14 +381,14 @@ Exp : Terme
 | Exp tSUP Exp { binOp(SUP); }
 | Exp tINFEGAL Exp {
 	binOp(SOU);
-	symbol_t *val = allocTemp();
+	symbol_t *val = allocTemp(0);
 	assemblyOutput(AFC" %d %d", val->address, 1);
 	pushSymbol(val);
 	binOp(INF);
 }
 | Exp tSUPEGAL Exp {
 	binOp(SOU);
-	symbol_t *val = allocTemp();
+	symbol_t *val = allocTemp(0);
 	assemblyOutput(AFC" %d %d", val->address, -1);
 	pushSymbol(val);
 	binOp(SUP);
@@ -381,7 +425,7 @@ int main(int argc, char const **argv) {
 	if(argc > 1) {
 		long len = strlen(argv[1]);
 
-		if(len < 2 || argv[1][len - 1] != 'c' || argv[1][len - 2] != '.') {
+		if(len < 3 || argv[1][len - 1] != 'c' || argv[1][len - 2] != '.') {
 			fprintf(stderr, "Le fichier doit avoir l'extension \".c\" !\n");
 			return 1;
 		}

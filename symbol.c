@@ -44,7 +44,9 @@ void resetSymbolTable() {
 		}
 		symbolTable.symbols[i].name = NULL;
 		symbolTable.symbols[i].address = i + 5;
-		symbolTable.symbols[i].type = VarInt;
+		symbolTable.symbols[i].type.constMask = 0;
+		symbolTable.symbols[i].type.indirectionCount = 0;
+		symbolTable.symbols[i].type.topLevelConst = false;
 
 		symbolTable.symbolsStack[i] = NULL;
 	}
@@ -99,12 +101,13 @@ symbol_t *createSymbol(char const *name, VarType type) {
 	return NULL;
 }
 
-symbol_t *allocTemp() {
+symbol_t *allocTemp(int indirectionCount) {
 	symbol_t *symbols = symbolTable.symbols;
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name == NULL) {
 			symbols[i].name = tempSymbol;
+			symbols[i].type.indirectionCount = indirectionCount;
 			return &symbols[i];
 		}
 	}
@@ -142,21 +145,68 @@ void clearSymbolStack() {
 	}
 }
 
-bool symbolDeclared(char const *name) {
-	return getExistingSymbol(name) != NULL;
-}
-
-bool symbolInitialized(char const *name) {
-	symbol_t *s = getExistingSymbol(name);
-	return s != NULL && s->initialized;
-}
-
 void printSymbolTable() {
 	symbol_t *symbols = symbolTable.symbols;
+
+	int *a;
+	int * const b;
+
+	a = b;
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name != NULL) {
 			printf("%#x: \"%s\" affected: %s\n", symbols[i].address, symbols[i].name, (symbols[i].initialized ? "true" : "false"));
+		}
+	}
+}
+
+void checkScalar(symbol_t const *s) {
+	if(s->type.indirectionCount > 0) {
+		yyerror("L'expresion n'est pas un scalaire.");
+	}
+}
+
+void checkIndirectionLevel(symbol_t const *s1, symbol_t const *s2) {
+	if(s1->type.indirectionCount != s2->type.indirectionCount) {
+		yyerror("Les expressions n'ont pas le même niveau d'indirection.");
+	}
+}
+
+bool sameType(VarType const *t1, VarType const *t2) {
+	return t1->indirectionCount == t2->indirectionCount && t1->constMask == t2->constMask;
+}
+
+bool compatibleForAffectation(VarType const *left, VarType const *right, bool allowConst) {
+	if(left->indirectionCount != right->indirectionCount) {
+		return false;
+	}
+	else if(!allowConst && left->topLevelConst) {
+		return false;
+	}
+
+	for(int i = 0; i < left->indirectionCount; ++i) {
+		bool lC = left->constMask & (1 << i);
+		bool rC = right->constMask & (1 << i);
+		if(rC && !lC) {
+			return false;
+		}
+	}
+	
+	return true;
+}
+void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *right, bool allowConst) {
+	if(left->type.indirectionCount != right->type.indirectionCount) {
+		yyerror("Le type de l'expression est incompatible avec le type de la variable %s.", left->name);
+	}
+	else if(!allowConst && left->type.topLevelConst) {
+		yyerror("La variable %s est constante.", left->name);
+	}
+
+	for(int i = 0; i < left->type.indirectionCount; ++i) {
+		bool lC = left->type.constMask & (1 << i);
+		bool rC = right->type.constMask & (1 << i);
+		if(rC && !lC) {
+			yyerror("Perte de la qualification const pour l'affectation de la variable %s.", left->name);
 		}
 	}
 }

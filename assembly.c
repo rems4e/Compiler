@@ -72,14 +72,14 @@ void initAssemblyOutput(char const *path) {
 	assemblyOutput(AFC" 0 0 ; Initialisation stack pointer");
 	assemblyOutput(AFC" 1 EOF%s ; Initialisation adresse de retour", UNKNOWN_ADDRESS);
 
-	callFunction("main", 0);
+	callFunction(getFunction("main"), 0);
 }
 
 void closeAssemblyOutput() {
 	int returnAddress = instructionsCount();
 
-	symbol_t *s1 = allocTemp(), *s2 = allocTemp();
-	symbol_t *zero = allocTemp();
+	symbol_t *s1 = allocTemp(0), *s2 = allocTemp(0);
+	symbol_t *zero = allocTemp(0);
 	assemblyOutput(AFC" %d 0 ; Table des adresses de retour de fonction", zero->address);
 	for(int i = 0; i < returnAddressStack.size; ++i) {
 		assemblyOutput(AFC" %d %s ; Adresse de retour pour l'appel de fonction %d", s1->address, returnAddressStack.address[i], i);
@@ -120,7 +120,7 @@ void closeAssemblyOutput() {
 		int charatersConsumed;
 		sscanf(pos + strlen("FUN"UNKNOWN_ADDRESS), "%d%n", &functionIndex, &charatersConsumed);
 
-		function_t *function = getFunction(functionIndex);
+		function_t *function = getFunctionWithIndex(functionIndex);
 		if(function->address == 0) {
 			yyerror("La fonction %s n'a pas été définie !\n", function->name);
 		}

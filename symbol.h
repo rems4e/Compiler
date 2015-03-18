@@ -9,12 +9,14 @@
 #define __Syste_me_Info__symbol__
 
 #include "constants.h"
+#include <stdint.h>
 
 typedef unsigned int address_t;
 
-typedef enum {
-	VarInt,
-	VarConst
+typedef struct {
+	uint32_t constMask;
+	bool topLevelConst;
+	int indirectionCount;
 } VarType;
 
 typedef struct {
@@ -32,15 +34,18 @@ int getStackSize(void);
 symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name, VarType type);
 
-symbol_t *allocTemp(void);
+symbol_t *allocTemp(int indirectionCount);
 void freeIfTemp(symbol_t *s);
 
 void pushSymbol(symbol_t *s);
 symbol_t *popSymbol(void);
 void clearSymbolStack(void);
 
-bool symbolDeclared(char const *name);
-bool symbolInitialized(char const *name);
+void checkScalar(symbol_t const *s);
+void checkIndirectionLevel(symbol_t const *s1, symbol_t const *s2);
+bool sameType(VarType const *t1, VarType const *t2);
+bool compatibleForAffectation(VarType const *left, VarType const *right, bool allowConst);
+void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *right, bool allowConst);
 
 void printSymbolTable(void);
 
