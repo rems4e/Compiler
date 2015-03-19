@@ -15,7 +15,6 @@ typedef unsigned int address_t;
 
 typedef struct {
 	uint32_t constMask;
-	bool topLevelConst;
 	int indirectionCount;
 } VarType;
 
@@ -41,6 +40,8 @@ void freeIfTemp(symbol_t *s);
 void pushSymbol(symbol_t *s);
 symbol_t *popSymbol(void);
 void clearSymbolStack(void);
+
+bool topLevelConst(VarType const *t);
 
 void checkScalar(symbol_t const *s);
 void checkIndirectionLevel(symbol_t const *s1, symbol_t const *s2);

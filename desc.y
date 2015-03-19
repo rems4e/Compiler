@@ -164,8 +164,8 @@ Indirections :
 
 Indirection :
 | tSTAR tCONST {
-	lastVarType.constMask |= 1 << lastVarType.indirectionCount;
 	++lastVarType.indirectionCount;
+	lastVarType.constMask |= 1 << lastVarType.indirectionCount;
 }
 | tSTAR {
 	++lastVarType.indirectionCount;
@@ -174,17 +174,15 @@ Indirection :
 Type : tINT {
 	lastVarType.constMask = 0;
 	lastVarType.indirectionCount = 0;
-	lastVarType.topLevelConst = false;
 } Indirections
 | tCONST {
 	lastVarType.constMask = 1;
 	lastVarType.indirectionCount = 0;
-	lastVarType.topLevelConst = true;
 } Indirections;
         
         
-TypedDef : tID { if(lastVarType.topLevelConst) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tVIR TypedDef
-| tID { if(lastVarType.topLevelConst) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tF
+TypedDef : tID { if(topLevelConst(&lastVarType)) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tVIR TypedDef
+| tID { if(topLevelConst(&lastVarType)) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tF
 | tID  tEGAL Exp { declaration($1); affectation($1, true); } tVIR TypedDef
 | tID tEGAL Exp { declaration($1); affectation($1, true); } tF;
 

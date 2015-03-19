@@ -47,7 +47,6 @@ void resetSymbolTable() {
 		symbolTable.symbols[i].pointedAddress = 0;
 		symbolTable.symbols[i].type.constMask = 0;
 		symbolTable.symbols[i].type.indirectionCount = 0;
-		symbolTable.symbols[i].type.topLevelConst = false;
 
 		symbolTable.symbolsStack[i] = NULL;
 	}
@@ -161,6 +160,10 @@ void printSymbolTable() {
 	}
 }
 
+bool topLevelConst(VarType const *t) {
+	return t->constMask & (1 << t->indirectionCount);
+}
+
 void checkScalar(symbol_t const *s) {
 	if(s->type.indirectionCount > 0) {
 		yyerror("L'expresion n'est pas un scalaire.");
@@ -181,7 +184,7 @@ bool compatibleForAffectation(VarType const *left, VarType const *right, bool al
 	if(left->indirectionCount != right->indirectionCount) {
 		return false;
 	}
-	else if(!allowConst && left->topLevelConst) {
+	else if(!allowConst && topLevelConst(left)) {
 		return false;
 	}
 
@@ -199,7 +202,7 @@ void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *righ
 	if(left->type.indirectionCount != right->type.indirectionCount) {
 		yyerror("Le type de l'expression est incompatible avec le type de la variable %s.", left->name);
 	}
-	else if(!allowConst && left->type.topLevelConst) {
+	else if(!allowConst && topLevelConst(&left->type)) {
 		yyerror("La variable %s est constante.", left->name);
 	}
 

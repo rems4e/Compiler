@@ -41,7 +41,6 @@ void initFunctionTable() {
 		functionTable.functions[i].paramsCount = 0;
 		functionTable.functions[i].returnType.indirectionCount = 0;
 		functionTable.functions[i].returnType.constMask = 0;
-		functionTable.functions[i].returnType.topLevelConst = false;
 		for(int j = 0; j < MAX_PARAMS; ++j) {
 			functionTable.functions[i].params[j].name = NULL;
 		}
@@ -52,7 +51,7 @@ void initFunctionTable() {
 		paramList.params[i].name = NULL;
 	}
 
-	VarType type = {.indirectionCount = 0, .constMask = 0, .topLevelConst = false};
+	VarType type = {.indirectionCount = 0, .constMask = 0};
 	createFunction(&type, "main", false, 0);
 }
 
