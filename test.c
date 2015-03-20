@@ -76,11 +76,15 @@ int main() {
 	int val1 = 3;
 	int val2 = 4;
 	int *p1 = &val1;
-	int * const p2 = p1;
+	int **p2 = &p1;
 
 	printf(*p2);
-	p2 = &val2;
+	printf(**p2);
+
+	p1 = &val2;
+
 	printf(*p2);
+	printf(**p2);
 
 	return 0;
 }

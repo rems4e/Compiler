@@ -21,6 +21,7 @@
 	static int retourConditionFor;
 	static int paramsCount;
 	static VarType lastVarType;
+	static int dereferenceCount = 0;
 	function_t *currentFunction = NULL;
 
 	void affectation(char const *nom, bool allowConst) {
@@ -160,16 +161,15 @@ Defs :
 Def : Type TypedDef;
 
 Indirections :
-| Indirection;
+| Indirections Indirection;
 
-Indirection :
-| tSTAR tCONST {
+Indirection : tSTAR tCONST {
 	++lastVarType.indirectionCount;
 	lastVarType.constMask |= 1 << lastVarType.indirectionCount;
 }
 | tSTAR {
 	++lastVarType.indirectionCount;
-}
+};
 
 Type : tINT {
 	lastVarType.constMask = 0;
@@ -179,7 +179,6 @@ Type : tINT {
 	lastVarType.constMask = 1;
 	lastVarType.indirectionCount = 0;
 } Indirections;
-        
         
 TypedDef : tID { if(topLevelConst(&lastVarType)) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tVIR TypedDef
 | tID { if(topLevelConst(&lastVarType)) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tF
@@ -230,22 +229,36 @@ FinWhile : tBF {
 	popLabel();
 };
 
+Dereference :
+| Dereference tSTAR { ++dereferenceCount; };
+
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(0);
 	assemblyOutput(AFC" %d %d", s->address, $1);
 	pushSymbol(s);
 }
-| tID {
-	symbol_t *s = getExistingSymbol($1);
+| Dereference tID {
+	symbol_t *s = getExistingSymbol($2);
 
-	if(s == NULL) {
-		yyerror("Variable %s non déclarée!", $1);
-	}
-	else if(!s->initialized) {
-		yyerror("Variable %s non initialisée avant utilisation!", $1);
+	if(!s->initialized) {
+		yyerror("Variable %s non initialisée avant utilisation!", $2);
 	}
 
-	pushSymbol(s);
+	if(dereferenceCount == 0) {
+		pushSymbol(s);
+	}
+	else {
+		symbol_t *i = allocTemp(s->type.indirectionCount - dereferenceCount);
+		symbol_t *s2 = s;
+		for(int i = 0; i < dereferenceCount - 1; ++i) {
+			address_t address = s2->pointedAddress;
+			s2 = symbolWithAddress(address);
+		}
+
+		assemblyOutput(COP" %d %d", i->address, s2->pointedAddress);
+		pushSymbol(i);
+		dereferenceCount = 0;
+	}
 }
 | Bool
 | tNULL {
@@ -305,17 +318,6 @@ Exp : Terme
 	a->pointedAddress = s->address;
 	assemblyOutput(AFC" %d %d", a->address, s->address);
 	pushSymbol(a);
-}
-| tSTAR tID {
-	symbol_t *s = getExistingSymbol($2);
-	if(s->type.indirectionCount == 0) {
-		yyerror("La variable %s n'est pas un pointeur.", $2);
-	}
-	else {
-		symbol_t *i = allocTemp(s->type.indirectionCount - 1);
-		assemblyOutput(COP" %d %d", i->address, s->pointedAddress);
-		pushSymbol(i);
-	}
 }
 | tID tEGAL Exp { affectation($1, false); }
 | tINCR tID {

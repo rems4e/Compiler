@@ -33,6 +33,7 @@ int getStackSize(void);
 
 symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name, VarType type);
+symbol_t *symbolWithAddress(address_t address);
 
 symbol_t *allocTemp(int indirectionCount);
 void freeIfTemp(symbol_t *s);

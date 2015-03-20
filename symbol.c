@@ -13,6 +13,7 @@
 #include "assembly.h"
 
 #define SYM_COUNT 1000
+#define ADDRESS_SHIFT 5
 
 typedef struct {
 	symbol_t symbols[SYM_COUNT];
@@ -43,7 +44,7 @@ void resetSymbolTable() {
 			free(symbolTable.symbols[i].name);
 		}
 		symbolTable.symbols[i].name = NULL;
-		symbolTable.symbols[i].address = i + 5;
+		symbolTable.symbols[i].address = i + ADDRESS_SHIFT;
 		symbolTable.symbols[i].pointedAddress = 0;
 		symbolTable.symbols[i].type.constMask = 0;
 		symbolTable.symbols[i].type.indirectionCount = 0;
@@ -100,6 +101,12 @@ symbol_t *createSymbol(char const *name, VarType type) {
 	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
 	return NULL;
 }
+
+symbol_t *symbolWithAddress(address_t address) {
+	assert(address > 2 && address < SYM_COUNT);
+	return &symbolTable.symbols[address - ADDRESS_SHIFT];
+}
+
 
 symbol_t *allocTemp(int indirectionCount) {
 	symbol_t *symbols = symbolTable.symbols;
