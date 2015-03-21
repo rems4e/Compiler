@@ -20,27 +20,31 @@
 	extern int const lineNumber;
 	static int retourConditionFor;
 	static int paramsCount;
-	static VarType lastVarType;
-	static int dereferenceCount = 0;
+	static VarType lastVarType, returnValueType;
 	function_t *currentFunction = NULL;
+	char const *funcName;
 
-	void affectation(char const *nom, bool allowConst) {
-		symbol_t *sym = getExistingSymbol(nom);
+	void affectation(dereferencedID_t id, bool allowConst) {
+		symbol_t *sym = getExistingSymbol(id.name);
+
+		if(id.dereferenceCount > 0) {
+			for(int i = 0; i < id.dereferenceCount; ++i) {
+				address_t address = sym->pointedAddress;
+				sym = symbolWithAddress(address);
+			}
+		}
 		symbol_t *val = popSymbol();
 
 		checkCompatibilityForAffectation(sym, val, allowConst);
 		sym->initialized = true;
 
-		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, nom);
+		assemblyOutput(COP" %d %d ; %s", sym->pointedAddress, val->address, id.name);
 		sym->pointedAddress = val->pointedAddress;
 		freeIfTemp(val);
 	}
 
 	void declaration(char const *nom) {
 		symbol_t *sym = createSymbol(nom, lastVarType);
-		if(sym == NULL) {
-			yyerror("variable déjà déclarée\n");
-		}
 	}
 
 	void binOp(char const *op) {
@@ -98,17 +102,22 @@
 
 	%}
 
-%union {int nb; char* var;}
+%union {
+	int nb;
+	char const *var;
+	struct dereferencedID_t dereferencedID;
+}
 
 %token <nb> tNOMBRE
 %token <var> tID
-%token <var> tFCT
+
+%type <dereferencedID> DereferencedID
 
 %token tPO tPF tVIR tBO tBF
 %token tINT tCONST tTRUE tFALSE
 %token tINCR tDECR
 %token tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
-%token tPLUS tMOINS tDIV tSTAR tEGAL
+%token tPLUS tMOINS tDIV tSTAR
 %token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
 
 %token tNULL
@@ -117,23 +126,23 @@
 %token tF
 %token tRETURN tPRINTF
 %token tIF tELSE tWHILE tFOR tDO
-%token END_OF_FILE
 
 %left tPLUS tMOINS
-%left tDIV tMUL
+%left tDIV tSTAR
 
-%left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF
+%left tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
+
+%left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tDIFF
 %left tOU
 %left tET
 
-%start S
+%start Corps
 
 %%
-S :
-| S Corps;
 
-//Fonction : tINT tID tPO { paramsCount = 0; } Params tPF { createFunction($2, false, paramsCount); } tF;
-FonctionDef : Type tID tPO { paramsCount = 0; } Params tPF { createFunction(&lastVarType, $2, true, paramsCount); } CorpsFonction { currentFunction = NULL; };
+FonctionEnd : { createFunction(&returnValueType, funcName, false, paramsCount); } tF
+| { createFunction(&returnValueType, funcName, true, paramsCount); } CorpsFonction { currentFunction = NULL; };
+
 CorpsFonction : tBO Defs Instrucs Return tF tBF;
 
 Return : tRETURN Exp {
@@ -151,9 +160,11 @@ ParamsList : Param
 
 Param : Type tID { ++paramsCount; pushParam($2, lastVarType); };
 
-Corps : FonctionDef
-| Corps;
-
+Corps :
+| Corps Type {
+	paramsCount = 0;
+	returnValueType = lastVarType;
+} tID tPO Params tPF { funcName = $4; } FonctionEnd;
 
 Defs :
 | Defs Def;
@@ -172,6 +183,7 @@ Indirection : tSTAR tCONST {
 };
 
 Type : tINT {
+	printf("type %d\n", lineNumber);
 	lastVarType.constMask = 0;
 	lastVarType.indirectionCount = 0;
 } Indirections
@@ -180,10 +192,26 @@ Type : tINT {
 	lastVarType.indirectionCount = 0;
 } Indirections;
         
-TypedDef : tID { if(topLevelConst(&lastVarType)) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tVIR TypedDef
-| tID { if(topLevelConst(&lastVarType)) { yyerror("La constante %s n'est pas initialisée.", $1); } declaration($1); } tF
-| tID  tEGAL Exp { declaration($1); affectation($1, true); } tVIR TypedDef
-| tID tEGAL Exp { declaration($1); affectation($1, true); } tF;
+TypedDef : tID {
+	if(topLevelConst(&lastVarType)) {
+		yyerror("La constante %s n'est pas initialisée.", $1);
+	}
+	declaration($1);
+} tVIR TypedDef
+| tID {
+	if(topLevelConst(&lastVarType)) {
+		yyerror("La constante %s n'est pas initialisée.", $1);
+	}
+	declaration($1);
+} tF
+| tID tEGAL Exp {
+	declaration($1);
+	affectation((dereferencedID_t){.name = $1, .dereferenceCount = 0}, true);
+} tVIR TypedDef
+| tID tEGAL Exp {
+	declaration($1);
+	affectation((dereferencedID_t){.name = $1, .dereferenceCount = 0}, true);
+} tF;
 
 Instrucs:
 | Instrucs Instruc { clearSymbolStack(); };
@@ -229,35 +257,34 @@ FinWhile : tBF {
 	popLabel();
 };
 
-Dereference :
-| Dereference tSTAR { ++dereferenceCount; };
+DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.name = $2.name, .dereferenceCount = $2.dereferenceCount + 1}; }
+| tID { $$ = (dereferencedID_t){.name = $1, .dereferenceCount = 0}; };
 
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(0);
 	assemblyOutput(AFC" %d %d", s->address, $1);
 	pushSymbol(s);
 }
-| Dereference tID {
-	symbol_t *s = getExistingSymbol($2);
+| DereferencedID {
+	symbol_t *s = getExistingSymbol($1.name);
 
 	if(!s->initialized) {
-		yyerror("Variable %s non initialisée avant utilisation!", $2);
+		yyerror("Variable %s non initialisée avant utilisation!", $1);
 	}
 
-	if(dereferenceCount == 0) {
+	if($1.dereferenceCount == 0) {
 		pushSymbol(s);
 	}
 	else {
-		symbol_t *i = allocTemp(s->type.indirectionCount - dereferenceCount);
+		symbol_t *i = allocTemp(s->type.indirectionCount - $1.dereferenceCount);
 		symbol_t *s2 = s;
-		for(int i = 0; i < dereferenceCount - 1; ++i) {
+		for(int i = 0; i < $1.dereferenceCount - 1; ++i) {
 			address_t address = s2->pointedAddress;
 			s2 = symbolWithAddress(address);
 		}
 
 		assemblyOutput(COP" %d %d", i->address, s2->pointedAddress);
 		pushSymbol(i);
-		dereferenceCount = 0;
 	}
 }
 | Bool
@@ -279,8 +306,7 @@ Cond : tPO Exp tPF {
 	freeIfTemp(cond);
 } ;
 
-Bool:
-| tTRUE {
+Bool: tTRUE {
 	symbol_t *s = allocTemp(0);
 	assemblyOutput(AFC" %d 1", s->address);
 	pushSymbol(s);
@@ -298,13 +324,6 @@ ArgsList : Exp { ++paramsCount; }
 | ArgsList tVIR Exp { ++paramsCount; };
 
 Exp : Terme
-| tID tPO { paramsCount = 0; } tPF {
-	function_t *function = getFunction($1);
-	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount);
-	callFunction(function, paramsCount);
-	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
-	pushSymbol(returnValue);
-}
 | tID tPO { paramsCount = 0; } Args tPF {
 	function_t *function = getFunction($1);
 	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount);
@@ -312,23 +331,25 @@ Exp : Terme
 	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
 	pushSymbol(returnValue);
 }
-| tAMP tID {
-	symbol_t *s = getExistingSymbol($2);
-	symbol_t *a = allocTemp(s->type.indirectionCount + 1);
+| tAMP DereferencedID {
+	symbol_t *s = getExistingSymbol($2.name);
+	symbol_t *a = allocTemp(s->type.indirectionCount + 1 - $2.dereferenceCount);
 	a->pointedAddress = s->address;
 	assemblyOutput(AFC" %d %d", a->address, s->address);
 	pushSymbol(a);
 }
-| tID tEGAL Exp { affectation($1, false); }
-| tINCR tID {
+| DereferencedID tEGAL Exp { affectation($1, false); }
+| tINCR DereferencedID {
+	symbol_t *s = getExistingSymbol($2.name);
 	symbol_t *one = allocTemp(0);
 	assemblyOutput(AFC" %d 1", one->address);
 	pushSymbol(one);
-	pushSymbol(getExistingSymbol($2));
+	pushSymbol(s);
 	binOpEq(ADD);
+	pushSymbol(s);
 }
-| tID tINCR {
-	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1);
+| DereferencedID tINCR {
+	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1.name);
 	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
@@ -338,15 +359,15 @@ Exp : Terme
 	freeIfTemp(popSymbol());
 	pushSymbol(copy);
 }
-| tDECR tID {
+| tDECR DereferencedID {
 	symbol_t *one = allocTemp(0);
 	assemblyOutput(AFC" %d 1", one->address);
 	pushSymbol(one);
-	pushSymbol(getExistingSymbol($2));
+	pushSymbol(getExistingSymbol($2.name));
 	binOpEq(SOU);
 }
-| tID tDECR {
-	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1);
+| DereferencedID tDECR {
+	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1.name);
 	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
@@ -361,10 +382,10 @@ Exp : Terme
 | Exp tSTAR Exp { binOp(MUL); }
 | Exp tDIV Exp { binOp(DIV); }
 
-| tID tPLUSEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(ADD); }
-| tID tMOINSEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(SOU); }
-| tID tDIVEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(DIV); }
-| tID tMULEQ Exp { pushSymbol(getExistingSymbol($1)); binOpEq(MUL); }
+| DereferencedID tPLUSEQ Exp { pushSymbol(getExistingSymbol($1.name)); binOpEq(ADD); }
+| DereferencedID tMOINSEQ Exp { pushSymbol(getExistingSymbol($1.name)); binOpEq(SOU); }
+| DereferencedID tDIVEQ Exp { pushSymbol(getExistingSymbol($1.name)); binOpEq(DIV); }
+| DereferencedID tMULEQ Exp { pushSymbol(getExistingSymbol($1.name)); binOpEq(MUL); }
 
 | Exp tET Exp {
 	toBoolean();
@@ -414,7 +435,7 @@ Exp : Terme
 }
 | Exp tBOOLEGAL Exp { binOp(EQU); }
 
-| tPO Exp tPF 
+| tPO Exp tPF
 | Exp tDIFF Exp {
 	binOp(EQU);
 	negate();

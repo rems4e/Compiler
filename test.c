@@ -78,6 +78,9 @@ int main() {
 	int *p1 = &val1;
 	int **p2 = &p1;
 
+	*p1 = 7;
+	*p2 = &val2;
+
 	printf(*p2);
 	printf(**p2);
 

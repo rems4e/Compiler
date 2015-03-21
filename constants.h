@@ -12,6 +12,12 @@
 void yyerror(char const *s, ...);
 #include <stdbool.h>
 
+typedef struct dereferencedID_t {
+	char const *name;
+	int dereferenceCount;
+} dereferencedID_t;
+
+
 #endif
 
 

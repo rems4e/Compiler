@@ -45,7 +45,7 @@ void resetSymbolTable() {
 		}
 		symbolTable.symbols[i].name = NULL;
 		symbolTable.symbols[i].address = i + ADDRESS_SHIFT;
-		symbolTable.symbols[i].pointedAddress = 0;
+		symbolTable.symbols[i].pointedAddress = i + ADDRESS_SHIFT;
 		symbolTable.symbols[i].type.constMask = 0;
 		symbolTable.symbols[i].type.indirectionCount = 0;
 

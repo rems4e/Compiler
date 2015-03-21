@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "constants.h"
 #include "y.tab.h"
 
 #define ECHO /*fprintf(yyout, "%s\n", yytext)*/
@@ -87,9 +88,9 @@ Delim				{ECHO;}
 
 
 
-{Nom}				{yylval.var = strdup(yytext); return tID;}
+{Nom}				{ECHO;yylval.var = strdup(yytext); return tID;}
 
-{nombre}			{yylval.nb=atoi(yytext); return tNOMBRE;}
+{nombre}			{ECHO;yylval.nb = atoi(yytext); return tNOMBRE;}
 
 %%
 
