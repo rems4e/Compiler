@@ -14,16 +14,11 @@
 typedef unsigned int address_t;
 
 typedef struct {
-	uint32_t constMask;
-	int indirectionCount;
-} VarType;
-
-typedef struct {
 	bool initialized;
 	char *name;
 	address_t address;
 	address_t pointedAddress;
-	VarType type;
+	varType_t type;
 } symbol_t;
 
 void initSymbols(void);
@@ -32,7 +27,7 @@ void cleanSymbols(void);
 int getStackSize(void);
 
 symbol_t *getExistingSymbol(char const *name);
-symbol_t *createSymbol(char const *name, VarType type);
+symbol_t *createSymbol(char const *name, varType_t type);
 symbol_t *symbolWithAddress(address_t address);
 
 symbol_t *allocTemp(int indirectionCount);
@@ -42,12 +37,12 @@ void pushSymbol(symbol_t *s);
 symbol_t *popSymbol(void);
 void clearSymbolStack(void);
 
-bool topLevelConst(VarType const *t);
+bool topLevelConst(varType_t const *t);
 
 void checkScalar(symbol_t const *s);
 void checkIndirectionLevel(symbol_t const *s1, symbol_t const *s2);
-bool sameType(VarType const *t1, VarType const *t2);
-bool compatibleForAffectation(VarType const *left, VarType const *right, bool allowConst);
+bool sameType(varType_t const *t1, varType_t const *t2);
+bool compatibleForAffectation(varType_t const *left, varType_t const *right, bool allowConst);
 void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *right, bool allowConst);
 
 void printSymbolTable(void);

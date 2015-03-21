@@ -20,7 +20,7 @@
 	extern int const lineNumber;
 	static int retourConditionFor;
 	static int paramsCount;
-	static VarType lastVarType, returnValueType;
+	static varType_t lastVarType, returnValueType;
 	function_t *currentFunction = NULL;
 	char const *funcName;
 
@@ -33,24 +33,17 @@
 				sym = symbolWithAddress(address);
 			}
 		}
-		symbol_t *val = popSymbol();
 
+		symbol_t *val = popSymbol();
 		checkCompatibilityForAffectation(sym, val, allowConst);
 		sym->initialized = true;
 
-		assemblyOutput(COP" %d %d ; %s", sym->pointedAddress, val->address, id.name);
+		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.name);
 		sym->pointedAddress = val->pointedAddress;
 		freeIfTemp(val);
 	}
 
-	void declaration(char const *nom) {
-		symbol_t *sym = createSymbol(nom, lastVarType);
-	}
-
-	void binOp(char const *op) {
-		symbol_t *s2 = popSymbol();
-		symbol_t *s1 = popSymbol();
-
+	void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2) {
 		if(op == EQU || op == INF || op == SUP) {
 			checkIndirectionLevel(s1, s2);
 		}
@@ -58,7 +51,6 @@
 			if(s1->type.indirectionCount != s2->type.indirectionCount && s2->type.indirectionCount > 0) {
 				yyerror("Opérandes invalide pour l'opérateur de soustraction");
 			}
-
 		}
 		else if(op == ADD) {
 			checkScalar(s2);
@@ -67,6 +59,13 @@
 			checkScalar(s1);
 			checkScalar(s2);
 		}
+	}
+
+	void binOp(char const *op) {
+		symbol_t *s2 = popSymbol();
+		symbol_t *s1 = popSymbol();
+
+		checkBinOp(op, s1, s2);
 
 		symbol_t *res = allocTemp(s1->type.indirectionCount);
 		pushSymbol(res);
@@ -81,7 +80,7 @@
 		symbol_t *s = popSymbol();
 		pushSymbol(r);
 
-		checkCompatibilityForAffectation(r, s, false);
+		checkBinOp(op, r, s);
 
 		assemblyOutput("%s %d %d %d", op, r->address, r->address, s->address);
 		freeIfTemp(s);
@@ -106,12 +105,14 @@
 	int nb;
 	char const *var;
 	struct dereferencedID_t dereferencedID;
+	varType_t varType;
 }
 
 %token <nb> tNOMBRE
 %token <var> tID
 
 %type <dereferencedID> DereferencedID
+%type <varType> Type
 
 %token tPO tPF tVIR tBO tBF
 %token tINT tCONST tTRUE tFALSE
@@ -140,6 +141,12 @@
 
 %%
 
+Corps :
+| Corps Type {
+	paramsCount = 0;
+	returnValueType = $2;
+} tID tPO Params tPF { funcName = $4; } FonctionEnd;
+
 FonctionEnd : { createFunction(&returnValueType, funcName, false, paramsCount); } tF
 | { createFunction(&returnValueType, funcName, true, paramsCount); } CorpsFonction { currentFunction = NULL; };
 
@@ -158,13 +165,7 @@ Params :
 ParamsList : Param
 | ParamsList tVIR Param;
 
-Param : Type tID { ++paramsCount; pushParam($2, lastVarType); };
-
-Corps :
-| Corps Type {
-	paramsCount = 0;
-	returnValueType = lastVarType;
-} tID tPO Params tPF { funcName = $4; } FonctionEnd;
+Param : Type tID { ++paramsCount; pushParam($2, $1); };
 
 Defs :
 | Defs Def;
@@ -183,35 +184,29 @@ Indirection : tSTAR tCONST {
 };
 
 Type : tINT {
-	printf("type %d\n", lineNumber);
-	lastVarType.constMask = 0;
-	lastVarType.indirectionCount = 0;
-} Indirections
+	lastVarType = (varType_t){.constMask = 0, .indirectionCount = 0};
+} Indirections {
+	$$ = (varType_t){.constMask = lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount};
+}
 | tCONST {
-	lastVarType.constMask = 1;
-	lastVarType.indirectionCount = 0;
-} Indirections;
+	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0};
+} Indirections {
+	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount};
+}
+
+TypedDefNext : tF
+| tVIR TypedDef
         
 TypedDef : tID {
 	if(topLevelConst(&lastVarType)) {
 		yyerror("La constante %s n'est pas initialisée.", $1);
 	}
-	declaration($1);
-} tVIR TypedDef
-| tID {
-	if(topLevelConst(&lastVarType)) {
-		yyerror("La constante %s n'est pas initialisée.", $1);
-	}
-	declaration($1);
-} tF
+	createSymbol($1, lastVarType);
+} TypedDefNext
 | tID tEGAL Exp {
-	declaration($1);
+	createSymbol($1, lastVarType);
 	affectation((dereferencedID_t){.name = $1, .dereferenceCount = 0}, true);
-} tVIR TypedDef
-| tID tEGAL Exp {
-	declaration($1);
-	affectation((dereferencedID_t){.name = $1, .dereferenceCount = 0}, true);
-} tF;
+} TypedDefNext;
 
 Instrucs:
 | Instrucs Instruc { clearSymbolStack(); };
@@ -289,10 +284,7 @@ Terme :  tNOMBRE {
 }
 | Bool
 | tNULL {
-	int ind = lastVarType.indirectionCount;
-	if(ind == 0) {
-		ind = 1;
-	}
+	int ind = -1;
 	symbol_t *s = allocTemp(ind);
 	s->pointedAddress = 0;
 	pushSymbol(s);
@@ -420,18 +412,12 @@ Exp : Terme
 | Exp tINF Exp { binOp(INF); }
 | Exp tSUP Exp { binOp(SUP); }
 | Exp tINFEGAL Exp {
-	binOp(SOU);
-	symbol_t *val = allocTemp(0);
-	assemblyOutput(AFC" %d %d", val->address, 1);
-	pushSymbol(val);
-	binOp(INF);
+	binOp(SUP);
+	negate();
 }
 | Exp tSUPEGAL Exp {
-	binOp(SOU);
-	symbol_t *val = allocTemp(0);
-	assemblyOutput(AFC" %d %d", val->address, -1);
-	pushSymbol(val);
-	binOp(SUP);
+	binOp(INF);
+	negate();
 }
 | Exp tBOOLEGAL Exp { binOp(EQU); }
 

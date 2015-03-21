@@ -51,7 +51,7 @@ void initFunctionTable() {
 		paramList.params[i].name = NULL;
 	}
 
-	VarType type = {.indirectionCount = 0, .constMask = 0};
+	varType_t type = {.indirectionCount = 0, .constMask = 0};
 	createFunction(&type, "main", false, 0);
 }
 
@@ -75,7 +75,7 @@ void initSymbolTable(function_t *function) {
 	}
 }
 
-void pushParam(char const *name, VarType type) {
+void pushParam(char const *name, varType_t type) {
 	assert(paramList.size < MAX_PARAMS - 1);
 	param_t param = {.name = strdup(name), .type = type};
 	paramList.params[paramList.size++] = param;
@@ -131,7 +131,7 @@ void callFunction(function_t *function, int argsCount) {
 	assemblyOutput(COP" 1 %d ; Récupération adresse de retour", RETURN_ADDRESS); // Récupération adresse de retour
 }
 
-void createFunction(VarType *returnType, char const *name, bool definition, int paramsCount) {
+void createFunction(varType_t *returnType, char const *name, bool definition, int paramsCount) {
 	function_t *function = &functionTable.functions[functionTable.size];
 	for(int i = 0; (i < functionTable.size) && (functionTable.functions[i].name != NULL); ++i) {
 		if(strcmp(functionTable.functions[i].name, name) == 0) {

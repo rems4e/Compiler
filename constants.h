@@ -11,11 +11,17 @@
 
 void yyerror(char const *s, ...);
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct dereferencedID_t {
 	char const *name;
 	int dereferenceCount;
 } dereferencedID_t;
+
+typedef struct {
+	uint32_t constMask;
+	int indirectionCount;
+} varType_t;
 
 
 #endif

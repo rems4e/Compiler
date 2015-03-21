@@ -83,7 +83,7 @@ symbol_t *getExistingSymbol(char const *name) {
 	return NULL;
 }
 
-symbol_t *createSymbol(char const *name, VarType type) {
+symbol_t *createSymbol(char const *name, varType_t type) {
 	symbol_t *symbols = symbolTable.symbols;
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
@@ -167,7 +167,7 @@ void printSymbolTable() {
 	}
 }
 
-bool topLevelConst(VarType const *t) {
+bool topLevelConst(varType_t const *t) {
 	return t->constMask & (1 << t->indirectionCount);
 }
 
@@ -183,11 +183,11 @@ void checkIndirectionLevel(symbol_t const *s1, symbol_t const *s2) {
 	}
 }
 
-bool sameType(VarType const *t1, VarType const *t2) {
+bool sameType(varType_t const *t1, varType_t const *t2) {
 	return t1->indirectionCount == t2->indirectionCount && t1->constMask == t2->constMask;
 }
 
-bool compatibleForAffectation(VarType const *left, VarType const *right, bool allowConst) {
+bool compatibleForAffectation(varType_t const *left, varType_t const *right, bool allowConst) {
 	if(left->indirectionCount != right->indirectionCount) {
 		return false;
 	}
@@ -206,8 +206,8 @@ bool compatibleForAffectation(VarType const *left, VarType const *right, bool al
 	return true;
 }
 void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *right, bool allowConst) {
-	if(left->type.indirectionCount != right->type.indirectionCount) {
-		yyerror("Le type de l'expression est incompatible avec le type de la variable %s.", left->name);
+	if((left->type.indirectionCount != right->type.indirectionCount) && !(right->type.indirectionCount == -1 && left->type.indirectionCount > 0)) {
+		yyerror("Le type de l'expression est incompatible avec le type de la variable %s (%d indirections à gauche, %d à droite).", left->name, left->type.indirectionCount, right->type.indirectionCount);
 	}
 	else if(!allowConst && topLevelConst(&left->type)) {
 		yyerror("La variable %s est constante.", left->name);

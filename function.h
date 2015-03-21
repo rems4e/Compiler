@@ -14,7 +14,7 @@
 
 typedef struct {
 	char *name;
-	VarType type;
+	varType_t type;
 } param_t;
 
 
@@ -22,15 +22,15 @@ typedef struct {
 	char *name;
 	int address;
 	int paramsCount;
-	VarType returnType;
+	varType_t returnType;
 	param_t params[MAX_PARAMS];
 } function_t;
 
-void pushParam(char const *name, VarType type);
+void pushParam(char const *name, varType_t type);
 param_t popParam(void);
 
 
-void createFunction(VarType *returnType, char const *name, bool definition, int paramsCount);
+void createFunction(varType_t *returnType, char const *name, bool definition, int paramsCount);
 void callFunction(function_t *function, int argsCount);
 
 function_t *getFunction(char const *name);
