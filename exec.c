@@ -31,6 +31,10 @@
 
 #define PRI 0xC
 
+#define JMI 0xD
+#define DR1 0xE
+#define DR2 0xF
+
 
 void exec(char const *sourcePath);
 
@@ -176,6 +180,21 @@ void exec(char const *sourcePath) {
 				SCAN_ONE;
 				printf("%d\n", *getMemory(op1));
 				break;
+
+			case JMI:
+				SCAN_ONE;
+				pc = memory[op1];
+				continue;
+
+			case DR1:
+				SCAN_TWO;
+				memory[*getMemory(op1)] = *getMemory(op2);
+				break;
+
+			case DR2:
+				SCAN_TWO;
+				*getMemory(op1) = memory[*getMemory(op2)];
+				break;
 		}
 
 		++pc;
@@ -185,4 +204,3 @@ void exec(char const *sourcePath) {
 	free(source);
 	fclose(sourceFile);
 }
-

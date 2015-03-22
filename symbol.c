@@ -45,7 +45,6 @@ void resetSymbolTable() {
 		}
 		symbolTable.symbols[i].name = NULL;
 		symbolTable.symbols[i].address = i + ADDRESS_SHIFT;
-		symbolTable.symbols[i].pointedAddress = i + ADDRESS_SHIFT;
 		symbolTable.symbols[i].type.constMask = 0;
 		symbolTable.symbols[i].type.indirectionCount = 0;
 
@@ -101,12 +100,6 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
 	return NULL;
 }
-
-symbol_t *symbolWithAddress(address_t address) {
-	assert(address > 2 && address < SYM_COUNT);
-	return &symbolTable.symbols[address - ADDRESS_SHIFT];
-}
-
 
 symbol_t *allocTemp(int indirectionCount) {
 	symbol_t *symbols = symbolTable.symbols;

@@ -122,9 +122,35 @@ int testPointer() {
 	return 0;
 }
 
+int triple(int *param) {
+	*param *= 3;
+
+	return 0;
+}
+
+int doubleParams(int *a, int *b) {
+	*a *= 2;
+	triple(a);
+	*b *= 2;
+
+	return 0;
+}
+
+int *max(int *a, int *b) {
+	if(*b < *a) {
+		return a;
+	}
+
+	return b;
+}
+
 int main() {
-	/*int i, j, a;
-	int res = 0;
+	int i = 4, j, a = 3, c, d, res;
+	int *p1 = &c, p2 = &d;
+
+	testPointer();
+
+	res = 0;
 	for(j = 0; j < 20; ++j) {
 		for(i = 0; i < 100; ++i) {
 			res += i;
@@ -143,7 +169,15 @@ int main() {
 	
 	printf(f(3, 4, 1));
 	printf(fact(10));
-	printf(fib(13));*/
+	printf(fib(13));
+
+	c = 42, d = 34;
+
+	printf(c);
+	printf(d);
+	doubleParams(&c, &d);
+	printf(c);
+	printf(d);
 
 	return 0;
 }

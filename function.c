@@ -100,7 +100,7 @@ void callFunction(function_t *function, int argsCount) {
 		stackSize += 2;
 	}
 	if(currentFunction != NULL) {
-		assemblyOutput(COP" %d 1 ; Sauvegarde ancienne adresse retour", RETURN_ADDRESS); // Sauvegarde adresse de retour
+		assemblyOutput(COP" %d 1 ; Sauvegarde ancienne adresse retour", RETURN_ADDRESS);
 	}
 
 	if(function->paramsCount != argsCount) {
@@ -113,22 +113,22 @@ void callFunction(function_t *function, int argsCount) {
 			yyerror("Type de l'argument %d passé à la fonction %s invalide !\n", i + 1, function->name);
 		}
 
-		assemblyOutput(COP" %d %d ; Copie de l'argument %s lors de l'appel de %s", param->address, arg->address, function->params[i].name, function->name); // Copie des arguments
+		assemblyOutput(COP" %d %d ; Copie de l'argument %s lors de l'appel de %s", param->address, arg->address, function->params[i].name, function->name);
 	}
 	assemblyOutput(AFC" %d %d ; Taille de la pile", STACK_SIZE_ADDRESS + stackSize, stackSize);
-	assemblyOutput(ADD" 0 0 %d ; Incrémentation stack pointer", STACK_SIZE_ADDRESS + stackSize); // Incrémentation stack pointer
+	assemblyOutput(ADD" 0 0 %d ; Incrémentation stack pointer", STACK_SIZE_ADDRESS + stackSize);
 
-	assemblyOutput(AFC" 1 %d ; Sauvegarde adresse retour %s", instructionsCount() + 2, currentFunction ? currentFunction->name : "<NULL>"); // Sauvegarde adresse de retour
+	assemblyOutput(AFC" 1 %d ; Sauvegarde adresse retour %s", instructionsCount() + 2, currentFunction ? currentFunction->name : "<NULL>");
 	if(currentFunction == NULL) {
-		assemblyOutput(JMP" %d ; On ne termine le programme que plus tard", instructionsCount() + 2); // Sauvegarde adresse de retour
-		assemblyOutput(JMP" EOF%s ; Fin du programme", UNKNOWN_ADDRESS); // Sauvegarde adresse de retour
+		assemblyOutput(JMP" %d ; On ne termine le programme que plus tard", instructionsCount() + 2);
+		assemblyOutput(JMP" EOF%s ; Fin du programme", UNKNOWN_ADDRESS);
 	}
 
-	assemblyOutput(JMP" FUN%s%d ; appel de la fonction %s", UNKNOWN_ADDRESS, function - &functionTable.functions[0], function->name); // Appel de la fonction
+	assemblyOutput(JMP" FUN%s%d ; appel de la fonction %s", UNKNOWN_ADDRESS, function - &functionTable.functions[0], function->name);
 	if(currentFunction != NULL) {
 		addFunctionReturnAddress(instructionsCount());
 	}
-	assemblyOutput(COP" 1 %d ; Récupération adresse de retour", RETURN_ADDRESS); // Récupération adresse de retour
+	assemblyOutput(COP" 1 %d ; Récupération adresse de retour", RETURN_ADDRESS);
 }
 
 void createFunction(varType_t *returnType, char const *name, bool definition, int paramsCount) {
@@ -144,6 +144,7 @@ void createFunction(varType_t *returnType, char const *name, bool definition, in
 		++functionTable.size;
 		function->name = strdup(name);
 		function->paramsCount = paramsCount;
+		function->returnType = *returnType;
 
 		for(int i = 0; i < paramsCount; ++i) {
 			param_t p = popParam();
@@ -169,6 +170,7 @@ void createFunction(varType_t *returnType, char const *name, bool definition, in
 			}
 		}
 	}
+
 	if(definition) {
 		function->address = instructionsCount();
 
@@ -177,8 +179,8 @@ void createFunction(varType_t *returnType, char const *name, bool definition, in
 		// On saute le retour de la fonction
 		pushLabel();
 		assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS" ; On saute le retour de la fonction %s", function->name);
-		assemblyOutput(SOU" 0 0 %d ; Décrémentation stack pointer", STACK_SIZE_ADDRESS); // Décrémentation stack pointer
-		assemblyOutput(JMP" FUN_RET ; On saute à la table de retour de fonction en fin de fichier"); // Retour à la fonction appelante
+		assemblyOutput(SOU" 0 0 %d ; Décrémentation stack pointer", STACK_SIZE_ADDRESS);
+		assemblyOutput(JMI" 1 ; Retour à la fonction appelante");
 		popLabel();
 
 		currentFunction = function;

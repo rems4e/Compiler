@@ -26,21 +26,30 @@
 
 	void affectation(dereferencedID_t id, bool allowConst) {
 		symbol_t *sym = getExistingSymbol(id.name);
+		symbol_t *val = popSymbol();
 
 		if(id.dereferenceCount > 0) {
-			for(int i = 0; i < id.dereferenceCount; ++i) {
-				address_t address = sym->pointedAddress;
-				sym = symbolWithAddress(address);
+			symbol_t *temp;
+			for(int i = 0; i < id.dereferenceCount - 1; ++i) {
+				temp = allocTemp(sym->type.indirectionCount - 1);
+				assemblyOutput(DR2" %d %d", temp->address, sym->address);
+
+				freeIfTemp(sym);
+				sym = temp;
 			}
+			symbol_t cop = *sym;
+			--cop.type.indirectionCount;
+			checkCompatibilityForAffectation(&cop, val, allowConst);
+			assemblyOutput(DR1" %d %d ; %s", sym->address, val->address);
+		}
+		else {
+			checkCompatibilityForAffectation(sym, val, allowConst);
+			assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.name);
 		}
 
-		symbol_t *val = popSymbol();
-		checkCompatibilityForAffectation(sym, val, allowConst);
-		sym->initialized = true;
-
-		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.name);
-		sym->pointedAddress = val->pointedAddress;
 		freeIfTemp(val);
+		freeIfTemp(sym);
+		sym->initialized = true;
 	}
 
 	void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2) {
@@ -75,14 +84,31 @@
 		freeIfTemp(s1);
 	}
 
-	void binOpEq(char const *op) {
-		symbol_t *r = popSymbol();
+	void binOpEq(char const *op, dereferencedID_t id) {
+		symbol_t *r = getExistingSymbol(id.name);
 		symbol_t *s = popSymbol();
+
+		if(id.dereferenceCount > 0) {
+			symbol_t *ind;
+			for(int i = 0; i < id.dereferenceCount; ++i) {
+				ind = allocTemp(r->type.indirectionCount - 1);
+				assemblyOutput(DR2" %d %d", ind->address, r->address);
+				freeIfTemp(r);
+				r = ind;
+			}
+
+			pushSymbol(ind);
+			pushSymbol(s);
+			binOp(op);
+			affectation(id, false);
+		}
+		else {
+			checkBinOp(op, r, s);
+			checkScalar(s);
+			assemblyOutput("%s %d %d %d", op, r->address, r->address, s->address);
+		}
+
 		pushSymbol(r);
-
-		checkBinOp(op, r, s);
-
-		assemblyOutput("%s %d %d %d", op, r->address, r->address, s->address);
 		freeIfTemp(s);
 	}
 
@@ -128,14 +154,14 @@
 %token tRETURN tPRINTF
 %token tIF tELSE tWHILE tFOR tDO
 
-%left tPLUS tMOINS
-%left tDIV tSTAR
-
-%left tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
+%right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
 
 %left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tDIFF
-%left tOU
 %left tET
+%left tOU
+
+%left tPLUS tMOINS
+%left tDIV tSTAR
 
 %start Corps
 
@@ -271,22 +297,21 @@ Terme :  tNOMBRE {
 		pushSymbol(s);
 	}
 	else {
-		symbol_t *i = allocTemp(s->type.indirectionCount - $1.dereferenceCount);
-		symbol_t *s2 = s;
-		for(int i = 0; i < $1.dereferenceCount - 1; ++i) {
-			address_t address = s2->pointedAddress;
-			s2 = symbolWithAddress(address);
+		symbol_t *ind;
+		for(int i = 0; i < $1.dereferenceCount; ++i) {
+			ind = allocTemp(s->type.indirectionCount - 1);
+			assemblyOutput(DR2" %d %d", ind->address, s->address);
+			freeIfTemp(s);
+			s = ind;
 		}
 
-		assemblyOutput(COP" %d %d", i->address, s2->pointedAddress);
-		pushSymbol(i);
+		pushSymbol(ind);
 	}
 }
 | Bool
 | tNULL {
 	int ind = -1;
 	symbol_t *s = allocTemp(ind);
-	s->pointedAddress = 0;
 	pushSymbol(s);
 	assemblyOutput(AFC" %d 0", s->address);
 };
@@ -326,47 +351,36 @@ Exp : Terme
 | tAMP DereferencedID {
 	symbol_t *s = getExistingSymbol($2.name);
 	symbol_t *a = allocTemp(s->type.indirectionCount + 1 - $2.dereferenceCount);
-	a->pointedAddress = s->address;
 	assemblyOutput(AFC" %d %d", a->address, s->address);
 	pushSymbol(a);
 }
 | DereferencedID tEGAL Exp { affectation($1, false); }
 | tINCR DereferencedID {
-	symbol_t *s = getExistingSymbol($2.name);
-	symbol_t *one = allocTemp(0);
+	symbol_t *one = allocTemp(0), *result = getExistingSymbol($2.name);
 	assemblyOutput(AFC" %d 1", one->address);
-	pushSymbol(one);
-	pushSymbol(s);
-	binOpEq(ADD);
-	pushSymbol(s);
+	assemblyOutput(ADD" %d %d", result->address, one->address);
+	pushSymbol(result);
 }
 | DereferencedID tINCR {
 	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1.name);
 	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
-	pushSymbol(one);
-	pushSymbol(result);
-	binOpEq(ADD);
-	freeIfTemp(popSymbol());
+	assemblyOutput(ADD" %d %d", result->address, one->address);
 	pushSymbol(copy);
 }
 | tDECR DereferencedID {
-	symbol_t *one = allocTemp(0);
+	symbol_t *one = allocTemp(0), *result = getExistingSymbol($2.name);
 	assemblyOutput(AFC" %d 1", one->address);
-	pushSymbol(one);
-	pushSymbol(getExistingSymbol($2.name));
-	binOpEq(SOU);
+	assemblyOutput(SOU" %d %d", result->address, one->address);
+	pushSymbol(result);
 }
 | DereferencedID tDECR {
 	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1.name);
 	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
-	pushSymbol(one);
-	pushSymbol(result);
-	binOpEq(SOU);
-	freeIfTemp(popSymbol());
+	assemblyOutput(SOU" %d %d", result->address, one->address);
 	pushSymbol(copy);
 }
 | Exp tPLUS Exp { binOp(ADD); }
@@ -374,10 +388,10 @@ Exp : Terme
 | Exp tSTAR Exp { binOp(MUL); }
 | Exp tDIV Exp { binOp(DIV); }
 
-| DereferencedID tPLUSEQ Exp { pushSymbol(getExistingSymbol($1.name)); binOpEq(ADD); }
-| DereferencedID tMOINSEQ Exp { pushSymbol(getExistingSymbol($1.name)); binOpEq(SOU); }
-| DereferencedID tDIVEQ Exp { pushSymbol(getExistingSymbol($1.name)); binOpEq(DIV); }
-| DereferencedID tMULEQ Exp { pushSymbol(getExistingSymbol($1.name)); binOpEq(MUL); }
+| DereferencedID tPLUSEQ Exp { binOpEq(ADD, $1); }
+| DereferencedID tMOINSEQ Exp { binOpEq(SOU, $1); }
+| DereferencedID tDIVEQ Exp { binOpEq(DIV, $1); }
+| DereferencedID tMULEQ Exp { binOpEq(MUL, $1); }
 
 | Exp tET Exp {
 	toBoolean();
@@ -427,9 +441,8 @@ Exp : Terme
 	negate();
 }
 
-
-
 %%
+
 void yyerror(const char *s, ...) {
 	va_list args;
 	va_start(args, s);
@@ -444,6 +457,11 @@ void yyerror(const char *s, ...) {
 }
 
 int main(int argc, char const **argv) {
+#ifdef YACC_DEBUG
+	extern int yydebug;
+	yydebug = 1;
+#endif
+
 	char *outputName = strdup("a.s");
 
 	initSymbols();

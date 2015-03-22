@@ -38,6 +38,10 @@
 
 #define PRI "PRI"
 
+#define JMI "JMI" // Saut avec indirection
+#define DR1 "DR1" // Copie du contenu de l'adresse passée en deuxième opérande dans l'adresse contenue dans l'adresse passée en opérande 1
+#define DR2 "DR2" // Copie du contenu de l'adresse contenue dans l'adresse passée en deuxième opérande dans l'opérande 1
+
 #else
 
 #define ADD "1"
@@ -58,6 +62,10 @@
 #define JMF_UNKNOWN "U_8"
 
 #define PRI "C"
+
+#define JMI "D" // Saut avec indirection
+#define DR1 "E" // Copie du contenu de l'adresse passée en deuxième opérande dans l'adresse contenue dans l'adresse passée en opérande 1
+#define DR2 "F" // Copie du contenu de l'adresse contenue dans l'adresse passée en deuxième opérande dans l'opérande 1
 
 #endif
 

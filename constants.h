@@ -9,6 +9,12 @@
 #ifndef Syste_me_Info_constants_h
 #define Syste_me_Info_constants_h
 
+//#define YACC_DEBUG
+
+#ifdef YACC_DEBUG
+#define YYDEBUG 1
+#endif
+
 void yyerror(char const *s, ...);
 #include <stdbool.h>
 #include <stdint.h>
