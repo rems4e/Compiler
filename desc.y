@@ -358,7 +358,7 @@ Exp : Terme
 | tINCR DereferencedID {
 	symbol_t *one = allocTemp(0), *result = getExistingSymbol($2.name);
 	assemblyOutput(AFC" %d 1", one->address);
-	assemblyOutput(ADD" %d %d", result->address, one->address);
+	assemblyOutput(ADD" %d %d %d", result->address, result->address, one->address);
 	pushSymbol(result);
 }
 | DereferencedID tINCR {
@@ -366,13 +366,13 @@ Exp : Terme
 	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
-	assemblyOutput(ADD" %d %d", result->address, one->address);
+	assemblyOutput(ADD" %d %d %d", result->address, result->address, one->address);
 	pushSymbol(copy);
 }
 | tDECR DereferencedID {
 	symbol_t *one = allocTemp(0), *result = getExistingSymbol($2.name);
 	assemblyOutput(AFC" %d 1", one->address);
-	assemblyOutput(SOU" %d %d", result->address, one->address);
+	assemblyOutput(SOU" %d %d %d", result->address, result->address, one->address);
 	pushSymbol(result);
 }
 | DereferencedID tDECR {
@@ -380,7 +380,7 @@ Exp : Terme
 	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
-	assemblyOutput(SOU" %d %d", result->address, one->address);
+	assemblyOutput(SOU" %d %d %d", result->address, result->address, one->address);
 	pushSymbol(copy);
 }
 | Exp tPLUS Exp { binOp(ADD); }
