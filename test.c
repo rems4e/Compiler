@@ -128,15 +128,10 @@ int triple(int *param) {
 	return 0;
 }
 
-int doubleParams(int *a, int *b) {
-	*a *= 2;
-	triple(a);
-	*b *= 2;
-
-	return 0;
-}
+int doubleParams(int *a, int *b);
 
 int *max(int *a, int *b) {
+	doubleParams(a, b);
 	if(*b < *a) {
 		return a;
 	}
@@ -178,6 +173,19 @@ int main() {
 	doubleParams(&c, &d);
 	printf(c);
 	printf(d);
+
+	p1 = max(&c, &d);
+	printf(c);
+	printf(d);
+	printf(*p1);
+	
+	return 0;
+}
+
+int doubleParams(int *a, int *b) {
+	*a *= 2;
+	triple(a);
+	*b *= 2;
 
 	return 0;
 }

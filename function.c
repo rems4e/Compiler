@@ -86,7 +86,6 @@ param_t popParam() {
 	--paramList.size;
 
 	param_t retVal = {.name = paramList.params[paramList.size].name, .type = paramList.params[paramList.size].type};
-	free(paramList.params[paramList.size].name);
 	paramList.params[paramList.size].name = NULL;
 
 	return retVal;
@@ -160,6 +159,8 @@ void createFunction(varType_t *returnType, char const *name, bool definition, in
 			bool ok = function->paramsCount == paramsCount;
 			for(int i = 0; ok && i < paramsCount; ++i) {
 				param_t param = popParam();
+				free(function->params[i].name);
+				function->params[i].name = strdup(param.name);
 				ok = sameType(&param.type, &function->params[i].type);
 			}
 
