@@ -180,9 +180,9 @@ CorpsFonction : tBO Defs Instrucs Return tF tBF;
 
 Return : tRETURN Exp {
 	symbol_t *returnValue = popSymbol();
-	assemblyOutput(COP" 2 %d ; Copie de la valeur de retour pour récupération par l'appelant", returnValue->address);
+	assemblyOutput(COP" 1 %d ; Copie de la valeur de retour pour récupération par l'appelant", returnValue->address);
 	freeIfTemp(returnValue);
-	assemblyOutput(JMP" %d ; return de la fonction %s", currentFunction->address + 1, currentFunction->name);
+	assemblyOutput(RET" ; Retour à la fonction appelante");
 };
 
 Params :
@@ -344,8 +344,7 @@ Exp : Terme
 | tID tPO { paramsCount = 0; } Args tPF {
 	function_t *function = getFunction($1);
 	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount);
-	callFunction(function, paramsCount);
-	assemblyOutput(COP" %d 2 ; Récupération de la valeur retournée par la fonction %s", returnValue->address, $1);
+	callFunction(function, paramsCount, returnValue);
 	pushSymbol(returnValue);
 }
 | tAMP DereferencedID {
@@ -477,6 +476,7 @@ int main(int argc, char const **argv) {
 		char *name = strdup(argv[1]);
 		name[len - 1] = 's';
 
+		free(outputName);
 		outputName = name;
 
 		if(f) {

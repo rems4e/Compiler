@@ -15,6 +15,7 @@
  * return void
  * nombres avec exposants
  * tableaux
+ * instructions vide
  * …
  */
 //#define YACC_DEBUG
