@@ -12,7 +12,6 @@
 /**
  * TODO:
  * Blocs if/accolade
- * return void
  * tableaux
  * …
  */
@@ -27,6 +26,8 @@
 
 void yyerror(char const *s, ...);
 
+typedef enum { BT_INT, BT_VOID } baseType_t;
+
 typedef struct dereferencedID_t {
 	char const *name;
 	int dereferenceCount;
@@ -35,6 +36,7 @@ typedef struct dereferencedID_t {
 typedef struct {
 	uint32_t constMask;
 	int indirectionCount;
+	baseType_t baseType;
 } varType_t;
 
 #endif

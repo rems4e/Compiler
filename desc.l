@@ -47,6 +47,9 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 "const int"			{ECHO;return tCONST;}
 "int"				{ECHO;return tINT;}
 "const"				{ECHO;return tCONST;}
+"void"				{ECHO;return tVOID;}
+"void const"		{ECHO;return tVOID;}
+"const void"		{ECHO;return tVOID;}
 
 "if"				{ECHO;return tIF;}
 "else"				{ECHO;return tELSE;}

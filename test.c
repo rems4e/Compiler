@@ -139,8 +139,13 @@ int *max(int *a, int *b) {
 	return b;
 }
 
+void fVoid() {
+	printf(444);
+}
+
 int main() {
-	/*int i = 4, j, a = 3, c, d, res;
+	void *varVoid;
+	int i = 4, j, a = 3, c, d, res;
 	int *p1 = &c, p2 = &d;
 
 	testPointer();
@@ -179,11 +184,15 @@ int main() {
 	printf(d);
 	printf(*p1);
 
-	return 0;*/
+	fVoid();
+	printf(3.55E4);
+
+	varVoid = NULL;
+
+	return 0;
 
 	;
 
-	printf(3.55E4);
 
 	return 0;
 }

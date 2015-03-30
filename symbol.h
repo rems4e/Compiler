@@ -28,7 +28,7 @@ int getStackSize(void);
 symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name, varType_t type);
 
-symbol_t *allocTemp(int indirectionCount);
+symbol_t *allocTemp(int indirectionCount, baseType_t baseType);
 void freeIfTemp(symbol_t *s);
 
 void pushSymbol(symbol_t *s);
@@ -42,6 +42,8 @@ void checkIndirectionLevel(symbol_t const *s1, symbol_t const *s2);
 bool sameType(varType_t const *t1, varType_t const *t2);
 bool compatibleForAffectation(varType_t const *left, varType_t const *right, bool allowConst);
 void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *right, bool allowConst);
+
+bool isVoid(varType_t const *type);
 
 void printSymbolTable(void);
 

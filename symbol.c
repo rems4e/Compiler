@@ -47,6 +47,7 @@ void resetSymbolTable() {
 		symbolTable.symbols[i].address = i + ADDRESS_SHIFT;
 		symbolTable.symbols[i].type.constMask = 0;
 		symbolTable.symbols[i].type.indirectionCount = 0;
+		symbolTable.symbols[i].type.baseType = BT_INT;
 
 		symbolTable.symbolsStack[i] = NULL;
 	}
@@ -101,20 +102,20 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 	return NULL;
 }
 
-symbol_t *allocTemp(int indirectionCount) {
+symbol_t *allocTemp(int indirectionCount, baseType_t baseType) {
 	symbol_t *symbols = symbolTable.symbols;
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name == NULL) {
 			symbols[i].name = tempSymbol;
 			symbols[i].type.indirectionCount = indirectionCount;
+			symbols[i].type.baseType = baseType;
 			return &symbols[i];
 		}
 	}
 
 	fprintf(stderr, "Symbol table too small, couldn't get room for new temporary symbol.\n");
 	return NULL;
-
 }
 
 void freeIfTemp(symbol_t *s) {
@@ -177,11 +178,14 @@ void checkIndirectionLevel(symbol_t const *s1, symbol_t const *s2) {
 }
 
 bool sameType(varType_t const *t1, varType_t const *t2) {
-	return t1->indirectionCount == t2->indirectionCount && t1->constMask == t2->constMask;
+	return t1->indirectionCount == t2->indirectionCount && t1->constMask == t2->constMask && t1->baseType == t2->baseType;
 }
 
 bool compatibleForAffectation(varType_t const *left, varType_t const *right, bool allowConst) {
 	if(left->indirectionCount != right->indirectionCount) {
+		return false;
+	}
+	else if(isVoid(left) || isVoid(right)) {
 		return false;
 	}
 	else if(!allowConst && topLevelConst(left)) {
@@ -202,6 +206,12 @@ void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *righ
 	if((left->type.indirectionCount != right->type.indirectionCount) && !(right->type.indirectionCount == -1 && left->type.indirectionCount > 0)) {
 		yyerror("Le type de l'expression est incompatible avec le type de la variable %s (%d indirections à gauche, %d à droite).", left->name, left->type.indirectionCount, right->type.indirectionCount);
 	}
+	else if(isVoid(&left->type)) {
+		yyerror("Une expression de type void ne peut se trouver à gauche d'une affectation.");
+	}
+	else if(isVoid(&right->type)) {
+		yyerror("Une expression de type void ne peut se trouver à gauche d'une affectation.");
+	}
 	else if(!allowConst && topLevelConst(&left->type)) {
 		yyerror("La variable %s est constante.", left->name);
 	}
@@ -213,4 +223,8 @@ void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *righ
 			yyerror("Perte de la qualification const pour l'affectation de la variable %s.", left->name);
 		}
 	}
+}
+
+bool isVoid(varType_t const *type) {
+	return type->baseType == BT_VOID && type->indirectionCount == 0;
 }

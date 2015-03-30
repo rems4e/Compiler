@@ -41,6 +41,7 @@ void initFunctionTable() {
 		functionTable.functions[i].paramsCount = 0;
 		functionTable.functions[i].returnType.indirectionCount = 0;
 		functionTable.functions[i].returnType.constMask = 0;
+		functionTable.functions[i].returnType.baseType = BT_INT;
 		for(int j = 0; j < MAX_PARAMS; ++j) {
 			functionTable.functions[i].params[j].name = NULL;
 		}
@@ -51,7 +52,7 @@ void initFunctionTable() {
 		paramList.params[i].name = NULL;
 	}
 
-	varType_t type = {.indirectionCount = 0, .constMask = 0};
+	varType_t type = {.indirectionCount = 0, .constMask = 0, .baseType = BT_INT};
 	createFunction(&type, "main", false, 0);
 }
 
@@ -92,7 +93,7 @@ param_t popParam() {
 }
 
 void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
-	allocTemp(0), allocTemp(0);
+	allocTemp(0, BT_INT), allocTemp(0, BT_INT);
 	int stackSize = getStackSize();
 
 	if(function->paramsCount != argsCount) {
@@ -100,7 +101,7 @@ void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
 	}
 	for(int i = 0; i < argsCount; ++i) {
 		symbol_t *arg = popSymbol();
-		symbol_t *param = allocTemp(arg->type.indirectionCount);
+		symbol_t *param = allocTemp(arg->type.indirectionCount, arg->type.baseType);
 		if(!compatibleForAffectation(&function->params[i].type, &arg->type, true)) {
 			yyerror("Type de l'argument %d passé à la fonction %s invalide !\n", i + 1, function->name);
 		}
@@ -121,7 +122,7 @@ void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
 		addFunctionReturnAddress(instructionsCount());
 	}
 
-	if(returnSymbol != NULL) {
+	if(returnSymbol != NULL && (!isVoid(&returnSymbol->type))) {
 		assemblyOutput(COP" %d %d ; Récupération valeur de retour", returnSymbol->address - stackSize, RETURN_VALUE_ADDRESS);
 	}
 	assemblyOutput(STK" %d ; Décrémentation stack pointer", -stackSize);
