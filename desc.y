@@ -237,7 +237,8 @@ TypedDef : tID {
 Instrucs:
 | Instrucs Instruc { clearSymbolStack(); };
 
-Instruc : Exp tVIR Instruc
+Instruc : tF
+| Exp tVIR Instruc
 | Exp tF
 | Return tF
 | tIF Cond tBO Instrucs tBF { popLabel(); }

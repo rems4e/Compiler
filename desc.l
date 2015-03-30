@@ -14,7 +14,11 @@ int lineNumber = 1;
 Delim	[ \t\n]+
 Nom	[_a-zA-Z][_a-zA-Z0-9]*
 chiffre	[0-9]
-nombre	{chiffre}+(\.{chiffre}+)?(E[+\-]?{chiffre}+)?
+chiffreOct	[0-7]
+chiffreHex	[0-9a-fA-F]
+nombreExp	{chiffre}+(\.{chiffre}+)?((E|e)[+\-]?{chiffre}+)?
+nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
+
 string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 
 %x C_COMMENT
@@ -90,7 +94,24 @@ Delim				{ECHO;}
 
 {Nom}				{ECHO;yylval.var = strdup(yytext); return tID;}
 
-{nombre}			{ECHO;yylval.nb = atoi(yytext); return tNOMBRE;}
+{nombre}			{
+						ECHO;
+						char *last;
+						yylval.nb = strtol(yytext, &last, 0);
+						if(last - yytext < strlen(yytext)) {
+							yyerror("constante numérique invalide %s.", yytext);
+						}
+						return tNOMBRE;
+					}
+{nombreExp}			{
+						ECHO;
+						char *last;
+						yylval.nb = (int)strtod(yytext, &last);
+						if(last - yytext < strlen(yytext)) {
+							yyerror("constante numérique invalide %s.", yytext);
+						}
+						return tNOMBRE;
+					}
 
 %%
 
