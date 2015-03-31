@@ -13,7 +13,7 @@
 #include "assembly.h"
 
 #define SYM_COUNT 1000
-#define ADDRESS_SHIFT 5
+#define ADDRESS_SHIFT 2
 
 typedef struct {
 	symbol_t symbols[SYM_COUNT];

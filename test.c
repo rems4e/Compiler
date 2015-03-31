@@ -178,7 +178,7 @@ int main() {
 	printf(c);
 	printf(d);
 	printf(*p1);
-	
+
 	return 0;
 }
 

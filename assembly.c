@@ -69,10 +69,7 @@ void initAssemblyOutput(char const *path) {
 	returnAddressStack.size = 1;
 	returnAddressStack.address[0] = strdup("EOF"UNKNOWN_ADDRESS);
 
-	assemblyOutput(AFC" 0 0 ; Initialisation stack pointer");
-	assemblyOutput(AFC" 1 EOF%s ; Initialisation adresse de retour", UNKNOWN_ADDRESS);
-
-	callFunction(getFunction("main"), 0);
+	callFunction(getFunction("main"), 0, NULL);
 }
 
 void closeAssemblyOutput() {

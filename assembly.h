@@ -19,6 +19,8 @@
 
 #ifdef OPCODE_TEXT
 
+#define STK "STK" // Ajout de l'opérande au stack pointer
+
 #define ADD "ADD"
 #define SOU "SOU"
 #define MUL "MUL"
@@ -38,11 +40,13 @@
 
 #define PRI "PRI"
 
-#define JMI "JMI" // Saut avec indirection
+#define RET "RET" // Retour à la fontion appelante
 #define DR1 "DR1" // Copie du contenu de l'adresse passée en deuxième opérande dans l'adresse contenue dans l'adresse passée en opérande 1
 #define DR2 "DR2" // Copie du contenu de l'adresse contenue dans l'adresse passée en deuxième opérande dans l'opérande 1
 
 #else
+
+#define STK "0"
 
 #define ADD "1"
 #define SOU "3"
@@ -63,7 +67,7 @@
 
 #define PRI "C"
 
-#define JMI "D" // Saut avec indirection
+#define RET "D" // Retour à la fonction appelante
 #define DR1 "E" // Copie du contenu de l'adresse passée en deuxième opérande dans l'adresse contenue dans l'adresse passée en opérande 1
 #define DR2 "F" // Copie du contenu de l'adresse contenue dans l'adresse passée en deuxième opérande dans l'opérande 1
 
