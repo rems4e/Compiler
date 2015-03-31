@@ -101,6 +101,33 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 	return NULL;
 }
 
+symbol_t *createTable(char const *name, int size) {
+	symbol_t *symbols = symbolTable.symbols;
+	
+	for(int i = 0; i < SYM_COUNT; ++i) {
+		if(symbols[i].name != NULL && strcmp(symbols[i].name, name) == 0) {
+			yyerror("La variable %s existe déjà !\n", name);
+			return NULL;
+		}
+		else if(symbols[i].name == NULL) {
+			symbols[i].name = strdup(name);
+			symbols[i].type.constMask=2;
+			symbols[i].type.indirectionCount = 1 ;
+			for(int j = 1 ; j < size ; j++){
+				asprintf(&symbols[j].name,"%s_tabIndice_%d",name,j) ;
+				symbols[j].type.constMask=2;
+				symbols[j].type.indirectionCount = 1 ;
+			}
+			
+			return &symbols[i];
+		}
+	}
+
+	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
+	return NULL;
+	
+}
+
 symbol_t *allocTemp(int indirectionCount) {
 	symbol_t *symbols = symbolTable.symbols;
 

@@ -86,6 +86,10 @@ Delim				{ECHO;}
 "!="				{ECHO;return tDIFF;}
 
 
+"["				{ECHO;return tCRO;}
+
+"]"				{ECHO;return tCRF;}
+
 
 
 {Nom}				{ECHO;yylval.var = strdup(yytext); return tID;}

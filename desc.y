@@ -25,7 +25,7 @@
 	char const *funcName;
 
 	void affectation(dereferencedID_t id, bool allowConst) {
-		symbol_t *sym = getExistingSymbol(id.name);
+		symbol_t *sym = id.symbol;
 		symbol_t *val = popSymbol();
 
 		if(id.dereferenceCount > 0) {
@@ -44,7 +44,7 @@
 		}
 		else {
 			checkCompatibilityForAffectation(sym, val, allowConst);
-			assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.name);
+			assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.symbol);
 		}
 
 		freeIfTemp(val);
@@ -85,7 +85,7 @@
 	}
 
 	void binOpEq(char const *op, dereferencedID_t id) {
-		symbol_t *r = getExistingSymbol(id.name);
+		symbol_t *r = id.symbol;
 		symbol_t *s = popSymbol();
 
 		if(id.dereferenceCount > 0) {
@@ -140,7 +140,7 @@
 %type <dereferencedID> DereferencedID
 %type <varType> Type
 
-%token tPO tPF tVIR tBO tBF
+%token tPO tPF tVIR tBO tBF tCRO tCRF
 %token tINT tCONST tTRUE tFALSE
 %token tINCR tDECR
 %token tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
@@ -231,8 +231,10 @@ TypedDef : tID {
 } TypedDefNext
 | tID tEGAL Exp {
 	createSymbol($1, lastVarType);
-	affectation((dereferencedID_t){.name = $1, .dereferenceCount = 0}, true);
-} TypedDefNext;
+	affectation((dereferencedID_t){.symbol = $1, .dereferenceCount = 0}, true);
+} TypedDefNext
+| tID tCRO tNOMBRE tCRF {
+	createTable($1,$3);} TypedDefNext ; //TODO
 
 Instrucs:
 | Instrucs Instruc { clearSymbolStack(); };
@@ -278,16 +280,32 @@ FinWhile : tBF {
 	popLabel();
 };
 
-DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.name = $2.name, .dereferenceCount = $2.dereferenceCount + 1}; }
-| tID { $$ = (dereferencedID_t){.name = $1, .dereferenceCount = 0}; };
+DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
+| tID { $$ = (dereferencedID_t){.symbol = $1, .dereferenceCount = 0}; } ;
+| Exp tCRO Exp tCRF { 
+	symbol_t * symbInd = popSymbol(), *ind, *ind2;
+	symbol_t * symbTab = popSymbol() ;
+	
+	ind2 = allocTemp(symbTab->type.indirectionCount);
+	assemblyOutput(ADD" %d %d %d", ind2->address, symbTab->address, symbInd->address) ;
+		
+	ind = allocTemp(symbTab->type.indirectionCount - 1);
+	assemblyOutput(DR2" %d %d", ind->address, ind2->address);
+	freeIfTemp(ind2);
+	ind2 = ind;
+	
 
+	freeIfTemp(symbInd) ;
+	freeIfTemp(symbTab) ;
+	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 0 };  } ; //TODO
+	
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(0);
 	assemblyOutput(AFC" %d %d", s->address, $1);
 	pushSymbol(s);
 }
 | DereferencedID {
-	symbol_t *s = getExistingSymbol($1.name);
+	symbol_t *s = $1.symbol;
 
 	if(!s->initialized) {
 		yyerror("Variable %s non initialisée avant utilisation!", $1);
@@ -298,14 +316,19 @@ Terme :  tNOMBRE {
 	}
 	else {
 		symbol_t *ind;
-		for(int i = 0; i < $1.dereferenceCount; ++i) {
-			ind = allocTemp(s->type.indirectionCount - 1);
-			assemblyOutput(DR2" %d %d", ind->address, s->address);
-			freeIfTemp(s);
-			s = ind;
+		if ($1.dereferenceCount > s->type.indirectionCount){
+			yyerror("SegFault, erreur de pointeur : %s !",$1);
 		}
-
-		pushSymbol(ind);
+		else{
+			for(int i = 0; i < $1.dereferenceCount; ++i) {
+				ind = allocTemp(s->type.indirectionCount - 1);
+				assemblyOutput(DR2" %d %d", ind->address, s->address);
+				freeIfTemp(s);
+				s = ind;
+			}
+			pushSymbol(ind);
+		}
+		
 	}
 }
 | Bool
@@ -314,7 +337,8 @@ Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(ind);
 	pushSymbol(s);
 	assemblyOutput(AFC" %d 0", s->address);
-};
+}
+| Tableau; //TODO
 
 Cond : tPO Exp tPF {
 	symbol_t *cond = popSymbol();
@@ -349,20 +373,20 @@ Exp : Terme
 	pushSymbol(returnValue);
 }
 | tAMP DereferencedID {
-	symbol_t *s = getExistingSymbol($2.name);
+	symbol_t *s = $2.symbol;
 	symbol_t *a = allocTemp(s->type.indirectionCount + 1 - $2.dereferenceCount);
 	assemblyOutput(AFC" %d %d", a->address, s->address);
 	pushSymbol(a);
 }
 | DereferencedID tEGAL Exp { affectation($1, false); }
 | tINCR DereferencedID {
-	symbol_t *one = allocTemp(0), *result = getExistingSymbol($2.name);
+	symbol_t *one = allocTemp(0), *result = $2.symbol;
 	assemblyOutput(AFC" %d 1", one->address);
 	assemblyOutput(ADD" %d %d %d", result->address, result->address, one->address);
 	pushSymbol(result);
 }
 | DereferencedID tINCR {
-	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1.name);
+	symbol_t *one = allocTemp(0), *result = $1.symbol;
 	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
@@ -370,13 +394,13 @@ Exp : Terme
 	pushSymbol(copy);
 }
 | tDECR DereferencedID {
-	symbol_t *one = allocTemp(0), *result = getExistingSymbol($2.name);
+	symbol_t *one = allocTemp(0), *result = $2.symbol;
 	assemblyOutput(AFC" %d 1", one->address);
 	assemblyOutput(SOU" %d %d %d", result->address, result->address, one->address);
 	pushSymbol(result);
 }
 | DereferencedID tDECR {
-	symbol_t *one = allocTemp(0), *result = getExistingSymbol($1.name);
+	symbol_t *one = allocTemp(0), *result = $1.symbol;
 	symbol_t *copy = allocTemp(result->type.indirectionCount);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);

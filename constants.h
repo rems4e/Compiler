@@ -28,8 +28,10 @@
 
 void yyerror(char const *s, ...);
 
+struct symbol_t ;
+
 typedef struct dereferencedID_t {
-	char const *name;
+	struct symbol_t *symbol;
 	int dereferenceCount;
 } dereferencedID_t;
 
