@@ -425,7 +425,7 @@ Terme :  tNOMBRE {
 	pushSymbol(s);
 	assemblyOutput(AFC" %d 0", s->address);
 }
-| Tableau ; //TODO
+//| Tableau ; //TODO
 
 Cond : tPO Exp tPF {
 	symbol_t *cond = popSymbol();
