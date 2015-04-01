@@ -11,9 +11,9 @@ int lineNumber = 1;
 
 %}
 
-Delim	[ \t\n]+
-Nom	[_a-zA-Z][_a-zA-Z0-9]*
-chiffre	[0-9]
+Delim		[ \t\n]+
+Nom			[_a-zA-Z][_a-zA-Z0-9]*
+chiffre		[0-9]
 chiffreOct	[0-7]
 chiffreHex	[0-9a-fA-F]
 nombreExp	{chiffre}+(\.{chiffre}+)?((E|e)[+\-]?{chiffre}+)?
@@ -22,11 +22,7 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 %x C_COMMENT
 %x C_COMMENTL
 
-%x STRING_MODE
-
 %%
-
-
 
 "/*"            	{ BEGIN(C_COMMENT); }
 <C_COMMENT>"*/" 	{ BEGIN(INITIAL); }
@@ -37,12 +33,14 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 <C_COMMENTL>"\n" 	{ BEGIN(INITIAL); ++lineNumber; }
 <C_COMMENTL>.    	{ }
 
-"\"" 				{ BEGIN(STRING_MODE); }
-<STRING_MODE>"\\\""	{ }
-<STRING_MODE>"\""   { }
-<STRING_MODE>.    	{ ECHO; yylval.string = strdup(yytext); return tSTRING; }
-
-
+\"(\\.|[^\\"])*\"   { ECHO;
+						// On enlève les 2 guillemets
+						size_t len = strlen(yytext) - 2;
+						char *val = malloc(len + 1);
+						strncpy(val, yytext + 1, len);
+						val[len] = 0;
+						yylval.string = val; return tSTRING;
+					}
 
 "return"			{ ECHO; return tRETURN; }
 "printf"			{ ECHO; return tPRINTF; }
@@ -52,6 +50,9 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "int const"			{ ECHO; return tCONST; }
 "const int"			{ ECHO; return tCONST; }
 "int"				{ ECHO; return tINT; }
+"char const"		{ ECHO; return tCONSTC; }
+"const char"		{ ECHO; return tCONSTC; }
+"char"				{ ECHO; return tCHAR; }
 "const"				{ ECHO; return tCONST; }
 "void"				{ ECHO; return tVOID; }
 "void const"		{ ECHO; return tVOID; }

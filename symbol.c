@@ -44,7 +44,7 @@ void resetSymbolTable() {
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		symbolTable.symbols[i].initialized = false;
-		if(isTemp(&symbolTable.symbols[i])) {
+		if(!isTemp(&symbolTable.symbols[i])) {
 			free(symbolTable.symbols[i].name);
 		}
 		symbolTable.symbols[i].name = NULL;
@@ -156,8 +156,8 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 			bool ok = true;
 			if(symbolTable.symbols[i].name == NULL) {
 				for(int j = 1; j < size; ++j) {
-					// Ça rentre pas…
-					if(symbolTable.symbols[j].name != NULL) {
+					if(symbolTable.symbols[i + j].name != NULL) {
+						// Ça rentre pas…
 						ok = false;
 						break;
 					}
@@ -172,7 +172,6 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 					 *newSym = &symbolTable.symbols[i];
 					for(int j = 1; j < size; ++j) {
 						symbolTable.symbols[i + j].type = symbolTable.symbols[i].type;
-						symbolTable.symbols[i+j].initialized = true;
 						asprintf(&symbolTable.symbols[i + j].name, "%s_tabIndice_%d", name, j) ;
 					}
 
@@ -289,10 +288,13 @@ bool sameType(varType_t const *t1, varType_t const *t2) {
 }
 
 bool compatibleForAffectation(varType_t const *left, varType_t const *right, bool allowConst) {
-	if(left->indirectionCount != right->indirectionCount) {
+	if(left->indirectionCount != right->indirectionCount || (left->indirectionCount > 0 && right->indirectionCount > 0 && (left->baseType == BT_VOID || right->baseType == BT_VOID))) {
 		return false;
 	}
 	else if(isVoid(left) || isVoid(right)) {
+		return false;
+	}
+	else if(left->baseType != right->baseType && left->indirectionCount > 0) {
 		return false;
 	}
 	else if(!allowConst && topLevelConst(left)) {
@@ -310,7 +312,7 @@ bool compatibleForAffectation(varType_t const *left, varType_t const *right, boo
 	return true;
 }
 void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *right, bool allowConst) {
-	if((left->type.indirectionCount != right->type.indirectionCount) && !(right->type.indirectionCount == -1 && left->type.indirectionCount > 0)) {
+	if((left->type.indirectionCount != right->type.indirectionCount) || (left->type.indirectionCount > 0 && right->type.indirectionCount > 0 && (left->type.baseType == BT_VOID || right->type.baseType == BT_VOID))) {
 		yyerror("Le type de l'expression est incompatible avec le type de la variable %s (%d indirections à gauche, %d à droite).", left->name, left->type.indirectionCount, right->type.indirectionCount);
 	}
 	else if(isVoid(&left->type)) {
@@ -318,6 +320,9 @@ void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *righ
 	}
 	else if(isVoid(&right->type)) {
 		yyerror("Une expression de type void ne peut se trouver à gauche d'une affectation.");
+	}
+	else if(left->type.baseType != right->type.baseType && left->type.indirectionCount > 0) {
+		yyerror("Les types des deux opérandes sont incompatibles.");
 	}
 	else if(!allowConst && topLevelConst(&left->type)) {
 		yyerror("La variable %s est constante.", left->name);
