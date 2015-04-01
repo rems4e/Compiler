@@ -274,7 +274,7 @@ Terme :  tNOMBRE {
 | DereferencedID {
 	symbol_t *s = $1.symbol;
 
-	if(!s->initialized) {
+	if(!s->initialized && !isTemp(s)) {
 		yyerror("Variable %s non initialisée avant utilisation!", $1);
 	}
 

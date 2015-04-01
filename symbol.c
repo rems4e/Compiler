@@ -44,7 +44,7 @@ void resetSymbolTable() {
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		symbolTable.symbols[i].initialized = false;
-		if(symbolTable.symbols[i].name != tempSymbol) {
+		if(isTemp(&symbolTable.symbols[i])) {
 			free(symbolTable.symbols[i].name);
 		}
 		symbolTable.symbols[i].name = NULL;
@@ -199,8 +199,12 @@ symbol_t *allocTemp(int indirectionCount, baseType_t baseType) {
 	return NULL;
 }
 
+bool isTemp(symbol_t *s) {
+	return s->name == tempSymbol;
+}
+
 void freeIfTemp(symbol_t *s) {
-	if(s->name == tempSymbol) {
+	if(isTemp(s)) {
 		s->name = NULL;
 	}
 }

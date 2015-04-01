@@ -31,6 +31,7 @@ symbol_t *createSymbol(char const *name, varType_t type);
 symbol_t *createTable(char const *name, varType_t type, int size);
 
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType);
+bool isTemp(symbol_t *s);
 void freeIfTemp(symbol_t *s);
 
 void pushBlock();
