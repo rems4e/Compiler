@@ -129,31 +129,56 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 	return NULL;
 }
 
-symbol_t *createTable(char const *name, int size) {
-	symbol_t *symbols = symbolTable.symbols;
-	
-	for(int i = 0; i < SYM_COUNT; ++i) {
-		if(symbols[i].name != NULL && strcmp(symbols[i].name, name) == 0) {
-			yyerror("La variable %s existe déjà !\n", name);
-			return NULL;
-		}
-		else if(symbols[i].name == NULL) {
-			symbols[i].name = strdup(name);
-			symbols[i].type.constMask=2;
-			symbols[i].type.indirectionCount = 1 ;
-			for(int j = 1 ; j < size ; j++){
-				asprintf(&symbols[j].name,"%s_tabIndice_%d",name,j) ;
-				symbols[j].type.constMask=2;
-				symbols[j].type.indirectionCount = 1 ;
+symbol_t *createTable(char const *name, varType_t type, int size) {
+	symbol_t **newSym = NULL;
+	for(int i = 0; i <= SYM_COUNT - size && newSym == NULL; ++i) {
+		for(int j = 0; j < size; ++j) {
+			symbol_t *sym = symbolTable.nestedSymbols[symbolTable.nestingLevel][i + j];
+			if(sym == NULL && j == size - 1) {
+				newSym = &symbolTable.nestedSymbols[symbolTable.nestingLevel][i];
+				break;
 			}
-			
-			return &symbols[i];
+			else if(sym != NULL && sym->name != NULL) {
+				if(strcmp(sym->name, name) == 0) {
+					yyerror("La variable %s existe déjà !\n", name);
+					return NULL;
+				}
+				break;
+			}
+		}
+	}
+
+	// On a trouvé la place dans la table nestedSymbols, plus qu'à trouver la place dans la table principale
+	if(newSym != NULL) {
+		for(int i = 0; i < SYM_COUNT; ++i) {
+			bool ok = true;
+			if(symbolTable.symbols[i].name == NULL) {
+				for(int j = 1; j < size; ++j) {
+					// Ça rentre pas…
+					if(symbolTable.symbols[j].name != NULL) {
+						ok = false;
+						break;
+					}
+				}
+				if(ok) {
+					symbolTable.symbols[i].name = strdup(name);
+					symbolTable.symbols[i].type = type;
+					++type.indirectionCount;
+					type.constMask |= 1 << type.indirectionCount;
+					*newSym = &symbolTable.symbols[i];
+					for(int j = 1; j < size; ++j) {
+						symbolTable.symbols[i + j].type = symbolTable.symbols[i].type;
+						asprintf(&symbolTable.symbols[i + j].name, "%s_tabIndice_%d", name, j) ;
+					}
+
+					return *newSym;
+				}
+			}
 		}
 	}
 
 	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
 	return NULL;
-	
 }
 
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType) {
@@ -177,7 +202,6 @@ void freeIfTemp(symbol_t *s) {
 		s->name = NULL;
 	}
 }
-
 
 void pushBlock() {
 	assert(symbolTable.nestingLevel < MAX_NESTING - 1);

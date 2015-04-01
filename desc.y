@@ -190,6 +190,8 @@
 %left tPLUS tMOINS
 %left tDIV tSTAR tMOD
 
+%left tCRO tCRF
+
 %nonassoc EndIf
 %nonassoc tELSE
 
@@ -294,7 +296,7 @@ TypedDef : tID {
 	affectation((dereferencedID_t){.symbol = s, .dereferenceCount = 0}, true);
 } TypedDefNext
 | tID tCRO tNOMBRE tCRF {
-	createTable($1, $3);
+	createTable($1, lastVarType, $3);
 } TypedDefNext ; //TODO
 
 Instrucs:
