@@ -295,7 +295,7 @@ TypedDef : tID {
 } TypedDefNext
 | tID tCRO tNOMBRE tCRF {
 	createTable($1, $3);
-} TypedDefNext ; //TODO
+} TypedDefNext ;
 
 Instrucs:
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
@@ -379,7 +379,7 @@ DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.sym
 
 	freeIfTemp(symbInd) ;
 	freeIfTemp(symbTab) ;
-	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 0 };  } ; //TODO
+	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 0 };  } ;
 	
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(0, BT_INT);
@@ -424,8 +424,8 @@ Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(ind, BT_VOID);
 	pushSymbol(s);
 	assemblyOutput(AFC" %d 0", s->address);
-};
-//| Tableau; //TODO
+}
+| Tableau ; //TODO
 
 Cond : tPO Exp tPF {
 	symbol_t *cond = popSymbol();
