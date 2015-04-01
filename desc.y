@@ -27,7 +27,7 @@
 	function_t *currentFunction = NULL;
 
 	void affectation(dereferencedID_t id, bool allowConst) {
-		symbol_t *sym = getExistingSymbol(id.name);
+		symbol_t *sym = id.symbol;
 		symbol_t *val = popSymbol();
 
 		if(id.dereferenceCount > 0) {
@@ -46,7 +46,7 @@
 		}
 		else {
 			checkCompatibilityForAffectation(sym, val, allowConst);
-			assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.name);
+			assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.symbol);
 		}
 
 		freeIfTemp(val);
@@ -91,7 +91,7 @@
 	}
 
 	void binOpEq(char const *op, dereferencedID_t id) {
-		symbol_t *r = getExistingSymbol(id.name);
+		symbol_t *r = id.symbol;
 		symbol_t *s = popSymbol();
 
 		if(id.dereferenceCount > 0) {
@@ -291,8 +291,10 @@ TypedDef : tID {
 		yyerror("Impossible de déclarer une variable de type void.");
 	}
 	createSymbol($1, lastVarType);
-	affectation((dereferencedID_t){.name = $1, .dereferenceCount = 0}, true);
-} TypedDefNext;
+	affectation((dereferencedID_t){.symbol = $1, .dereferenceCount = 0}, true);
+} TypedDefNext
+| tID tCRO tNOMBRE tCRF {
+	createTable($1,$3);} TypedDefNext ; //TODO
 
 Instrucs:
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
@@ -359,16 +361,32 @@ ForCondition : { // Condition
 	assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS);
 };
 
-DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.name = $2.name, .dereferenceCount = $2.dereferenceCount + 1}; }
-| tID { $$ = (dereferencedID_t){.name = $1, .dereferenceCount = 0}; };
+DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
+| tID { $$ = (dereferencedID_t){.symbol = $1, .dereferenceCount = 0}; } ;
+| Exp tCRO Exp tCRF { 
+	symbol_t * symbInd = popSymbol(), *ind, *ind2;
+	symbol_t * symbTab = popSymbol() ;
+	
+	ind2 = allocTemp(symbTab->type.indirectionCount);
+	assemblyOutput(ADD" %d %d %d", ind2->address, symbTab->address, symbInd->address) ;
+		
+	ind = allocTemp(symbTab->type.indirectionCount - 1);
+	assemblyOutput(DR2" %d %d", ind->address, ind2->address);
+	freeIfTemp(ind2);
+	ind2 = ind;
+	
 
+	freeIfTemp(symbInd) ;
+	freeIfTemp(symbTab) ;
+	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 0 };  } ; //TODO
+	
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", s->address, $1);
 	pushSymbol(s);
 }
 | DereferencedID {
-	symbol_t *s = getExistingSymbol($1.name);
+	symbol_t *s = $1.symbol;
 
 	if(!s->initialized) {
 		yyerror("Variable %s non initialisée avant utilisation!", $1);
@@ -402,7 +420,8 @@ Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(ind, BT_VOID);
 	pushSymbol(s);
 	assemblyOutput(AFC" %d 0", s->address);
-};
+}
+| Tableau; //TODO
 
 Cond : tPO Exp tPF {
 	symbol_t *cond = popSymbol();

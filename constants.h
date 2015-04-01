@@ -29,7 +29,7 @@ void yyerror(char const *s, ...);
 typedef enum { BT_INT, BT_VOID } baseType_t;
 
 typedef struct dereferencedID_t {
-	char const *name;
+	struct symbol_t *symbol;
 	int dereferenceCount;
 } dereferencedID_t;
 
