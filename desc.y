@@ -296,13 +296,12 @@ TypedDef : tID {
 	affectation((dereferencedID_t){.symbol = s, .dereferenceCount = 0}, true);
 } TypedDefNext
 | tID tCRO tNOMBRE tCRF {
-<<<<<<< HEAD
-	createTable($1, $3);
-} TypedDefNext ;
-=======
 	createTable($1, lastVarType, $3);
-} TypedDefNext ; //TODO
->>>>>>> 8ee15c5ab2e372b18277b7a56d06250f17a2072b
+} TypedDefNext 
+|tID tCRO tNOMBRE tCRF tEGAL Exp {
+
+}; //TODO
+
 
 Instrucs:
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
@@ -372,21 +371,25 @@ ForCondition : { // Condition
 DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
 | tID { $$ = (dereferencedID_t){.symbol = getExistingSymbol($1), .dereferenceCount = 0}; } ;
 | Exp tCRO Exp tCRF { 
+
 	symbol_t * symbInd = popSymbol(), *ind, *ind2;
 	symbol_t * symbTab = popSymbol() ;
-	
-	ind2 = allocTemp(symbTab->type.indirectionCount, symbTab->type.baseType);
+	int indCount = symbTab->type.indirectionCount ;
+	//TODO verifier que symbTab n'est pas un pointeur
+	ind2 = allocTemp(indCount, symbTab->type.baseType);
 	assemblyOutput(ADD" %d %d %d", ind2->address, symbTab->address, symbInd->address) ;
 		
-	ind = allocTemp(symbTab->type.indirectionCount - 1, symbTab->type.baseType);
+	ind2->initialized = true ;
+	/*ind = allocTemp(indCount - 1, symbTab->type.baseType);
 	assemblyOutput(DR2" %d %d", ind->address, ind2->address);
-	freeIfTemp(ind2);
-	ind2 = ind;
-	
+	freeIfTemp(ind2);*/
 
-	freeIfTemp(symbInd) ;
 	freeIfTemp(symbTab) ;
-	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 0 };  } ;
+	freeIfTemp(symbInd) ;
+	
+	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 1}; 
+	
+} ;
 	
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(0, BT_INT);
@@ -397,7 +400,7 @@ Terme :  tNOMBRE {
 	symbol_t *s = $1.symbol;
 
 	if(!s->initialized) {
-		yyerror("Variable %s non initialisée avant utilisation!", $1);
+		yyerror("Variable %s non initialisée avant utilisation!", $1.symbol->name);
 	}
 
 	if($1.dereferenceCount == 0) {

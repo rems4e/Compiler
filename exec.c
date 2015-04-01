@@ -218,5 +218,5 @@ void exec(char const *sourcePath) {
 
 	free(memory);
 	free(source);
-	fclose(sourceFile);
+	//fclose(sourceFile);
 }
