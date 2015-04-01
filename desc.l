@@ -75,11 +75,13 @@ Delim				{ECHO;}
 
 "/="				{ECHO;return tDIVEQ;}
 "*="				{ECHO;return tMULEQ;}
+"%="				{ECHO;return tMODEQ;}
 "-="				{ECHO;return tMOINSEQ;}
 "+="				{ECHO;return tPLUSEQ;}
 
 "/"					{ECHO;return tDIV;}
 "*"					{ECHO;return tSTAR;}
+"%"					{ECHO;return tMOD;}
 "-"					{ECHO;return tMOINS;}
 "+"					{ECHO;return tPLUS;}
 "="					{ECHO;return tEGAL ;}

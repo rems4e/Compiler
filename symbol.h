@@ -31,6 +31,9 @@ symbol_t *createSymbol(char const *name, varType_t type);
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType);
 void freeIfTemp(symbol_t *s);
 
+void pushBlock();
+void popBlock();
+
 void pushSymbol(symbol_t *s);
 symbol_t *popSymbol(void);
 void clearSymbolStack(void);

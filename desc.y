@@ -22,7 +22,7 @@
 	static int paramsCount;
 	static bool lastInstructionIsReturn = false;
 	static varType_t lastVarType, returnValueType;
-	static char const *funcName;
+	static char const *funcName = NULL;
 
 	function_t *currentFunction = NULL;
 
@@ -52,6 +52,7 @@
 		freeIfTemp(val);
 		freeIfTemp(sym);
 		sym->initialized = true;
+		pushSymbol(sym);
 	}
 
 	void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2) {
@@ -130,6 +131,26 @@
 		negate();
 	}
 
+	void modulo() {
+		symbol_t *leftBackup = allocTemp(0, BT_INT);
+		symbol_t *rightBackup = allocTemp(0, BT_INT);
+		symbol_t *right = popSymbol();
+		symbol_t *left = popSymbol();
+		assemblyOutput(COP" %d %d", leftBackup->address, left->address);
+		assemblyOutput(COP" %d %d", rightBackup->address, right->address);
+
+		pushSymbol(left);
+		pushSymbol(right);
+		binOp(DIV);
+		pushSymbol(rightBackup);
+		binOp(MUL);
+
+		symbol_t *res = popSymbol();
+		pushSymbol(leftBackup);
+		pushSymbol(res);
+		binOp(SOU);
+	}
+
 	%}
 
 %union {
@@ -148,25 +169,29 @@
 %token tPO tPF tVIR tBO tBF
 %token tINT tCONST tVOID tTRUE tFALSE
 %token tINCR tDECR
-%token tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
-%token tPLUS tMOINS tDIV tSTAR
+%token tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
+%token tPLUS tMOINS tDIV tSTAR tMOD
 %token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
 
 %token tNULL
 %token tAMP
 
 %token tF
+
 %token tRETURN tPRINTF
 %token tIF tELSE tWHILE tFOR tDO
 
-%right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tEGAL
+%right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
 
 %left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tDIFF
 %left tET
 %left tOU
 
 %left tPLUS tMOINS
-%left tDIV tSTAR
+%left tDIV tSTAR tMOD
+
+%nonassoc EndIf
+%nonassoc tELSE
 
 %start Corps
 
@@ -273,17 +298,56 @@ Instrucs:
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
 
 Instruc : tF
+| tBO { pushBlock(); } Defs Instrucs tBF { popBlock(); }
 | Exp tVIR Instruc
 | Exp tF
 | Return tF { lastInstructionIsReturn = true; }
-| tIF Cond tBO Instrucs tBF { popLabel(); }
-| tIF Cond tBO Instrucs tBF { pushLabelLastButOne(); assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS); } tELSE tBO { popLabel(); } Instrucs tBF { popLabel(); }
-| tWHILE { pushInstructionCount(); } Cond tBO Instrucs FinWhile
-| tDO { pushInstructionCount(); } tBO Instrucs tBF tWHILE Cond tF { assemblyOutput(JMP" %d", popInstructionCount()); popLabel(); }
+| tIF Cond Instruc %prec EndIf { popLabel(); }
+| tIF Cond Instruc tELSE { pushLabelLastButOne(); assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS); popLabel(); } Instruc { popLabel(); }
+| tWHILE { pushInstructionCount(); } Cond Instruc {
+	assemblyOutput(JMP" %d", popInstructionCount());
+	popLabel();
+}
+| tDO { pushInstructionCount(); } Instruc tWHILE Cond tF { assemblyOutput(JMP" %d", popInstructionCount()); popLabel(); }
 
-| tFOR tPO Exp { // Initialisation
+| tFOR { pushBlock(); } tPO ExpOrEmptyOrDef { // Initialisation
+	freeIfTemp(popSymbol());
 	pushInstructionCount();
-} tF Exp { // Condition
+} ForCondition tF { // Action en fin de boucle
+	retourConditionFor = popInstructionCount();
+	pushInstructionCount();
+} ExpOrEmpty {
+	freeIfTemp(popSymbol());
+	assemblyOutput(JMP" %d", retourConditionFor);
+} tPF {  // Corps de boucle
+	popLabel();
+} Instruc { // Corps de boucle
+	assemblyOutput(JMP" %d", popInstructionCount()); // Action de fin de boucle
+	popLabel();
+	popBlock();
+};
+
+ExpOrEmptyOrDef : tF {
+	pushSymbol(allocTemp(0, BT_VOID));
+}
+| Exp tF
+| Def;
+
+ExpOrEmpty : {
+	pushSymbol(allocTemp(0, BT_VOID));
+}
+| Exp;
+
+ForCondition : { // Condition
+	symbol_t *cond = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d 1", cond->address);
+	pushLabel();
+	assemblyOutput(JMF_UNKNOWN" %d "UNKNOWN_ADDRESS, cond->address);
+	freeIfTemp(cond);
+	pushLabel();
+	assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS);
+}
+| Exp { // Condition
 	symbol_t *cond = popSymbol();
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
@@ -293,31 +357,6 @@ Instruc : tF
 	freeIfTemp(cond);
 	pushLabel();
 	assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS);
-} tF { // Action en fin de boucle
-	retourConditionFor = popInstructionCount();
-	pushInstructionCount();
-} Exp {
-	assemblyOutput(JMP" %d", retourConditionFor);
-} tPF tBO {  // Corps de boucle
-	popLabel();
-} Instrucs { // Corps de boucle
-	assemblyOutput(JMP" %d", popInstructionCount()); // Action de fin de boucle
-} tBF {
-	popLabel();
-}
-
-| tPRINTF tPO Exp tPF tF {
-	symbol_t *s = popSymbol();
-	if(isVoid(&s->type)) {
-		yyerror("L'expression ne peut pas être de type void.");
-	}
-	assemblyOutput(PRI" %d", s->address);
-	freeIfTemp(s);
-};
-
-FinWhile : tBF {
-	assemblyOutput(JMP" %d", popInstructionCount());
-	popLabel();
 };
 
 DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.name = $2.name, .dereferenceCount = $2.dereferenceCount + 1}; }
@@ -399,6 +438,16 @@ Exp : Terme
 	callFunction(function, paramsCount, returnValue);
 	pushSymbol(returnValue);
 }
+| tPRINTF tPO Exp tPF {
+	symbol_t *s = popSymbol();
+	if(isVoid(&s->type)) {
+		yyerror("L'expression ne peut pas être de type void.");
+	}
+	assemblyOutput(PRI" %d", s->address);
+	freeIfTemp(s);
+	symbol_t *ret = allocTemp(0, BT_VOID);
+	pushSymbol(ret);
+}
 | tAMP DereferencedID {
 	symbol_t *s = getExistingSymbol($2.name);
 
@@ -443,6 +492,15 @@ Exp : Terme
 | Exp tMOINS Exp { binOp(SOU); }
 | Exp tSTAR Exp { binOp(MUL); }
 | Exp tDIV Exp { binOp(DIV); }
+| Exp tMOD Exp { modulo(); }
+| DereferencedID tMODEQ Exp {
+	symbol_t *sym = getExistingSymbol($1.name);
+	symbol_t *sym2 = popSymbol();
+	pushSymbol(sym);
+	pushSymbol(sym2);
+	modulo();
+	affectation($1, false);
+}
 
 | DereferencedID tPLUSEQ Exp { binOpEq(ADD, $1); }
 | DereferencedID tMOINSEQ Exp { binOpEq(SOU, $1); }

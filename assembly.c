@@ -172,7 +172,7 @@ void pushLabel() {
 
 void pushLabelLastButOne() {
 	assert(labelsList.size < TAILLE_MAX - 1);
-	assert(labelsList.size > 1);
+	assert(labelsList.size > 0);
 
 	labelsStack.labels[labelsStack.size] = labelsStack.labels[labelsStack.size - 1];
 	labelsStack.labels[labelsStack.size++ - 1] = &labelsList.labels[labelsList.size++];

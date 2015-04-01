@@ -11,8 +11,8 @@
 
 /**
  * TODO:
- * Blocs if/accolade
  * tableaux
+ * chaînes de caractères
  * …
  */
 //#define YACC_DEBUG

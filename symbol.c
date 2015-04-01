@@ -13,12 +13,16 @@
 #include "assembly.h"
 
 #define SYM_COUNT 1000
+#define MAX_NESTING 20
 #define ADDRESS_SHIFT 2
 
 typedef struct {
 	symbol_t symbols[SYM_COUNT];
 	symbol_t *symbolsStack[SYM_COUNT];
 	int stackSize;
+
+	symbol_t *nestedSymbols[MAX_NESTING][SYM_COUNT];
+	int nestingLevel;
 } symbolTable_t;
 
 
@@ -51,6 +55,13 @@ void resetSymbolTable() {
 
 		symbolTable.symbolsStack[i] = NULL;
 	}
+
+	symbolTable.nestingLevel = 0;
+	for(int i = 0; i < MAX_NESTING; ++i) {
+		for(int j = 0; j < SYM_COUNT; ++j) {
+			symbolTable.nestedSymbols[i][j] = NULL;
+		}
+	}
 }
 
 void cleanSymbols() {
@@ -70,31 +81,47 @@ int getStackSize() {
 }
 
 symbol_t *getExistingSymbol(char const *name) {
-	symbol_t *symbols = symbolTable.symbols;
-
-	for(int i = 0; i < SYM_COUNT; ++i) {
-		if(symbols[i].name != NULL && strcmp(symbols[i].name, name) == 0) {
-			return &symbols[i];
+	// On cherche d'abord dans le niveau d'imbrication le plus élevé
+	for(int i = symbolTable.nestingLevel; i >= 0; --i) {
+		for(int j = 0; j < SYM_COUNT; ++j) {
+			symbol_t *sym = symbolTable.nestedSymbols[i][j];
+			if(sym == NULL) {
+				break;
+			}
+			else if(sym->name != NULL && strcmp(sym->name, name) == 0) {
+				return sym;
+			}
 		}
 	}
 
-	yyerror("variable %s non déclarée\n", name);
+	yyerror("Variable %s non déclarée\n", name);
 
 	return NULL;
 }
 
 symbol_t *createSymbol(char const *name, varType_t type) {
-	symbol_t *symbols = symbolTable.symbols;
-
+	symbol_t **newSym = NULL;
 	for(int i = 0; i < SYM_COUNT; ++i) {
-		if(symbols[i].name != NULL && strcmp(symbols[i].name, name) == 0) {
+		symbol_t *sym = symbolTable.nestedSymbols[symbolTable.nestingLevel][i];
+		if(sym == NULL) {
+			newSym = &symbolTable.nestedSymbols[symbolTable.nestingLevel][i];
+			break;
+		}
+		else if(sym->name != NULL && strcmp(sym->name, name) == 0) {
 			yyerror("La variable %s existe déjà !\n", name);
 			return NULL;
 		}
-		else if(symbols[i].name == NULL) {
-			symbols[i].name = strdup(name);
-			symbols[i].type = type;
-			return &symbols[i];
+	}
+
+	// On a trouvé la place dans la table nestedSymbols, plus qu'à trouver la place dans la table principale
+	if(newSym != NULL) {
+		for(int i = 0; i < SYM_COUNT; ++i) {
+			if(symbolTable.symbols[i].name == NULL) {
+				symbolTable.symbols[i].name = strdup(name);
+				symbolTable.symbols[i].type = type;
+				*newSym = &symbolTable.symbols[i];
+				return *newSym;
+			}
 		}
 	}
 
@@ -124,6 +151,26 @@ void freeIfTemp(symbol_t *s) {
 	}
 }
 
+
+void pushBlock() {
+	assert(symbolTable.nestingLevel < MAX_NESTING - 1);
+	++symbolTable.nestingLevel;
+}
+
+void popBlock() {
+	assert(symbolTable.nestingLevel > 0);
+	for(int i = 0; i < SYM_COUNT; ++i) {
+		symbol_t *toDelete = symbolTable.nestedSymbols[symbolTable.nestingLevel][i];
+		if(toDelete == NULL)
+			break;
+
+		free(toDelete->name);
+		toDelete->name = NULL;
+
+		symbolTable.nestedSymbols[symbolTable.nestingLevel][i] = NULL;
+	}
+	--symbolTable.nestingLevel;
+}
 
 void pushSymbol(symbol_t *s) {
 	assert(symbolTable.stackSize < SYM_COUNT - 1);
