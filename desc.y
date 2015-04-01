@@ -166,7 +166,7 @@
 %type <dereferencedID> DereferencedID
 %type <varType> Type
 
-%token tPO tPF tVIR tBO tBF
+%token tPO tPF tVIR tBO tBF tCRO tCRF
 %token tINT tCONST tVOID tTRUE tFALSE
 %token tINCR tDECR
 %token tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
@@ -290,11 +290,12 @@ TypedDef : tID {
 	if(isVoid(&lastVarType)) {
 		yyerror("Impossible de déclarer une variable de type void.");
 	}
-	createSymbol($1, lastVarType);
-	affectation((dereferencedID_t){.symbol = $1, .dereferenceCount = 0}, true);
+	symbol_t *s = createSymbol($1, lastVarType);
+	affectation((dereferencedID_t){.symbol = s, .dereferenceCount = 0}, true);
 } TypedDefNext
 | tID tCRO tNOMBRE tCRF {
-	createTable($1,$3);} TypedDefNext ; //TODO
+	createTable($1, $3);
+} TypedDefNext ; //TODO
 
 Instrucs:
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
@@ -362,15 +363,15 @@ ForCondition : { // Condition
 };
 
 DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
-| tID { $$ = (dereferencedID_t){.symbol = $1, .dereferenceCount = 0}; } ;
+| tID { $$ = (dereferencedID_t){.symbol = getExistingSymbol($1), .dereferenceCount = 0}; } ;
 | Exp tCRO Exp tCRF { 
 	symbol_t * symbInd = popSymbol(), *ind, *ind2;
 	symbol_t * symbTab = popSymbol() ;
 	
-	ind2 = allocTemp(symbTab->type.indirectionCount);
+	ind2 = allocTemp(symbTab->type.indirectionCount, symbTab->type.baseType);
 	assemblyOutput(ADD" %d %d %d", ind2->address, symbTab->address, symbInd->address) ;
 		
-	ind = allocTemp(symbTab->type.indirectionCount - 1);
+	ind = allocTemp(symbTab->type.indirectionCount - 1, symbTab->type.baseType);
 	assemblyOutput(DR2" %d %d", ind->address, ind2->address);
 	freeIfTemp(ind2);
 	ind2 = ind;
@@ -396,22 +397,25 @@ Terme :  tNOMBRE {
 		pushSymbol(s);
 	}
 	else {
-		if($1.dereferenceCount > s->type.indirectionCount) {
-			yyerror("Impossible de déréférencer l'expression %d fois.", $1.dereferenceCount);
+		if ($1.dereferenceCount > s->type.indirectionCount){
+			yyerror("Impossible de déréférencer l'expresion %d fois.", $1.dereferenceCount);
 		}
-		symbol_t *ind;
-		for(int i = 0; i < $1.dereferenceCount; ++i) {
-			ind = allocTemp(s->type.indirectionCount - 1, s->type.baseType);
-			assemblyOutput(DR2" %d %d", ind->address, s->address);
-			freeIfTemp(s);
-			s = ind;
-		}
+		else {
+			symbol_t *ind;
 
-		if(isVoid(&ind->type)) {
-			yyerror("L'expression ne peut pas être de type void.");
-		}
+			for(int i = 0; i < $1.dereferenceCount; ++i) {
+				ind = allocTemp(s->type.indirectionCount - 1, $1.symbol->type.baseType);
+				assemblyOutput(DR2" %d %d", ind->address, s->address);
+				freeIfTemp(s);
+				s = ind;
+			}
+			pushSymbol(ind);
 
-		pushSymbol(ind);
+			if(isVoid(&ind->type)) {
+				yyerror("L'expression ne peut pas être de type void.");
+			}
+		}
+		
 	}
 }
 | Bool
@@ -420,8 +424,8 @@ Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(ind, BT_VOID);
 	pushSymbol(s);
 	assemblyOutput(AFC" %d 0", s->address);
-}
-| Tableau; //TODO
+};
+//| Tableau; //TODO
 
 Cond : tPO Exp tPF {
 	symbol_t *cond = popSymbol();
@@ -468,7 +472,7 @@ Exp : Terme
 	pushSymbol(ret);
 }
 | tAMP DereferencedID {
-	symbol_t *s = getExistingSymbol($2.name);
+	symbol_t *s = $2.symbol;
 
 	if(isVoid(&s->type)) {
 		yyerror("Impossible de prendre l'adresse d'une expression de type void.");
@@ -480,13 +484,13 @@ Exp : Terme
 }
 | DereferencedID tEGAL Exp { affectation($1, false); }
 | tINCR DereferencedID {
-	symbol_t *one = allocTemp(0, BT_INT), *result = getExistingSymbol($2.name);
+	symbol_t *one = allocTemp(0, BT_INT), *result = $2.symbol;
 	assemblyOutput(AFC" %d 1", one->address);
 	assemblyOutput(ADD" %d %d %d", result->address, result->address, one->address);
 	pushSymbol(result);
 }
 | DereferencedID tINCR {
-	symbol_t *one = allocTemp(0, BT_INT), *result = getExistingSymbol($1.name);
+	symbol_t *one = allocTemp(0, BT_INT), *result = $1.symbol;
 	symbol_t *copy = allocTemp(result->type.indirectionCount, result->type.baseType);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
@@ -494,13 +498,13 @@ Exp : Terme
 	pushSymbol(copy);
 }
 | tDECR DereferencedID {
-	symbol_t *one = allocTemp(0, BT_INT), *result = getExistingSymbol($2.name);
+	symbol_t *one = allocTemp(0, BT_INT), *result = $2.symbol;
 	assemblyOutput(AFC" %d 1", one->address);
 	assemblyOutput(SOU" %d %d %d", result->address, result->address, one->address);
 	pushSymbol(result);
 }
 | DereferencedID tDECR {
-	symbol_t *one = allocTemp(0, BT_INT), *result = getExistingSymbol($1.name);
+	symbol_t *one = allocTemp(0, BT_INT), *result = $1.symbol;
 	symbol_t *copy = allocTemp(result->type.indirectionCount, result->type.baseType);
 	assemblyOutput(COP" %d %d", copy->address, result->address);
 	assemblyOutput(AFC" %d 1", one->address);
@@ -513,7 +517,7 @@ Exp : Terme
 | Exp tDIV Exp { binOp(DIV); }
 | Exp tMOD Exp { modulo(); }
 | DereferencedID tMODEQ Exp {
-	symbol_t *sym = getExistingSymbol($1.name);
+	symbol_t *sym = $1.symbol;
 	symbol_t *sym2 = popSymbol();
 	pushSymbol(sym);
 	pushSymbol(sym2);

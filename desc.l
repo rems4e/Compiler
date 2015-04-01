@@ -99,8 +99,6 @@ Delim				{ECHO;}
 
 "]"				{ECHO;return tCRF;}
 
-
-
 {Nom}				{ECHO;yylval.var = strdup(yytext); return tID;}
 
 {nombre}			{

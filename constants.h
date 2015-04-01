@@ -26,6 +26,7 @@
 
 void yyerror(char const *s, ...);
 
+struct symbol_t;
 typedef enum { BT_INT, BT_VOID } baseType_t;
 
 typedef struct dereferencedID_t {
