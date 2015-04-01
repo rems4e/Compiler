@@ -28,7 +28,7 @@ int getStackSize(void);
 symbol_t *getExistingSymbol(char const *name);
 symbol_t *createSymbol(char const *name, varType_t type);
 
-symbol_t *createTable(char const *name, int size) ;
+symbol_t *createTable(char const *name, varType_t type, int size);
 
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType);
 void freeIfTemp(symbol_t *s);

@@ -190,6 +190,8 @@
 %left tPLUS tMOINS
 %left tDIV tSTAR tMOD
 
+%left tCRO tCRF
+
 %nonassoc EndIf
 %nonassoc tELSE
 
@@ -294,8 +296,13 @@ TypedDef : tID {
 	affectation((dereferencedID_t){.symbol = s, .dereferenceCount = 0}, true);
 } TypedDefNext
 | tID tCRO tNOMBRE tCRF {
+<<<<<<< HEAD
 	createTable($1, $3);
 } TypedDefNext ;
+=======
+	createTable($1, lastVarType, $3);
+} TypedDefNext ; //TODO
+>>>>>>> 8ee15c5ab2e372b18277b7a56d06250f17a2072b
 
 Instrucs:
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
