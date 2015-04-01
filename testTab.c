@@ -1,20 +1,14 @@
 int main () {
-
-	int tab[4], a =1;
-
-
-	tab[0] = 0 ;
-	tab[1] = 4 ;
 	
+	int tab[4] = {0,0,0,0}  ;
 	
-	for(int i=0; i<4;i++){
-		tab[i]=i ;
+	/*for (int i = 0 ; i++ ; i<4){
+		tab[i]=0;
+	}*/
+	
+	for (int i = 0 ; i++ ; i<4){
+		printf(tab[i]);
 	}
-	
-	for(int i=0; i<4;i++){
-		printf(tab[i]) ;
-	}
-
 	
 	return 0 ;
 }
