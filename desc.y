@@ -78,6 +78,7 @@
 %nonassoc EndIf
 %nonassoc tELSE
 
+
 %start Corps
 
 %%
@@ -160,7 +161,7 @@ Type : tINT {
 };
 
 TypedDefNext : tF
-| tVIR TypedDef
+| tVIR TypedDef ;
         
 TypedDef : tID {
 	if(topLevelConst(&lastVarType)) {
@@ -178,9 +179,30 @@ TypedDef : tID {
 	symbol_t *s = createSymbol($1, lastVarType);
 	affectation((dereferencedID_t){.symbol = s, .dereferenceCount = 0}, true);
 } TypedDefNext
-| tID tCRO tNOMBRE tCRF {
-	createTable($1, lastVarType, $3);
-} TypedDefNext ; //TODO
+|Tab TabDef TypedDefNext ;
+
+Tab :  tID tCRO tNOMBRE tCRF {
+	symbol_t *symTab = createTable($1, lastVarType, $3);
+	pushSymbol(symTab);
+};
+
+TabDef : {freeIfTemp(popSymbol()) ;}
+|tEGAL tBO FinTab ;
+
+//TODO
+FinTab : Exp tBF{ symbol_t *symInd = popSymbol() ;
+			symInd->address ++ ;
+			affectation((dereferencedID_t){.symbol = symInd, .dereferenceCount = 1}, true) ;//TODO Modif de la table des symbole (incorrect)
+	freeIfTemp(symInd);
+}
+| Exp tVIR {
+		symbol_t *symInd = popSymbol(); 
+		symInd->address ++ ;
+		affectation((dereferencedID_t){.symbol = symInd, .dereferenceCount = 1  }, true) ;
+		pushSymbol(symInd) ; //TODO Modif de la table des symbole (incorrect)
+	} FinTab ;
+//TODO
+
 
 Instrucs:
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
@@ -250,21 +272,25 @@ ForCondition : { // Condition
 DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
 | tID { $$ = (dereferencedID_t){.symbol = getExistingSymbol($1, true), .dereferenceCount = 0}; } ;
 | Exp tCRO Exp tCRF { 
+
 	symbol_t * symbInd = popSymbol(), *ind, *ind2;
 	symbol_t * symbTab = popSymbol() ;
-	
-	ind2 = allocTemp(symbTab->type.indirectionCount, symbTab->type.baseType);
+	int indCount = symbTab->type.indirectionCount ;
+	//TODO verifier que symbTab n'est pas un pointeur
+	ind2 = allocTemp(indCount, symbTab->type.baseType);
 	assemblyOutput(ADD" %d %d %d", ind2->address, symbTab->address, symbInd->address) ;
 		
-	ind = allocTemp(symbTab->type.indirectionCount - 1, symbTab->type.baseType);
+	ind2->initialized = true ;
+	/*ind = allocTemp(indCount - 1, symbTab->type.baseType);
 	assemblyOutput(DR2" %d %d", ind->address, ind2->address);
-	freeIfTemp(ind2);
-	ind2 = ind;
-	
+	freeIfTemp(ind2);*/
 
-	freeIfTemp(symbInd) ;
 	freeIfTemp(symbTab) ;
-	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 0 };  } ; //TODO
+	freeIfTemp(symbInd) ;
+	
+	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 1}; 
+	
+} ;
 	
 Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(0, BT_INT);

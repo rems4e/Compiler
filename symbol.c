@@ -164,12 +164,15 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 				}
 				if(ok) {
 					symbolTable.symbols[i].name = strdup(name);
-					symbolTable.symbols[i].type = type;
-					++type.indirectionCount;
+
+					symbolTable.symbols[i].initialized = true;
+					++type.indirectionCount; 
 					type.constMask |= 1 << type.indirectionCount;
-					*newSym = &symbolTable.symbols[i];
+					symbolTable.symbols[i].type=type;
+					 *newSym = &symbolTable.symbols[i];
 					for(int j = 1; j < size; ++j) {
 						symbolTable.symbols[i + j].type = symbolTable.symbols[i].type;
+						symbolTable.symbols[i+j].initialized = true;
 						asprintf(&symbolTable.symbols[i + j].name, "%s_tabIndice_%d", name, j) ;
 					}
 
