@@ -9,6 +9,8 @@
 #define __Syste_me_Info__assembly__
 
 #include <stdlib.h>
+#include "constants.h"
+#include "symbol.h"
 
 //#define STRIP_COMMENTS
 
@@ -89,5 +91,18 @@ void popLabel(void);
 void popLabelWithAddress(int address);
 
 void addFunctionReturnAddress(int returnAddress);
+
+
+void affectation(dereferencedID_t id, bool allowConst);
+
+void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2);
+void binOp(char const *op);
+void binOpEq(char const *op, dereferencedID_t id);
+
+void negate();
+void toBoolean();
+
+void modulo();
+
 
 #endif /* defined(__Syste_me_Info__assembly__) */

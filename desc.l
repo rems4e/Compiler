@@ -19,10 +19,10 @@ chiffreHex	[0-9a-fA-F]
 nombreExp	{chiffre}+(\.{chiffre}+)?((E|e)[+\-]?{chiffre}+)?
 nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 
-string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
-
 %x C_COMMENT
 %x C_COMMENTL
+
+%x STRING_MODE
 
 %%
 
@@ -37,69 +37,75 @@ string 	"\""({Op}|{nombre}|{Nom}|{Delim})*"\""
 <C_COMMENTL>"\n" 	{ BEGIN(INITIAL); ++lineNumber; }
 <C_COMMENTL>.    	{ }
 
-
-"return"			{ECHO;return tRETURN;}
-"printf"			{ECHO;return tPRINTF;}
-
-"true"				{ECHO;return tTRUE;}
-"false"				{ECHO;return tFALSE;}
-"int const"			{ECHO;return tCONST;}
-"const int"			{ECHO;return tCONST;}
-"int"				{ECHO;return tINT;}
-"const"				{ECHO;return tCONST;}
-"void"				{ECHO;return tVOID;}
-"void const"		{ECHO;return tVOID;}
-"const void"		{ECHO;return tVOID;}
-
-"if"				{ECHO;return tIF;}
-"else"				{ECHO;return tELSE;}
-"&&"				{ECHO;return tET;}
-"||"				{ECHO;return tOU;}
-"while"				{ECHO;return tWHILE;}
-"for"				{ECHO;return tFOR;}
-"do"				{ECHO;return tDO;}
-
-"NULL"				{ECHO;return tNULL;}
-"&"                 {ECHO;return tAMP;}
-
-"("					{ECHO;return tPO;}
-")"					{ECHO;return tPF;}
-"{"					{ECHO;return tBO;}
-"}"					{ECHO;return tBF;}
-","					{ECHO;return tVIR;}
-\n					{ECHO; ++lineNumber;}
-Delim				{ECHO;}
-
-"++"				{ECHO;return tINCR;}
-"--"				{ECHO;return tDECR;}
-
-"/="				{ECHO;return tDIVEQ;}
-"*="				{ECHO;return tMULEQ;}
-"%="				{ECHO;return tMODEQ;}
-"-="				{ECHO;return tMOINSEQ;}
-"+="				{ECHO;return tPLUSEQ;}
-
-"/"					{ECHO;return tDIV;}
-"*"					{ECHO;return tSTAR;}
-"%"					{ECHO;return tMOD;}
-"-"					{ECHO;return tMOINS;}
-"+"					{ECHO;return tPLUS;}
-"="					{ECHO;return tEGAL ;}
-";"					{ECHO;return tF;}
-
-"=="				{ECHO;return tBOOLEGAL;}
-"<="				{ECHO;return tINFEGAL;}
-">="				{ECHO;return tSUPEGAL;}
-">"					{ECHO;return tSUP;}
-"<"					{ECHO;return tINF;}
-"!="				{ECHO;return tDIFF;}
+"\"" 				{ BEGIN(STRING_MODE); }
+<STRING_MODE>"\\\""	{ }
+<STRING_MODE>"\""   { }
+<STRING_MODE>.    	{ ECHO; yylval.string = strdup(yytext); return tSTRING; }
 
 
-"["				{ECHO;return tCRO;}
 
-"]"				{ECHO;return tCRF;}
+"return"			{ ECHO; return tRETURN; }
+"printf"			{ ECHO; return tPRINTF; }
 
-{Nom}				{ECHO;yylval.var = strdup(yytext); return tID;}
+"true"				{ ECHO; return tTRUE; }
+"false"				{ ECHO; return tFALSE; }
+"int const"			{ ECHO; return tCONST; }
+"const int"			{ ECHO; return tCONST; }
+"int"				{ ECHO; return tINT; }
+"const"				{ ECHO; return tCONST; }
+"void"				{ ECHO; return tVOID; }
+"void const"		{ ECHO; return tVOID; }
+"const void"		{ ECHO; return tVOID; }
+
+"if"				{ ECHO; return tIF; }
+"else"				{ ECHO; return tELSE; }
+"&&"				{ ECHO; return tET; }
+"||"				{ ECHO; return tOU; }
+"while"				{ ECHO; return tWHILE; }
+"for"				{ ECHO; return tFOR; }
+"do"				{ ECHO; return tDO; }
+
+"NULL"				{ ECHO; return tNULL; }
+"&"                 { ECHO; return tAMP; }
+
+"("					{ ECHO; return tPO; }
+")"					{ ECHO; return tPF; }
+"{"					{ ECHO; return tBO; }
+"}"					{ ECHO; return tBF; }
+","					{ ECHO; return tVIR; }
+\n					{ ECHO; ++lineNumber; }
+Delim				{ ECHO; }
+
+"++"				{ ECHO; return tINCR; }
+"--"				{ ECHO; return tDECR; }
+
+"/="				{ ECHO; return tDIVEQ; }
+"*="				{ ECHO; return tMULEQ; }
+"%="				{ ECHO; return tMODEQ; }
+"-="				{ ECHO; return tMOINSEQ; }
+"+="				{ ECHO; return tPLUSEQ; }
+
+"/"					{ ECHO; return tDIV; }
+"*"					{ ECHO; return tSTAR; }
+"%"					{ ECHO; return tMOD; }
+"-"					{ ECHO; return tMOINS; }
+"+"					{ ECHO; return tPLUS; }
+"="					{ ECHO; return tEGAL ; }
+";"					{ ECHO; return tF; }
+
+"=="				{ ECHO; return tBOOLEGAL; }
+"<="				{ ECHO; return tINFEGAL; }
+">="				{ ECHO; return tSUPEGAL; }
+">"					{ ECHO; return tSUP; }
+"<"					{ ECHO; return tINF; }
+"!="				{ ECHO; return tDIFF; }
+
+
+"["				{ ECHO; return tCRO; }
+
+"]"				{ ECHO; return tCRF; }
+
+{Nom}			{ ECHO; yylval.string = strdup(yytext); return tID; }
 
 {nombre}			{
 						ECHO;

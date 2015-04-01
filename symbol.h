@@ -25,7 +25,7 @@ void cleanSymbols(void);
 
 int getStackSize(void);
 
-symbol_t *getExistingSymbol(char const *name);
+symbol_t *getExistingSymbol(char const *name, bool failIfNotFound);
 symbol_t *createSymbol(char const *name, varType_t type);
 
 symbol_t *createTable(char const *name, varType_t type, int size);

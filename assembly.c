@@ -195,3 +195,129 @@ void addFunctionReturnAddress(int returnAddress) {
 	asprintf(&buf, "%d", returnAddress);
 	returnAddressStack.address[returnAddressStack.size++] = buf;
 }
+
+void affectation(dereferencedID_t id, bool allowConst) {
+	symbol_t *sym = id.symbol;
+	symbol_t *val = popSymbol();
+
+	if(id.dereferenceCount > 0) {
+		symbol_t *temp;
+		for(int i = 0; i < id.dereferenceCount - 1; ++i) {
+			temp = allocTemp(sym->type.indirectionCount - 1, sym->type.baseType);
+			assemblyOutput(DR2" %d %d", temp->address, sym->address);
+
+			freeIfTemp(sym);
+			sym = temp;
+		}
+		symbol_t cop = *sym;
+		--cop.type.indirectionCount;
+		checkCompatibilityForAffectation(&cop, val, allowConst);
+		assemblyOutput(DR1" %d %d ; %s", sym->address, val->address);
+	}
+	else {
+		checkCompatibilityForAffectation(sym, val, allowConst);
+		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.symbol);
+	}
+
+	freeIfTemp(val);
+	freeIfTemp(sym);
+	sym->initialized = true;
+	pushSymbol(sym);
+}
+
+void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2) {
+	if(isVoid(&s1->type) || isVoid(&s2->type)) {
+		yyerror("Les opérandes ne peuvent pas être de type void.");
+	}
+	else if(op == EQU || op == INF || op == SUP) {
+		checkIndirectionLevel(s1, s2);
+	}
+	else if(op == SOU) {
+		if(s1->type.indirectionCount != s2->type.indirectionCount && s2->type.indirectionCount > 0) {
+			yyerror("Opérandes invalide pour l'opérateur de soustraction");
+		}
+	}
+	else if(op == ADD) {
+		checkScalar(s2);
+	}
+	else if(op == MUL || op == DIV) {
+		checkScalar(s1);
+		checkScalar(s2);
+	}
+}
+
+void binOp(char const *op) {
+	symbol_t *s2 = popSymbol();
+	symbol_t *s1 = popSymbol();
+
+	checkBinOp(op, s1, s2);
+
+	symbol_t *res = allocTemp(s1->type.indirectionCount, s1->type.baseType);
+	pushSymbol(res);
+
+	assemblyOutput("%s %d %d %d", op, res->address, s1->address, s2->address);
+	freeIfTemp(s2);
+	freeIfTemp(s1);
+}
+
+void binOpEq(char const *op, dereferencedID_t id) {
+	symbol_t *r = id.symbol;
+	symbol_t *s = popSymbol();
+
+	if(id.dereferenceCount > 0) {
+		symbol_t *ind;
+		for(int i = 0; i < id.dereferenceCount; ++i) {
+			ind = allocTemp(r->type.indirectionCount - 1, r->type.baseType);
+			assemblyOutput(DR2" %d %d", ind->address, r->address);
+			freeIfTemp(r);
+			r = ind;
+		}
+
+		pushSymbol(ind);
+		pushSymbol(s);
+		binOp(op);
+		affectation(id, false);
+	}
+	else {
+		checkBinOp(op, r, s);
+		checkScalar(s);
+		assemblyOutput("%s %d %d %d", op, r->address, r->address, s->address);
+	}
+
+	pushSymbol(r);
+	freeIfTemp(s);
+}
+
+void negate() {
+	symbol_t *zero = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d %d ; negate", zero->address, 0);
+
+	pushSymbol(zero);
+	binOp(EQU);
+}
+
+void toBoolean() {
+	negate();
+	negate();
+}
+
+void modulo() {
+	symbol_t *leftBackup = allocTemp(0, BT_INT);
+	symbol_t *rightBackup = allocTemp(0, BT_INT);
+	symbol_t *right = popSymbol();
+	symbol_t *left = popSymbol();
+	assemblyOutput(COP" %d %d", leftBackup->address, left->address);
+	assemblyOutput(COP" %d %d", rightBackup->address, right->address);
+
+	pushSymbol(left);
+	pushSymbol(right);
+	binOp(DIV);
+	pushSymbol(rightBackup);
+	binOp(MUL);
+
+	symbol_t *res = popSymbol();
+	pushSymbol(leftBackup);
+	pushSymbol(res);
+	binOp(SOU);
+}
+

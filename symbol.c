@@ -80,7 +80,7 @@ int getStackSize() {
 	return 0;
 }
 
-symbol_t *getExistingSymbol(char const *name) {
+symbol_t *getExistingSymbol(char const *name, bool failIfNotFound) {
 	// On cherche d'abord dans le niveau d'imbrication le plus élevé
 	for(int i = symbolTable.nestingLevel; i >= 0; --i) {
 		for(int j = 0; j < SYM_COUNT; ++j) {
@@ -94,7 +94,9 @@ symbol_t *getExistingSymbol(char const *name) {
 		}
 	}
 
-	yyerror("Variable %s non déclarée\n", name);
+	if(failIfNotFound) {
+		yyerror("Variable %s non déclarée\n", name);
+	}
 
 	return NULL;
 }
