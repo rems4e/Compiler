@@ -9,6 +9,7 @@
 	#include "symbol.h"
 	#include "assembly.h"
 	#include "function.h"
+	#include "utility.h"
 
 	#define YYERROR_VERBOSE
 
@@ -29,7 +30,7 @@
 	function_t *currentFunction = NULL;
 
 	static struct {
-		int data[MAX_INITIALIZER];
+		symbol_t *data[MAX_INITIALIZER];
 		int count;
 	} initializerList;
 
@@ -196,19 +197,37 @@ Tab :  tID tCRO tNOMBRE tCRF {
 };
 
 TabDef : { freeIfTemp(popSymbol()); }
-| tEGAL tBO FinTab;
+| tEGAL tBO FinTab {
+	symbol_t *tab = popSymbol();
+	symbol_t *last = getTabIndex(tab->name, initializerList.count - 1);
+	if(last == NULL) {
+		yyerror("Trop d'éléments dans la liste d'initialisation de %s.", tab->name);
+	}
+	else {
+		symbol_t *current = getTabIndex(tab->name, 0);
+		for(int i = 0; i < initializerList.count; ++i, ++current) {
+			symbol_t *init = initializerList.data[i];
+			assemblyOutput(COP" %d %d", current->address, init->address);
+			freeIfTemp(init);
+			current->initialized = true;
+		}
+		for(int i = initializerList.count; ; ++i) {
+			symbol_t *current = getTabIndex(tab->name, i);
+			if(current == NULL)
+				break;
+			current->initialized = true;
+			assemblyOutput(AFC" %d 0", current->address);
+		}
+	}
+
+	initializerList.count = 0;
+};
 
 FinTab : Exp tBF {
-	symbol_t *symInd = popSymbol();
-	++symInd->address;
-	affectation((dereferencedID_t){.symbol = symInd, .dereferenceCount = 1}, true); //TODO Modif de la table des symbole (incorrect)
-	freeIfTemp(symInd);
+	initializerList.data[initializerList.count++] = popSymbol();
 }
 | Exp tVIR {
-		symbol_t *symInd = popSymbol(); 
-		++symInd->address;
-		affectation((dereferencedID_t){.symbol = symInd, .dereferenceCount = 1}, true);
-		pushSymbol(symInd) ; //TODO Modif de la table des symbole (incorrect)
+	initializerList.data[initializerList.count++] = popSymbol();
 } FinTab;
 
 
@@ -342,11 +361,19 @@ Terme :  tNOMBRE {
 	char *interningName;
 	asprintf(&interningName, "__internedString__%s", $1);
 
+	// Suppression des retours à la ligne dans le nom de symbole, ça casse l'assembleur à cause des commentaires
+	char *pos = interningName;
+	while((pos = strstr(pos, "\n")) != NULL) {
+		stringReplaceWithShorter(pos, 1, "", 0);
+	}
+
 	symbol_t *tab = getExistingSymbol(interningName, false);
 	if(tab == NULL) {
 		tab = createTable(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
+		symbol_t *data = getTabIndex(interningName, 0);
+		assert(data);
 		for(int i = 0; i < len; ++i) {
-			assemblyOutput(AFC" %d %d", tab->address + i, $1[i]);
+			assemblyOutput(AFC" %d %d", data->address + i, $1[i]);
 		}
 	}
 
@@ -393,7 +420,17 @@ Exp : Terme
 	if(isVoid(&s->type)) {
 		yyerror("L'expression ne peut pas être de type void.");
 	}
-	assemblyOutput(PRI" %d", s->address);
+	int mode = 0;
+	if(s->type.baseType == BT_CHAR && s->type.indirectionCount == 1) {
+		mode = 3; // chaîne de caracères
+	}
+	else if(s->type.baseType == BT_CHAR && s->type.indirectionCount == 0) {
+		mode = 2; // caractère
+	}
+	else if(s->type.indirectionCount > 0) {
+		mode = 1; //pointeur
+	}
+	assemblyOutput(PRI" %d %d", s->address, mode);
 	freeIfTemp(s);
 	symbol_t *ret = allocTemp(0, BT_VOID);
 	pushSymbol(ret);
@@ -407,6 +444,7 @@ Exp : Terme
 
 	symbol_t *a = allocTemp(s->type.indirectionCount + 1 - $2.dereferenceCount, s->type.baseType);
 	assemblyOutput(AFC" %d %d", a->address, s->address);
+	assemblyOutput(ABS" %d", a->address);
 	pushSymbol(a);
 }
 | DereferencedID tEGAL Exp { affectation($1, false); }
@@ -484,13 +522,21 @@ Exp : Terme
 
 	symbol_t *zero = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", zero->address, 0);
+	symbol_t *s = popSymbol();
 	pushSymbol(zero);
-	binOp(SUP);
+	pushSymbol(s);
+	binOp(INF);
 }
 | Exp tINF Exp { binOp(INF); }
-| Exp tSUP Exp { binOp(SUP); }
+| Exp tSUP Exp {
+	symbol_t *s1 = popSymbol(), *s2 = popSymbol();
+	pushSymbol(s1), pushSymbol(s2);
+	binOp(INF);
+}
 | Exp tINFEGAL Exp {
-	binOp(SUP);
+	symbol_t *s1 = popSymbol(), *s2 = popSymbol();
+	pushSymbol(s1), pushSymbol(s2);
+	binOp(INF);
 	negate();
 }
 | Exp tSUPEGAL Exp {

@@ -1,4 +1,4 @@
-int f(int p1, int p2, int p3) {
+/*int f(int p1, int p2, int p3) {
 	if(p3 > 0) {
 		return p1 + p2;
 	}
@@ -120,7 +120,7 @@ int testPointer() {
 	printf(**p2);
 
 	return 0;
-}
+}*/
 
 int triple(int *param) {
 	*param *= 3;
@@ -130,7 +130,7 @@ int triple(int *param) {
 
 int doubleParams(int *a, int *b);
 
-int *max(int *a, int *b) {
+/*int *max(int *a, int *b) {
 	doubleParams(a, b);
 	if(*b < *a) {
 		return a;
@@ -141,10 +141,43 @@ int *max(int *a, int *b) {
 
 void fVoid() {
 	printf(444);
-}
+}*/
 
 int main() {
-	void *varVoid;
+	/*char const *a = "abcdefgh\n";
+	char const *c = "abcdefghi";
+	char const *b = "abcdefgh";
+
+	printf(a[0]);*/
+
+	int tab[4] = {5, 4, 3, 1};
+
+	int i = 42, j = 77;
+
+	int *p = &i;
+
+	doubleParams(&i, &j);
+
+	/*for (int i = 0 ; i++ ; i<4){
+		tab[i]=0;
+	 }*/
+
+	for(int i = 0; i < 4; ++i) {
+		int tt = tab[i];
+		printf(tt);
+		printf(" ");
+		printf(tt);
+		printf("\n");
+	}
+
+	printf(*p);
+	printf(" ");
+	printf(j);
+	printf("\n");
+
+
+
+	/*void *varVoid;
 	int i = 4, j, a = 3, c, d, res;
 	int *p1 = &c, p2 = &d;
 
@@ -191,7 +224,7 @@ int main() {
 
 	return 0;
 
-	;
+	;*/
 
 
 	return 0;

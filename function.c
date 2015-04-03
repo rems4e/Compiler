@@ -172,9 +172,7 @@ void createFunction(varType_t *returnType, char const *name, bool definition, in
 
 	if(definition) {
 		function->address = instructionsCount();
-
 		initSymbolTable(function);
-
 		currentFunction = function;
 	}
 }

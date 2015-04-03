@@ -4,6 +4,7 @@
 #include <string.h>
 #include "constants.h"
 #include "y.tab.h"
+#include "utility.h"
 
 #define ECHO /*fprintf(yyout, "%s\n", yytext)*/
 
@@ -39,6 +40,19 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 						char *val = malloc(len + 1);
 						strncpy(val, yytext + 1, len);
 						val[len] = 0;
+
+						char *pos = val;
+						while((pos = strstr(pos, "\\n")) != NULL) {
+							stringReplaceWithShorter(pos, 2, "\n", 0);
+						}
+						pos = val;
+						while((pos = strstr(pos, "\\t")) != NULL) {
+							stringReplaceWithShorter(pos, 2, "\t", 0);
+						}
+						pos = val;
+						while((pos = strstr(pos, "\\\\")) != NULL) {
+							stringReplaceWithShorter(pos, 2, "\\", 0);
+						}
 						yylval.string = val; return tSTRING;
 					}
 

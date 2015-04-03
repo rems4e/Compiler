@@ -163,19 +163,21 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 					}
 				}
 				if(ok) {
-					symbolTable.symbols[i].name = strdup(name);
-
-					symbolTable.symbols[i].initialized = true;
-					++type.indirectionCount; 
-					type.constMask |= 1 << type.indirectionCount;
-					symbolTable.symbols[i].type=type;
-					 *newSym = &symbolTable.symbols[i];
-					for(int j = 1; j < size; ++j) {
-						symbolTable.symbols[i + j].type = symbolTable.symbols[i].type;
-						asprintf(&symbolTable.symbols[i + j].name, "%s_tabIndice_%d", name, j) ;
+					for(int j = 0; j < size; ++j) {
+						*(newSym + j) = &symbolTable.symbols[i + j];
+						symbolTable.symbols[i + j].type = type;
+						asprintf(&symbolTable.symbols[i + j].name, "%s__tabIndice%d", name, j);
 					}
 
-					return *newSym;
+					++type.indirectionCount;
+					type.constMask |= 1 << type.indirectionCount;
+					symbol_t *ptr = createSymbol(name, type);
+					ptr->initialized = true;
+
+					assemblyOutput(AFC" %d %d ; Accès au tableau \"%s\"", ptr->address, (*newSym)->address, name);
+					assemblyOutput(ABS" %d", ptr->address);
+
+					return ptr;
 				}
 			}
 		}
@@ -183,6 +185,17 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 
 	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
 	return NULL;
+}
+
+symbol_t *getTabIndex(char const *name, int index) {
+	char *toFind;
+	asprintf(&toFind, "%s__tabIndice%d", name, index);
+
+	symbol_t *ret = getExistingSymbol(toFind, false);
+
+	free(toFind);
+	return ret;
+
 }
 
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType) {
@@ -288,13 +301,13 @@ bool sameType(varType_t const *t1, varType_t const *t2) {
 }
 
 bool compatibleForAffectation(varType_t const *left, varType_t const *right, bool allowConst) {
-	if(left->indirectionCount != right->indirectionCount || (left->indirectionCount > 0 && right->indirectionCount > 0 && (left->baseType == BT_VOID || right->baseType == BT_VOID))) {
+	if(left->indirectionCount != right->indirectionCount && !(left->indirectionCount > 0 && right->indirectionCount > 0 && (left->baseType == BT_VOID || right->baseType == BT_VOID))) {
 		return false;
 	}
 	else if(isVoid(left) || isVoid(right)) {
 		return false;
 	}
-	else if(left->baseType != right->baseType && left->indirectionCount > 0) {
+	else if(left->baseType != right->baseType && left->indirectionCount > 0 && !(left->baseType == BT_VOID || right->baseType == BT_VOID)) {
 		return false;
 	}
 	else if(!allowConst && topLevelConst(left)) {
@@ -312,7 +325,7 @@ bool compatibleForAffectation(varType_t const *left, varType_t const *right, boo
 	return true;
 }
 void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *right, bool allowConst) {
-	if((left->type.indirectionCount != right->type.indirectionCount) || (left->type.indirectionCount > 0 && right->type.indirectionCount > 0 && (left->type.baseType == BT_VOID || right->type.baseType == BT_VOID))) {
+	if((left->type.indirectionCount != right->type.indirectionCount) && !(left->type.indirectionCount > 0 && right->type.indirectionCount > 0 && (left->type.baseType == BT_VOID || right->type.baseType == BT_VOID))) {
 		yyerror("Le type de l'expression est incompatible avec le type de la variable %s (%d indirections à gauche, %d à droite).", left->name, left->type.indirectionCount, right->type.indirectionCount);
 	}
 	else if(isVoid(&left->type)) {
@@ -321,7 +334,7 @@ void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *righ
 	else if(isVoid(&right->type)) {
 		yyerror("Une expression de type void ne peut se trouver à gauche d'une affectation.");
 	}
-	else if(left->type.baseType != right->type.baseType && left->type.indirectionCount > 0) {
+	else if(left->type.baseType != right->type.baseType && left->type.indirectionCount > 0 && !(left->type.baseType == BT_VOID || right->type.baseType == BT_VOID)) {
 		yyerror("Les types des deux opérandes sont incompatibles.");
 	}
 	else if(!allowConst && topLevelConst(&left->type)) {

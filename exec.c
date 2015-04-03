@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
+//#define DEBUG
+#define MEMORY_VAL 0x00
+
 #define STRINGIFY(X) #X
 
 #define MEMORY_SIZE 1000000
@@ -25,7 +28,6 @@
 
 #define EQU 0xB
 #define INF 0x9
-#define SUP 0xA
 
 #define COP 0x5
 #define AFC 0x6
@@ -35,6 +37,7 @@
 
 #define PRI 0xC
 
+#define ABS 0xA
 #define RET 0xD
 #define DR1 0xE
 #define DR2 0xF
@@ -116,8 +119,7 @@ void exec(char const *sourcePath) {
 	}
 
 	memory = malloc(MEMORY_SIZE * sizeof(int));
-
-	//memset(memory, 0xFF, MEMORY_SIZE);
+	memset(memory, MEMORY_VAL, MEMORY_SIZE);
 
 	int opcode, op1, op2, op3;
 	int pc = 0;
@@ -130,12 +132,14 @@ void exec(char const *sourcePath) {
 		}
 		++line;
 
-		/*printf("Ligne : %d\nsp : %d\n", pc + 1, stackPointer);
+#ifdef DEBUG
+		printf("Ligne : %d\nsp : %d\n", pc + 1, stackPointer);
 
 		for(int i = 0; i < 30; ++i) {
 			printf("\tmemory[%d]: %d\n", i, memory[i]);
 		}
-		putc('\n', stdout);*/
+		putc('\n', stdout);
+#endif
 		switch(opcode) {
 			case STK:
 				SCAN_ONE(STRINGIFY(STK));
@@ -165,10 +169,6 @@ void exec(char const *sourcePath) {
 				SCAN_THREE(STRINGIFY(INF));
 				*getMemory(op1) = *getMemory(op2) < *getMemory(op3);
 				break;
-			case SUP:
-				SCAN_THREE(STRINGIFY(SUP));
-				*getMemory(op1) = *getMemory(op2) > *getMemory(op3);
-				break;
 
 			case COP:
 				SCAN_TWO(STRINGIFY(COP));
@@ -193,8 +193,27 @@ void exec(char const *sourcePath) {
 				break;
 				
 			case PRI:
-				SCAN_ONE(STRINGIFY(PRI));
-				printf("%d\n", *getMemory(op1));
+				SCAN_TWO(STRINGIFY(PRI));
+				if(op2 == 0) {
+					printf("%d", *getMemory(op1));
+					fflush(stdout);
+				}
+				else if(op2 == 1) {
+					printf("0x%.8x", *getMemory(op1));
+					fflush(stdout);
+				}
+				else if(op2 == 2) {
+					putc(*getMemory(op1), stdout);
+					fflush(stdout);
+				}
+				else if(op2 == 3) {
+					op1 = *getMemory(op1);
+					int val;
+					while((val = memory[op1++])) {
+						putc(val, stdout);
+					}
+					fflush(stdout);
+				}
 				break;
 
 			case RET:
@@ -210,6 +229,11 @@ void exec(char const *sourcePath) {
 			case DR2:
 				SCAN_TWO(STRINGIFY(DR2));
 				*getMemory(op1) = memory[*getMemory(op2)];
+				break;
+
+			case ABS:
+				SCAN_ONE(STRINGIFY(ABS));
+				*getMemory(op1) += stackPointer;
 				break;
 		}
 

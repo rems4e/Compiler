@@ -30,7 +30,7 @@
 
 #define EQU "EQU"
 #define INF "INF"
-#define SUP "SUP"
+#define ABS "ABS"
 
 #define COP "COP"
 #define AFC "AFC"
@@ -57,7 +57,7 @@
 
 #define EQU "B"
 #define INF "9"
-#define SUP "A"
+#define ABS "A"
 
 #define COP "5"
 #define AFC "6"

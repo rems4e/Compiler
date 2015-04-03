@@ -212,11 +212,11 @@ void affectation(dereferencedID_t id, bool allowConst) {
 		symbol_t cop = *sym;
 		--cop.type.indirectionCount;
 		checkCompatibilityForAffectation(&cop, val, allowConst);
-		assemblyOutput(DR1" %d %d ; %s", sym->address, val->address);
+		assemblyOutput(DR1" %d %d", sym->address, val->address);
 	}
 	else {
 		checkCompatibilityForAffectation(sym, val, allowConst);
-		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.symbol);
+		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.symbol->name);
 	}
 
 	freeIfTemp(val);
@@ -229,7 +229,7 @@ void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2) {
 	if(isVoid(&s1->type) || isVoid(&s2->type)) {
 		yyerror("Les opérandes ne peuvent pas être de type void.");
 	}
-	else if(op == EQU || op == INF || op == SUP) {
+	else if(op == EQU || op == INF) {
 		checkIndirectionLevel(s1, s2);
 	}
 	else if(op == SOU) {
