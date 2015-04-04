@@ -12,7 +12,6 @@
 /**
  * TODO:
  * char val[] = "machin" -> copie du tableau
- * déclaration des tableaux avec []
  * break/continue
  * réparer (*p)++
  * …

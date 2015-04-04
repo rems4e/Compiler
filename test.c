@@ -146,6 +146,8 @@ void fVoid() {
 int global = 3;
 int *pGlobal = &global;
 char const *globalString = "truc\n";
+int globalTab[5] = {10, 9, 8, 7, 6};
+int globalTab2[] = {20, 19, 18, 17, 16};
 
 void printTruc() {
 	printf("truc\n");
@@ -157,11 +159,24 @@ void printTruc() {
 int global2 = 43;
 
 int main() {
-	/*printf(global);
+	printf(global);
 	printTruc();
 	printf(global);
+	char txt[2] = {'A', 0};
+	printf(txt);
+	printf(++global2);
+
+	/*for(int i = 0; i < 5; ++i) {
+		printf(globalTab[i]);
+		printf(" ");
+	}
 	printf("\n");
-	printf(++global2);*/
+
+	for(int i = 0; i < 500; ++i) {
+		printf(globalTab2[i]);
+		printf(" ");
+	}
+	printf("\n");*/
 
 	/*char const *a = "abcdefgh\n";
 	char const *c = "abcdefghi";
@@ -177,7 +192,7 @@ int main() {
 
 	printf(truc);*/
 
-	int tab[4] = {5, 4, 3, 1};
+	/*int tab[4] = {5, 4, 3, 1};
 
 	int i = 42, j = 77;
 
@@ -187,8 +202,8 @@ int main() {
 
 
 	for(int i = 0; i < 4; ++i) {
-		int tt = tab[i];
 		printf(*(tab + i));
+		int tt = tab[i];
 		printf(tt);
 		printf(" ");
 		printf(tt);
@@ -198,7 +213,7 @@ int main() {
 	printf(*p);
 	printf(" ");
 	printf(j);
-	printf("\n");
+	printf("\n");*/
 
 
 

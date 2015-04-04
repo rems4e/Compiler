@@ -23,9 +23,10 @@
 	extern int const lineNumber;
 	static int retourConditionFor;
 	static int paramsCount;
+	static int tabSize;
 	static bool lastInstructionIsReturn = false;
 	static varType_t lastVarType, returnValueType;
-	static char const *funcName = NULL;
+	static char const *idName = NULL;
 
 	function_t *currentFunction = NULL;
 
@@ -45,7 +46,8 @@
 
 %token <nb> tNOMBRE
 %token <string> tID
-%token <string> tSTRING
+%token <string> tSTRING_LITTERAL
+%token <string> tCHAR_LITTERAL
 
 %type <dereferencedID> DereferencedID
 %type <varType> Type
@@ -90,12 +92,12 @@ DefCorps : Def
 | Type tID tPO {
 	paramsCount = 0;
 	returnValueType = $1;
-} Params tPF { funcName = $2; } FonctionEnd;
+} Params tPF { idName = $2; } FonctionEnd;
 
-FonctionEnd : { createFunction(&returnValueType, funcName, false, paramsCount); } tF
-| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, funcName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction { currentFunction = NULL; popBlock(); setGlobalScope(true); };
+FonctionEnd : { createFunction(&returnValueType, idName, false, paramsCount); } tF
+| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction { currentFunction = NULL; popBlock(); setGlobalScope(true); };
 
-CorpsFonction : tBO Defs Instrucs tBF {
+CorpsFonction : tBO Instrucs tBF {
 	if(!lastInstructionIsReturn && !isVoid(&currentFunction->returnType)) {
 		yyerror("Une valeur de retour est obligatoire à la fin d'une fonction ne retournant pas void.");
 	}
@@ -130,9 +132,6 @@ ParamsList : Param
 | ParamsList tVIR Param;
 
 Param : Type tID { ++paramsCount; pushParam($2, $1); };
-
-Defs :
-| Defs Def;
 
 Def : Type TypedDef;
 
@@ -195,13 +194,32 @@ TypedDef : tID {
 | Tab TabDef TypedDefNext;
 
 Tab :  tID tCRO tNOMBRE tCRF {
-	symbol_t *symTab = createTable($1, lastVarType, $3);
-	pushSymbol(symTab);
+	if($3 < 0) {
+		yyerror("Impossible de créer un tableau de dimension négative.");
+	}
+
+	tabSize = $3;
+	idName = $1;
+}
+| tID tCRO tCRF {
+	tabSize = -1;
+	idName = $1;
 };
 
-TabDef : { freeIfTemp(popSymbol()); }
+TabDef : {
+	if(tabSize == -1) {
+		yyerror("Un tableau dont la dimension n'a pas été spécifiée doit être initialisé.");
+	}
+	else {
+		symbol_t *symTab = createTable(idName, lastVarType, tabSize);
+	}
+}
 | tEGAL tBO FinTab {
-	symbol_t *tab = popSymbol();
+	if(tabSize == -1) {
+		tabSize = initializerList.count;
+	}
+	symbol_t *tab = createTable(idName, lastVarType, tabSize);
+
 	symbol_t *last = getTabIndex(tab->name, initializerList.count - 1).symbol;
 	if(last == NULL) {
 		yyerror("Trop d'éléments dans la liste d'initialisation de %s.", tab->name);
@@ -238,7 +256,8 @@ Instrucs:
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
 
 Instruc : tF
-| tBO { pushBlock(); } Defs Instrucs tBF { popBlock(); }
+| Def
+| tBO { pushBlock(); } Instrucs tBF { popBlock(); }
 | Exp tVIR Instruc
 | Exp tF
 | Return tF { lastInstructionIsReturn = true; }
@@ -326,7 +345,7 @@ DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.sym
 	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 1};
 	pushSymbol(ind2);
 }
-| tSTRING {
+| tSTRING_LITTERAL {
 	dereferencedID_t id = createString($1);
 	$$ = id;
 	pushSymbol(id.symbol);
@@ -371,6 +390,11 @@ Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(1, BT_VOID);
 	pushSymbol(s);
 	assemblyOutput(AFC" %d 0", s->address);
+}
+| tCHAR_LITTERAL {
+	symbol_t *s = allocTemp(0, BT_CHAR);
+	assemblyOutput(AFC" %d %d", s->address, (int)($1[0]));
+	pushSymbol(s);
 };
 
 Cond : tPO Exp tPF {

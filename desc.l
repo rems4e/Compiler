@@ -10,6 +10,29 @@
 
 int lineNumber = 1;
 
+char *cleanString(char const *string) {
+	// On enlève les 2 guillemets
+	size_t len = strlen(string) - 2;
+	char *val = malloc(len + 1);
+	strncpy(val, string + 1, len);
+	val[len] = 0;
+
+	char *pos = val;
+	while((pos = strstr(pos, "\\n")) != NULL) {
+		stringReplaceWithShorter(pos, 2, "\n", 0);
+	}
+	pos = val;
+	while((pos = strstr(pos, "\\t")) != NULL) {
+		stringReplaceWithShorter(pos, 2, "\t", 0);
+	}
+	pos = val;
+	while((pos = strstr(pos, "\\\\")) != NULL) {
+		stringReplaceWithShorter(pos, 2, "\\", 0);
+	}
+
+	return val;
+}
+
 %}
 
 Delim		[ \t\n]+
@@ -34,26 +57,16 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 <C_COMMENTL>"\n" 	{ BEGIN(INITIAL); ++lineNumber; }
 <C_COMMENTL>.    	{ }
 
-\"(\\.|[^\\"])*\"   { ECHO;
-						// On enlève les 2 guillemets
-						size_t len = strlen(yytext) - 2;
-						char *val = malloc(len + 1);
-						strncpy(val, yytext + 1, len);
-						val[len] = 0;
+\"(\\.|[^\\"])*\"   { ECHO; yylval.string = cleanString(yytext); return tSTRING_LITTERAL; }
 
-						char *pos = val;
-						while((pos = strstr(pos, "\\n")) != NULL) {
-							stringReplaceWithShorter(pos, 2, "\n", 0);
+\'(\\.|[^\\'])+\'	{
+						ECHO;
+						char const *val = cleanString(yytext);
+						if(strlen(val) > 1) {
+							yyerror("Une constante de caractère ne peut comporter qu'un seul caractère.");
 						}
-						pos = val;
-						while((pos = strstr(pos, "\\t")) != NULL) {
-							stringReplaceWithShorter(pos, 2, "\t", 0);
-						}
-						pos = val;
-						while((pos = strstr(pos, "\\\\")) != NULL) {
-							stringReplaceWithShorter(pos, 2, "\\", 0);
-						}
-						yylval.string = val; return tSTRING;
+						yylval.string = val;
+						return tCHAR_LITTERAL;
 					}
 
 "return"			{ ECHO; return tRETURN; }
