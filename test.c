@@ -122,13 +122,13 @@ int testPointer() {
 	return 0;
 }*/
 
-int triple(int *param) {
+/*int triple(int *param) {
 	*param *= 3;
 
 	return 0;
 }
 
-int doubleParams(int *a, int *b);
+int doubleParams(int *a, int *b);*/
 
 /*int *max(int *a, int *b) {
 	doubleParams(a, b);
@@ -143,14 +143,26 @@ void fVoid() {
 	printf(444);
 }*/
 
+void printTruc() {
+	printf("truc\n");
+}
+
 int main() {
-	/*char const *a = "abcdefgh\n";
+	char const *a = "abcdefgh\n";
 	char const *c = "abcdefghi";
 	char const *b = "abcdefgh";
 
-	printf(a[0]);*/
+	char const *truc = "truc\n";
 
-	int tab[4] = {5, 4, 3, 1};
+	printTruc();
+
+	printf(a);
+	printf(b);
+	printf(c);
+
+	printf(truc);
+
+	/*int tab[4] = {5, 4, 3, 1};
 
 	int i = 42, j = 77;
 
@@ -158,9 +170,6 @@ int main() {
 
 	doubleParams(&i, &j);
 
-	/*for (int i = 0 ; i++ ; i<4){
-		tab[i]=0;
-	 }*/
 
 	for(int i = 0; i < 4; ++i) {
 		int tt = tab[i];
@@ -173,7 +182,7 @@ int main() {
 	printf(*p);
 	printf(" ");
 	printf(j);
-	printf("\n");
+	printf("\n");*/
 
 
 
@@ -230,10 +239,10 @@ int main() {
 	return 0;
 }
 
-int doubleParams(int *a, int *b) {
+/*int doubleParams(int *a, int *b) {
 	*a *= 2;
 	triple(a);
 	*b *= 2;
 
 	return 0;
-}
+}*/

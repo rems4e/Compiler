@@ -11,15 +11,18 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "assembly.h"
+#include "utility.h"
 
 #define SYM_COUNT 1000
+#define GLOBAL_COUNT 1000
 #define MAX_NESTING 20
 #define ADDRESS_SHIFT 2
 
 typedef struct {
 	symbol_t symbols[SYM_COUNT];
+	symbol_t globals[GLOBAL_COUNT];
 	symbol_t *symbolsStack[SYM_COUNT];
-	int stackSize;
+	int stackSize, globalCount;
 
 	symbol_t *nestedSymbols[MAX_NESTING][SYM_COUNT];
 	int nestingLevel;
@@ -28,6 +31,8 @@ typedef struct {
 
 static symbolTable_t symbolTable;
 static char *tempSymbol;
+static bool globalScope;
+
 void resetSymbolTable();
 void initFunctionTable();
 void freeFunctionTable();
@@ -35,8 +40,25 @@ void freeFunctionTable();
 void initSymbols() {
 	tempSymbol = strdup("__temp__");
 
+	symbolTable.nestingLevel = 0;
+	for(int i = 0; i < MAX_NESTING; ++i) {
+		for(int j = 0; j < SYM_COUNT; ++j) {
+			symbolTable.nestedSymbols[i][j] = NULL;
+		}
+	}
+
 	resetSymbolTable();
 	initFunctionTable();
+
+	symbolTable.globalCount = 0;
+	for(int i = 0; i < GLOBAL_COUNT; ++i) {
+		symbolTable.globals[i].initialized = false;
+		symbolTable.globals[i].name = NULL;
+		symbolTable.globals[i].address = i;
+		symbolTable.globals[i].type.constMask = 0;
+		symbolTable.globals[i].type.indirectionCount = 0;
+		symbolTable.globals[i].type.baseType = BT_INT;
+	}
 }
 
 void resetSymbolTable() {
@@ -56,18 +78,31 @@ void resetSymbolTable() {
 		symbolTable.symbolsStack[i] = NULL;
 	}
 
-	symbolTable.nestingLevel = 0;
-	for(int i = 0; i < MAX_NESTING; ++i) {
+	for(int i = 1; i < symbolTable.nestingLevel; ++i) {
 		for(int j = 0; j < SYM_COUNT; ++j) {
 			symbolTable.nestedSymbols[i][j] = NULL;
 		}
 	}
+	symbolTable.nestingLevel = 0;
 }
 
 void cleanSymbols() {
 	resetSymbolTable();
+
+	for(int i = 0; i < GLOBAL_COUNT; ++i) {
+		free(symbolTable.globals[i].name);
+	}
+
 	free(tempSymbol);
 	freeFunctionTable();
+}
+
+bool getGlobalScope() {
+	return globalScope;
+}
+
+void setGlobalScope(bool global) {
+	globalScope = global;
 }
 
 int getStackSize() {
@@ -80,16 +115,58 @@ int getStackSize() {
 	return 0;
 }
 
-symbol_t *getExistingSymbol(char const *name, bool failIfNotFound) {
+int getGlobalSymbolsCount() {
+	return symbolTable.globalCount;
+}
+
+dereferencedID_t createString(char const *value) {
+	bool const oldGlobalScope = getGlobalScope();
+
+	setGlobalScope(true);
+
+	int len = strlen(value) + 1;
+	char *interningName;
+	asprintf(&interningName, "__internedString__%s", value);
+
+	dereferencedID_t deref = getExistingSymbol(interningName, false);
+	symbol_t *tab = deref.symbol;
+	if(tab == NULL) {
+		tab = createTable(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
+		dereferencedID_t data = getTabIndex(interningName, 0);
+		assert(data.symbol);
+		for(int i = 0; i < len; ++i) {
+			assemblyOutput(AFC" %d %d", data.symbol->address + i, value[i]);
+		}
+	}
+
+	free(interningName);
+
+	setGlobalScope(oldGlobalScope);
+
+	return getExistingSymbol(interningName, true);
+}
+
+dereferencedID_t getExistingSymbol(char const *name, bool failIfNotFound) {
+	int const maxLevel = getGlobalScope() ? 0 : symbolTable.nestingLevel;
 	// On cherche d'abord dans le niveau d'imbrication le plus élevé
-	for(int i = symbolTable.nestingLevel; i >= 0; --i) {
+	for(int i = maxLevel; i >= 0; --i) {
 		for(int j = 0; j < SYM_COUNT; ++j) {
 			symbol_t *sym = symbolTable.nestedSymbols[i][j];
-			if(sym == NULL) {
-				break;
-			}
-			else if(sym->name != NULL && strcmp(sym->name, name) == 0) {
-				return sym;
+			if(sym != NULL && sym->name != NULL && strcmp(sym->name, name) == 0) {
+				if(sym >= symbolTable.globals && sym < symbolTable.globals + GLOBAL_COUNT && !getGlobalScope()) {
+					symbol_t *s = allocTemp(sym->type.indirectionCount + 1, sym->type.baseType);
+					s->type.constMask = sym->type.constMask;
+					asprintf(&s->name, "__global__%s", sym->name);
+					s->initialized = true;
+
+					char *comment = safeComment(name);
+					assemblyOutput(AFC" %d %d ; Accès à la variable globale %s", s->address, sym->address, comment ? comment : NULL);
+					free(comment);
+
+					return (dereferencedID_t){.symbol = s, .dereferenceCount = 1};
+				}
+
+				return (dereferencedID_t){.symbol = sym, .dereferenceCount = 0};
 			}
 		}
 	}
@@ -98,15 +175,17 @@ symbol_t *getExistingSymbol(char const *name, bool failIfNotFound) {
 		yyerror("Variable %s non déclarée\n", name);
 	}
 
-	return NULL;
+	return (dereferencedID_t){.symbol = NULL, .dereferenceCount = 0};
 }
 
 symbol_t *createSymbol(char const *name, varType_t type) {
+	int const nestingLevel = getGlobalScope() ? 0 : symbolTable.nestingLevel;
+
 	symbol_t **newSym = NULL;
 	for(int i = 0; i < SYM_COUNT; ++i) {
-		symbol_t *sym = symbolTable.nestedSymbols[symbolTable.nestingLevel][i];
+		symbol_t *sym = symbolTable.nestedSymbols[nestingLevel][i];
 		if(sym == NULL) {
-			newSym = &symbolTable.nestedSymbols[symbolTable.nestingLevel][i];
+			newSym = &symbolTable.nestedSymbols[nestingLevel][i];
 			break;
 		}
 		else if(sym->name != NULL && strcmp(sym->name, name) == 0) {
@@ -117,13 +196,29 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 
 	// On a trouvé la place dans la table nestedSymbols, plus qu'à trouver la place dans la table principale
 	if(newSym != NULL) {
-		for(int i = 0; i < SYM_COUNT; ++i) {
-			if(symbolTable.symbols[i].name == NULL) {
-				symbolTable.symbols[i].name = strdup(name);
-				symbolTable.symbols[i].type = type;
-				*newSym = &symbolTable.symbols[i];
-				return *newSym;
+		symbol_t *sym = NULL;
+		if(getGlobalScope()) {
+			for(int i = 0; i < GLOBAL_COUNT; ++i) {
+				if(symbolTable.globals[i].name == NULL) {
+					sym = &symbolTable.globals[i];
+					++symbolTable.globalCount;
+					break;
+				}
 			}
+		}
+		else {
+			for(int i = 0; i < SYM_COUNT; ++i) {
+				if(symbolTable.symbols[i].name == NULL) {
+					sym = &symbolTable.symbols[i];
+					break;
+				}
+			}
+		}
+		if(sym != NULL) {
+			sym->name = strdup(name);
+			sym->type = type;
+			*newSym = sym;
+			return *newSym;
 		}
 	}
 
@@ -132,12 +227,14 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 }
 
 symbol_t *createTable(char const *name, varType_t type, int size) {
+	int const nestingLevel = getGlobalScope() ? 0 : symbolTable.nestingLevel;
+
 	symbol_t **newSym = NULL;
 	for(int i = 0; i <= SYM_COUNT - size && newSym == NULL; ++i) {
 		for(int j = 0; j < size; ++j) {
-			symbol_t *sym = symbolTable.nestedSymbols[symbolTable.nestingLevel][i + j];
+			symbol_t *sym = symbolTable.nestedSymbols[nestingLevel][i + j];
 			if(sym == NULL && j == size - 1) {
-				newSym = &symbolTable.nestedSymbols[symbolTable.nestingLevel][i];
+				newSym = &symbolTable.nestedSymbols[nestingLevel][i];
 				break;
 			}
 			else if(sym != NULL && sym->name != NULL) {
@@ -152,11 +249,13 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 
 	// On a trouvé la place dans la table nestedSymbols, plus qu'à trouver la place dans la table principale
 	if(newSym != NULL) {
-		for(int i = 0; i < SYM_COUNT; ++i) {
+		int const count = getGlobalScope() ? GLOBAL_COUNT : SYM_COUNT;
+		symbol_t *symbols = getGlobalScope() ? symbolTable.globals : symbolTable.symbols;
+		for(int i = 0; i < count; ++i) {
 			bool ok = true;
-			if(symbolTable.symbols[i].name == NULL) {
+			if(symbols[i].name == NULL) {
 				for(int j = 1; j < size; ++j) {
-					if(symbolTable.symbols[i + j].name != NULL) {
+					if(symbols[i + j].name != NULL) {
 						// Ça rentre pas…
 						ok = false;
 						break;
@@ -164,9 +263,9 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 				}
 				if(ok) {
 					for(int j = 0; j < size; ++j) {
-						*(newSym + j) = &symbolTable.symbols[i + j];
-						symbolTable.symbols[i + j].type = type;
-						asprintf(&symbolTable.symbols[i + j].name, "%s__tabIndice%d", name, j);
+						*(newSym + j) = &symbols[i + j];
+						symbols[i + j].type = type;
+						asprintf(&symbols[i + j].name, "%s__tabIndice%d", name, j);
 					}
 
 					++type.indirectionCount;
@@ -174,9 +273,15 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 					symbol_t *ptr = createSymbol(name, type);
 					ptr->initialized = true;
 
-					assemblyOutput(AFC" %d %d ; Accès au tableau \"%s\"", ptr->address, (*newSym)->address, name);
+					char *comment = safeComment(name);
+
+					assemblyOutput(AFC" %d %d ; Tableau \"%s\"", ptr->address, (*newSym)->address, comment ? comment : "");
+					free(comment);
 					assemblyOutput(ABS" %d", ptr->address);
 
+					if(getGlobalScope()) {
+						symbolTable.globalCount += size;
+					}
 					return ptr;
 				}
 			}
@@ -187,11 +292,11 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 	return NULL;
 }
 
-symbol_t *getTabIndex(char const *name, int index) {
+dereferencedID_t getTabIndex(char const *name, int index) {
 	char *toFind;
 	asprintf(&toFind, "%s__tabIndice%d", name, index);
 
-	symbol_t *ret = getExistingSymbol(toFind, false);
+	dereferencedID_t ret = getExistingSymbol(toFind, false);
 
 	free(toFind);
 	return ret;

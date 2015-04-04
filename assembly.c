@@ -17,7 +17,8 @@
 
 #define TAILLE_MAX 1000
 
-static char *buffer = NULL;
+static char *assemblyBuffer = NULL;
+static char *globalBuffer = NULL;
 static FILE *output = NULL;
 
 typedef struct {
@@ -49,13 +50,15 @@ static labelList_t labelsList;
 static addressStack_t addressStack;
 static returnStack_t returnAddressStack;
 
-static size_t linesCount = 0;
+static int linesCount = 0, globalCount = 0;
 
 
 void initAssemblyOutput(char const *path) {
 	output = fopen(path, "w+");
-	buffer = malloc(1);
-	buffer[0] = '\0';
+	assemblyBuffer = malloc(1);
+	assemblyBuffer[0] = '\0';
+	globalBuffer = malloc(1);
+	globalBuffer[0] = '\0';
 
 	labelsList.size = 0;
 	labelsStack.size = 0;
@@ -66,37 +69,47 @@ void initAssemblyOutput(char const *path) {
 		returnAddressStack.address[i] = NULL;
 	}
 
+	setGlobalScope(false);
+
 	returnAddressStack.size = 1;
 	returnAddressStack.address[0] = strdup("EOF"UNKNOWN_ADDRESS);
+	assemblyOutput(JMP" EOC"UNKNOWN_ADDRESS" ; Saut à l'initialisation des variables globales");
 
-	callFunction(getFunction("main"), 0, NULL);
+	setGlobalScope(true);
+
+#ifndef STRIP_COMMENTS
+	assemblyOutput(COP" 0 0 ; Initialisation des variables globales");
+#endif
 }
 
 void closeAssemblyOutput() {
-	char *pos = buffer;
+	char *pos;
 	char labelBuf[5];
 	int currentLabel = 0;
 	int unknownLength = strlen(UNKNOWN_ADDRESS);
 	size_t length;
 
-#ifdef STRIP_COMMENTS
-	while((pos = strstr(pos, ";")) != NULL) {
-		if(pos[-1] == ' ')
-			--pos;
-		char *pos2 = strstr(pos, "\n");
-		size_t length = pos2 - pos;
-		stringReplaceWithShorter(pos, length, "", 0);
+	callFunction(getFunction("main"), 0, NULL);
+
+	char *buf2;
+	asprintf(&buf2, "%s%s", assemblyBuffer, globalBuffer);
+	free(assemblyBuffer);
+	free(globalBuffer);
+	assemblyBuffer = buf2;
+
+	pos = assemblyBuffer;
+	length = sprintf(labelBuf, "%d", instructionsCount());
+	while((pos = strstr(pos, "EOC"UNKNOWN_ADDRESS)) != NULL) {
+		stringReplaceWithShorter(pos, 3 + unknownLength, labelBuf, length);
 	}
 
-#endif
-
-	pos = buffer;
-	length = sprintf(labelBuf, "%zu", instructionsCount());
+	pos = assemblyBuffer;
+	length = sprintf(labelBuf, "%d", instructionsCount() + globalCount);
 	while((pos = strstr(pos, "EOF"UNKNOWN_ADDRESS)) != NULL) {
 		stringReplaceWithShorter(pos, 3 + unknownLength, labelBuf, length);
 	}
 
-	pos = buffer;
+	pos = assemblyBuffer;
 	while((pos = strstr(pos, "FUN"UNKNOWN_ADDRESS)) != NULL) {
 		int functionIndex;
 		int charatersConsumed;
@@ -110,7 +123,7 @@ void closeAssemblyOutput() {
 		stringReplaceWithShorter(pos, strlen("FUN"UNKNOWN_ADDRESS) + charatersConsumed, labelBuf, length);
 	}
 
-	pos = buffer;
+	pos = assemblyBuffer;
 
 	char const *labelPattern = "\n"UNKNOWN_PREFIX;
 	while((pos = strstr(pos, labelPattern)) != NULL) {
@@ -127,9 +140,22 @@ void closeAssemblyOutput() {
 	}
 	assert(currentLabel == labelsList.size);
 
-	fputs(buffer, output);
-	fclose(output);
+#ifdef STRIP_COMMENTS
+	pos = assemblyBuffer;
+	while((pos = strstr(pos, ";")) != NULL) {
+		if(pos[-1] == ' ')
+			--pos;
+		char *pos2 = strstr(pos, "\n");
+		size_t length = pos2 - pos;
+		stringReplaceWithShorter(pos, length, "", 0);
+	}
 
+#endif
+
+	fputs(assemblyBuffer, output);
+	fclose(output);
+	free(assemblyBuffer);
+	
 	for(int i = 0; i < TAILLE_MAX; ++i) {
 		free(returnAddressStack.address[i]);
 	}
@@ -139,19 +165,21 @@ void assemblyOutput(char const *lineFormat, ...) {
 	va_list args;
 	va_start(args, lineFormat);
 
+	char **buffer = getGlobalScope() ? &globalBuffer : &assemblyBuffer;
+
 	char *buf1, *buf2;
 	vasprintf(&buf1, lineFormat, args);
-	asprintf(&buf2, "%s%s\n", buffer, buf1);
+	asprintf(&buf2, "%s%s\n", *buffer, buf1);
 	free(buf1);
-	free(buffer);
-	buffer = buf2;
+	free(*buffer);
+	*buffer = buf2;
 
 	va_end(args);
 
-	++linesCount;
+	getGlobalScope() ? ++globalCount : ++linesCount;
 }
 
-size_t instructionsCount() {
+int instructionsCount() {
 	return linesCount;
 }
 

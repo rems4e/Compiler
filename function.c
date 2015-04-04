@@ -94,11 +94,16 @@ param_t popParam() {
 
 void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
 	allocTemp(0, BT_INT), allocTemp(0, BT_INT);
-	int stackSize = getStackSize();
+	int const stackSize = getGlobalScope() ? getGlobalSymbolsCount() : getStackSize();
 
 	if(function->paramsCount != argsCount) {
 		yyerror("Nombre d'arguments passés à la fonction %s invalide (%d au lieu de %d) !\n", function->name, argsCount, function->paramsCount);
 	}
+
+#ifndef STRIP_COMMENTS
+	assemblyOutput(COP" 0 0 ; Début de l'appel de la fonciton %s", function->name);
+#endif
+
 	for(int i = 0; i < argsCount; ++i) {
 		symbol_t *arg = popSymbol();
 		symbol_t *param = allocTemp(arg->type.indirectionCount, arg->type.baseType);
@@ -117,7 +122,7 @@ void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
 		assemblyOutput(AFC" %d EOF%s ; Sauvegarde adresse retour ", RETURN_ADDRESS, UNKNOWN_ADDRESS);
 	}
 
-	assemblyOutput(JMP" FUN%s%d ; appel de la fonction %s", UNKNOWN_ADDRESS, function - &functionTable.functions[0], function->name);
+	assemblyOutput(JMP" FUN%s%ld ; Appel de la fonction %s", UNKNOWN_ADDRESS, function - &functionTable.functions[0], function->name);
 	if(currentFunction != NULL) {
 		addFunctionReturnAddress(instructionsCount());
 	}
@@ -172,6 +177,9 @@ void createFunction(varType_t *returnType, char const *name, bool definition, in
 
 	if(definition) {
 		function->address = instructionsCount();
+#ifndef STRIP_COMMENTS
+		assemblyOutput(COP" 0 0 ; Début de la fonction %s", name);
+#endif
 		initSymbolTable(function);
 		currentFunction = function;
 	}

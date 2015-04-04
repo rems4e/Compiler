@@ -23,4 +23,11 @@
  */
 void stringReplaceWithShorter(char *replaced, size_t toReplace, char const *replacing, size_t replacingLength);
 
+/**
+ * Supprime les retours à la ligne du paramètre.
+ * La chaîne retournée doit être libérée avec free.
+ * Si la macro STRIP_COMMENTS est définie dans assembly.h, retourne NULL.
+ */
+char *safeComment(char const *unsafe);
+
 #endif /* defined(__Syste_me_Info__utility__) */

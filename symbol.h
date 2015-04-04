@@ -20,16 +20,23 @@ typedef struct symbol_t {
 	varType_t type;
 } symbol_t;
 
+
 void initSymbols(void);
 void cleanSymbols(void);
 
 int getStackSize(void);
+int getGlobalSymbolsCount(void);
 
-symbol_t *getExistingSymbol(char const *name, bool failIfNotFound);
+bool getGlobalScope(void);
+void setGlobalScope(bool global);
+
+dereferencedID_t createString(char const *value);
+
+dereferencedID_t getExistingSymbol(char const *name, bool failIfNotFound);
 symbol_t *createSymbol(char const *name, varType_t type);
 
 symbol_t *createTable(char const *name, varType_t type, int size);
-symbol_t *getTabIndex(char const *name, int index);
+dereferencedID_t getTabIndex(char const *name, int index);
 
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType);
 bool isTemp(symbol_t *s);

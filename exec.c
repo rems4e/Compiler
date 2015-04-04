@@ -86,7 +86,8 @@ void error(char const *opcode, int expected, int got) {
 
 int *getMemory(int address) {
 	address += stackPointer;
-	assert(address >= 0 && address < MEMORY_SIZE);
+	assert(address >= 0);
+	assert(address < MEMORY_SIZE);
 
 	return &memory[address];
 }
@@ -203,16 +204,16 @@ void exec(char const *sourcePath) {
 					fflush(stdout);
 				}
 				else if(op2 == 2) {
-					putc(*getMemory(op1), stdout);
-					fflush(stdout);
+					putchar(*getMemory(op1));
 				}
 				else if(op2 == 3) {
 					op1 = *getMemory(op1);
 					int val;
+					flockfile(stdout);
 					while((val = memory[op1++])) {
-						putc(val, stdout);
+						putchar_unlocked(val);
 					}
-					fflush(stdout);
+					funlockfile(stdout);
 				}
 				break;
 

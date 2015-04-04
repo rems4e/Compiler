@@ -78,9 +78,9 @@
 void initAssemblyOutput(char const *path);
 void closeAssemblyOutput(void);
 
-void assemblyOutput(char const *lineFormat, ...);
+void assemblyOutput(char const *lineFormat, ...) __printflike(1, 2);
 
-size_t instructionsCount(void);
+int instructionsCount(void);
 
 void pushInstructionCount(void);
 int popInstructionCount(void);
@@ -91,7 +91,6 @@ void popLabel(void);
 void popLabelWithAddress(int address);
 
 void addFunctionReturnAddress(int returnAddress);
-
 
 void affectation(dereferencedID_t id, bool allowConst);
 

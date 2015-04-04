@@ -90,7 +90,7 @@ Corps :
 } tID tPO Params tPF { funcName = $4; } FonctionEnd;
 
 FonctionEnd : { createFunction(&returnValueType, funcName, false, paramsCount); } tF
-| { createFunction(&returnValueType, funcName, true, paramsCount); } CorpsFonction { currentFunction = NULL; };
+| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, funcName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction { currentFunction = NULL; popBlock(); setGlobalScope(true); };
 
 CorpsFonction : tBO Defs Instrucs tBF {
 	if(!lastInstructionIsReturn && !isVoid(&currentFunction->returnType)) {
@@ -199,12 +199,12 @@ Tab :  tID tCRO tNOMBRE tCRF {
 TabDef : { freeIfTemp(popSymbol()); }
 | tEGAL tBO FinTab {
 	symbol_t *tab = popSymbol();
-	symbol_t *last = getTabIndex(tab->name, initializerList.count - 1);
+	symbol_t *last = getTabIndex(tab->name, initializerList.count - 1).symbol;
 	if(last == NULL) {
 		yyerror("Trop d'éléments dans la liste d'initialisation de %s.", tab->name);
 	}
 	else {
-		symbol_t *current = getTabIndex(tab->name, 0);
+		symbol_t *current = getTabIndex(tab->name, 0).symbol;
 		for(int i = 0; i < initializerList.count; ++i, ++current) {
 			symbol_t *init = initializerList.data[i];
 			assemblyOutput(COP" %d %d", current->address, init->address);
@@ -212,7 +212,7 @@ TabDef : { freeIfTemp(popSymbol()); }
 			current->initialized = true;
 		}
 		for(int i = initializerList.count; ; ++i) {
-			symbol_t *current = getTabIndex(tab->name, i);
+			symbol_t *current = getTabIndex(tab->name, i).symbol;
 			if(current == NULL)
 				break;
 			current->initialized = true;
@@ -297,7 +297,7 @@ ForCondition : { // Condition
 };
 
 DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
-| tID { $$ = (dereferencedID_t){.symbol = getExistingSymbol($1, true), .dereferenceCount = 0}; }
+| tID { dereferencedID_t id = getExistingSymbol($1, true); $$ = (dereferencedID_t){.symbol = id.symbol, .dereferenceCount = id.dereferenceCount}; }
 | Exp tCRO Exp tCRF {
 	symbol_t *symbInd = popSymbol(), *ind, *ind2;
 	symbol_t * symbTab = popSymbol() ;
@@ -312,6 +312,9 @@ DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.sym
 	freeIfTemp(symbInd);
 	
 	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 1};
+}
+| tSTRING {
+	$$ = createString($1);
 };
 	
 Terme :  tNOMBRE {
@@ -355,30 +358,6 @@ Terme :  tNOMBRE {
 	symbol_t *s = allocTemp(1, BT_VOID);
 	pushSymbol(s);
 	assemblyOutput(AFC" %d 0", s->address);
-}
-| tSTRING {
-	int len = strlen($1) + 1;
-	char *interningName;
-	asprintf(&interningName, "__internedString__%s", $1);
-
-	// Suppression des retours à la ligne dans le nom de symbole, ça casse l'assembleur à cause des commentaires
-	char *pos = interningName;
-	while((pos = strstr(pos, "\n")) != NULL) {
-		stringReplaceWithShorter(pos, 1, "", 0);
-	}
-
-	symbol_t *tab = getExistingSymbol(interningName, false);
-	if(tab == NULL) {
-		tab = createTable(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
-		symbol_t *data = getTabIndex(interningName, 0);
-		assert(data);
-		for(int i = 0; i < len; ++i) {
-			assemblyOutput(AFC" %d %d", data->address + i, $1[i]);
-		}
-	}
-
-	free(interningName);
-	pushSymbol(tab);
 };
 
 Cond : tPO Exp tPF {
