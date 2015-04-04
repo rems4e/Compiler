@@ -143,12 +143,27 @@ void fVoid() {
 	printf(444);
 }*/
 
+int global = 3;
+int *pGlobal = &global;
+char const *globalString = "truc\n";
+
 void printTruc() {
 	printf("truc\n");
+	printf(global);
+	printf(globalString);
+	++*pGlobal;
 }
 
+int global2 = 43;
+
 int main() {
-	char const *a = "abcdefgh\n";
+	/*printf(global);
+	printTruc();
+	printf(global);
+	printf("\n");
+	printf(++global2);*/
+
+	/*char const *a = "abcdefgh\n";
 	char const *c = "abcdefghi";
 	char const *b = "abcdefgh";
 
@@ -160,19 +175,20 @@ int main() {
 	printf(b);
 	printf(c);
 
-	printf(truc);
+	printf(truc);*/
 
-	/*int tab[4] = {5, 4, 3, 1};
+	int tab[4] = {5, 4, 3, 1};
 
 	int i = 42, j = 77;
 
 	int *p = &i;
 
-	doubleParams(&i, &j);
+	//doubleParams(&i, &j);
 
 
 	for(int i = 0; i < 4; ++i) {
 		int tt = tab[i];
+		printf(*(tab + i));
 		printf(tt);
 		printf(" ");
 		printf(tt);
@@ -182,7 +198,7 @@ int main() {
 	printf(*p);
 	printf(" ");
 	printf(j);
-	printf("\n");*/
+	printf("\n");
 
 
 

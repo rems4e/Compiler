@@ -13,9 +13,8 @@
  * TODO:
  * char val[] = "machin" -> copie du tableau
  * déclaration des tableaux avec []
- * variables globales
- * printf(*(a + 1));
  * break/continue
+ * réparer (*p)++
  * …
  */
 

@@ -248,7 +248,6 @@ void affectation(dereferencedID_t id, bool allowConst) {
 	}
 
 	freeIfTemp(val);
-	freeIfTemp(sym);
 	sym->initialized = true;
 	pushSymbol(sym);
 }

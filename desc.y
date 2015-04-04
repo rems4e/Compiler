@@ -84,10 +84,13 @@
 %%
 
 Corps :
-| Corps Type {
+| Corps DefCorps;
+
+DefCorps : Def
+| Type tID tPO {
 	paramsCount = 0;
-	returnValueType = $2;
-} tID tPO Params tPF { funcName = $4; } FonctionEnd;
+	returnValueType = $1;
+} Params tPF { funcName = $2; } FonctionEnd;
 
 FonctionEnd : { createFunction(&returnValueType, funcName, false, paramsCount); } tF
 | { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, funcName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction { currentFunction = NULL; popBlock(); setGlobalScope(true); };
@@ -297,7 +300,16 @@ ForCondition : { // Condition
 };
 
 DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
-| tID { dereferencedID_t id = getExistingSymbol($1, true); $$ = (dereferencedID_t){.symbol = id.symbol, .dereferenceCount = id.dereferenceCount}; }
+| tID {
+	dereferencedID_t id = getExistingSymbol($1, true);
+	$$ = (dereferencedID_t){.symbol = id.symbol, .dereferenceCount = id.dereferenceCount};
+	pushSymbol(id.symbol);
+}
+| tPO Exp tPF {
+	symbol_t *s = popSymbol();
+	$$ = (dereferencedID_t){.symbol = s, .dereferenceCount = 0};
+	pushSymbol(s);
+}
 | Exp tCRO Exp tCRF {
 	symbol_t *symbInd = popSymbol(), *ind, *ind2;
 	symbol_t * symbTab = popSymbol() ;
@@ -312,9 +324,12 @@ DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.sym
 	freeIfTemp(symbInd);
 	
 	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 1};
+	pushSymbol(ind2);
 }
 | tSTRING {
-	$$ = createString($1);
+	dereferencedID_t id = createString($1);
+	$$ = id;
+	pushSymbol(id.symbol);
 };
 	
 Terme :  tNOMBRE {
@@ -328,10 +343,8 @@ Terme :  tNOMBRE {
 		yyerror("Variable %s non initialisée avant utilisation!", $1);
 	}
 
-	if($1.dereferenceCount == 0) {
-		pushSymbol(s);
-	}
-	else {
+	if($1.dereferenceCount > 0) {
+		popSymbol();
 		if ($1.dereferenceCount > s->type.indirectionCount){
 			yyerror("Impossible de déréférencer l'expresion %d fois.", $1.dereferenceCount);
 		}
@@ -428,32 +441,40 @@ Exp : Terme
 }
 | DereferencedID tEGAL Exp { affectation($1, false); }
 | tINCR DereferencedID {
-	symbol_t *one = allocTemp(0, BT_INT), *result = $2.symbol;
+	symbol_t *one = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d 1", one->address);
-	assemblyOutput(ADD" %d %d %d", result->address, result->address, one->address);
-	pushSymbol(result);
+	pushSymbol(one);
+	binOpEq(ADD, $2);
 }
 | DereferencedID tINCR {
-	symbol_t *one = allocTemp(0, BT_INT), *result = $1.symbol;
+	symbol_t *one = allocTemp(0, BT_INT), *result = popSymbol();
 	symbol_t *copy = allocTemp(result->type.indirectionCount, result->type.baseType);
-	assemblyOutput(COP" %d %d", copy->address, result->address);
+
 	assemblyOutput(AFC" %d 1", one->address);
-	assemblyOutput(ADD" %d %d %d", result->address, result->address, one->address);
-	pushSymbol(copy);
+	pushSymbol(result);
+	affectation((dereferencedID_t){.symbol = copy, .dereferenceCount = 0}, false);
+
+	pushSymbol(one);
+	binOpEq(ADD, $1);
+	popSymbol();
 }
 | tDECR DereferencedID {
-	symbol_t *one = allocTemp(0, BT_INT), *result = $2.symbol;
+	symbol_t *one = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d 1", one->address);
-	assemblyOutput(SOU" %d %d %d", result->address, result->address, one->address);
-	pushSymbol(result);
+	pushSymbol(one);
+	binOpEq(SOU, $2);
 }
 | DereferencedID tDECR {
-	symbol_t *one = allocTemp(0, BT_INT), *result = $1.symbol;
+	symbol_t *one = allocTemp(0, BT_INT), *result = popSymbol();
 	symbol_t *copy = allocTemp(result->type.indirectionCount, result->type.baseType);
-	assemblyOutput(COP" %d %d", copy->address, result->address);
+
 	assemblyOutput(AFC" %d 1", one->address);
-	assemblyOutput(SOU" %d %d %d", result->address, result->address, one->address);
-	pushSymbol(copy);
+	pushSymbol(result);
+	affectation((dereferencedID_t){.symbol = copy, .dereferenceCount = 0}, false);
+
+	pushSymbol(one);
+	binOpEq(SOU, $1);
+	popSymbol();
 }
 | Exp tPLUS Exp { binOp(ADD); }
 | Exp tMOINS Exp { binOp(SOU); }
