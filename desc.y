@@ -28,6 +28,7 @@
 	static int loop = 0;
 	static varType_t lastVarType, returnValueType;
 	static char const *idName = NULL;
+	static symbol_t *ternarySymbol;
 
 	function_t *currentFunction = NULL;
 
@@ -65,10 +66,14 @@
 %token tNULL tTRUE tFALSE
 %token tAMP
 
+%token tQUESTION tDEUXP
+
 %token tF
 
 %token tRETURN tPRINTF
 %token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE
+
+%right tQUESTION tDEUXP
 
 %right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
 
@@ -637,6 +642,32 @@ Exp : Terme
 	binOp(EQU);
 	negate();
 }
+| Exp {
+	symbol_t *cond = popSymbol();
+	if(isVoid(&cond->type)) {
+		yyerror("La condition ne peut pas être de type void.");
+	}
+	pushIfLabel();
+	assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, cond->address);
+	freeIfTemp(cond);
+} tQUESTION Exp tDEUXP {
+	symbol_t *exp = popSymbol();
+	ternarySymbol = allocTemp(exp->type.indirectionCount, exp->type.baseType);
+	assemblyOutput(COP" %d %d", ternarySymbol->address, exp->address);
+
+	pushIfLabelLastButOne();
+	assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS);
+	popIfLabel();
+} Exp {
+	symbol_t *exp = popSymbol();
+	if(!sameType(&exp->type, &ternarySymbol->type)) {
+		yyerror("Les expressions de la condition ternaire doivent avoir le même type.");
+	}
+	assemblyOutput(COP" %d %d", ternarySymbol->address, exp->address);
+	pushSymbol(ternarySymbol);
+	popIfLabel();
+};
+//| tIF CondIf Instruc tELSE { pushIfLabelLastButOne(); assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS); popIfLabel(); } Instruc { popIfLabel(); }
 
 %%
 

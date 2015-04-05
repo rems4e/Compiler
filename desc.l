@@ -133,8 +133,10 @@ Delim				{ ECHO; }
 
 
 "["				{ ECHO; return tCRO; }
-
 "]"				{ ECHO; return tCRF; }
+
+"?"				{ ECHO; return tQUESTION; }
+":"				{ ECHO; return tDEUXP; }
 
 {Nom}			{ ECHO; yylval.string = strdup(yytext); return tID; }
 

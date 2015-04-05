@@ -15,6 +15,8 @@
  * switch
  * goto
  * ternaires
+ * bitop
+ * sizeof
  * …
  */
 

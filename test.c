@@ -154,18 +154,18 @@ void printTruc() {
 	printf(global);
 	printf(globalString);
 	++*pGlobal;
-}
+}*/
 
-int global2 = 43;*/
+int global2 = 43;
 
 int main() {
-	int i = 0;
+	/*int i = 0;
 	for(int i = 0; i < 10; ++i) {
 		if(i > 5) {
 			break;
 		}
 		printf(i);
-	}
+	}*/
 
 	/*char txttxt[] = "ABCDEF";
 
