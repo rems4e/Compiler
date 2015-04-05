@@ -25,14 +25,11 @@ typedef struct {
 	int adresseSaut;
 } label_t;
 
-typedef struct {
-	label_t *labels[TAILLE_MAX];
-	int size;
-} labelStack_t;
-
 typedef struct  {
 	label_t labels[TAILLE_MAX];
 	int size;
+	label_t *stack[TAILLE_MAX];
+	int stackSize;
 } labelList_t;
 
 typedef struct {
@@ -45,13 +42,13 @@ typedef struct {
 	int size;
 } returnStack_t;
 
-static labelStack_t labelsStack;
-static labelList_t labelsList;
+static labelList_t ifLabels, loopLabels;
 static addressStack_t addressStack;
 static returnStack_t returnAddressStack;
 
 static int linesCount = 0, globalCount = 0;
 
+static void replaceLabels(char *txt, char const *prefix, labelList_t *labels, char *buf, size_t unknownLength);
 
 void initAssemblyOutput(char const *path) {
 	output = fopen(path, "w+");
@@ -60,12 +57,12 @@ void initAssemblyOutput(char const *path) {
 	globalBuffer = malloc(1);
 	globalBuffer[0] = '\0';
 
-	labelsList.size = 0;
-	labelsStack.size = 0;
+	ifLabels.size = loopLabels.size = 0;
+	ifLabels.stackSize = loopLabels.stackSize = 0;
 	addressStack.size = 0;
 	for(int i = 0; i < TAILLE_MAX; ++i) {
-		labelsList.labels[i].adresseSaut = 0;
-		labelsStack.labels[i] = NULL;
+		ifLabels.labels[i].adresseSaut = loopLabels.labels[i].adresseSaut = 0;
+		ifLabels.stack[i] = loopLabels.stack[i] = NULL;
 		returnAddressStack.address[i] = NULL;
 	}
 
@@ -84,8 +81,7 @@ void initAssemblyOutput(char const *path) {
 
 void closeAssemblyOutput() {
 	char *pos;
-	char labelBuf[5];
-	int currentLabel = 0;
+	char labelBuf[6];
 	int unknownLength = strlen(UNKNOWN_ADDRESS);
 	size_t length;
 
@@ -123,22 +119,8 @@ void closeAssemblyOutput() {
 		stringReplaceWithShorter(pos, strlen("FUN"UNKNOWN_ADDRESS) + charatersConsumed, labelBuf, length);
 	}
 
-	pos = assemblyBuffer;
-
-	char const *labelPattern = "\n"UNKNOWN_PREFIX;
-	while((pos = strstr(pos, labelPattern)) != NULL) {
-		length = strlen(pos + 3);
-		memmove(pos + 1, pos + 3, length);
-		pos[length + 1] = 0;
-
-		pos = strstr(pos, UNKNOWN_ADDRESS);
-
-		length = sprintf(labelBuf, "%d", labelsList.labels[currentLabel].adresseSaut);
-		
-		stringReplaceWithShorter(pos, unknownLength, labelBuf, length);
-		++currentLabel;
-	}
-	assert(currentLabel == labelsList.size);
+	replaceLabels(assemblyBuffer, "\n"UNKNOWN_IF_PREFIX, &ifLabels, labelBuf, unknownLength);
+	replaceLabels(assemblyBuffer, "\n"UNKNOWN_LOOP_PREFIX, &loopLabels, labelBuf, unknownLength);
 
 #ifdef STRIP_COMMENTS
 	pos = assemblyBuffer;
@@ -159,6 +141,22 @@ void closeAssemblyOutput() {
 	for(int i = 0; i < TAILLE_MAX; ++i) {
 		free(returnAddressStack.address[i]);
 	}
+}
+
+void replaceLabels(char *txt, char const *prefix, labelList_t *labels, char *buf, size_t unknownLength) {
+	int currentLabel = 0;
+	while((txt = strstr(txt, prefix)) != NULL) {
+		size_t length = strlen(txt + 4);
+		memmove(txt + 1, txt + 4, length);
+		txt[length + 1] = 0;
+
+		txt = strstr(txt, UNKNOWN_ADDRESS);
+		length = sprintf(buf, "%d", labels->labels[currentLabel].adresseSaut);
+
+		stringReplaceWithShorter(txt, unknownLength, buf, length);
+		++currentLabel;
+	}
+	assert(currentLabel == labels->size);
 }
 
 void assemblyOutput(char const *lineFormat, ...) {
@@ -183,6 +181,11 @@ int instructionsCount() {
 	return linesCount;
 }
 
+int lastInstructionCount() {
+	assert(addressStack.size > 0);
+	return addressStack.address[addressStack.size - 1];
+}
+
 void pushInstructionCount() {
 	assert(addressStack.size < TAILLE_MAX - 1);
 	addressStack.address[addressStack.size++] = instructionsCount();
@@ -193,28 +196,34 @@ int popInstructionCount() {
 	return addressStack.address[--addressStack.size];
 }
 
-void pushLabel() {
-	assert(labelsList.size < TAILLE_MAX - 1);
-	labelsStack.labels[labelsStack.size++] = &labelsList.labels[labelsList.size++];
+void pushIfLabel() {
+	assert(ifLabels.size < TAILLE_MAX - 1);
+	ifLabels.stack[ifLabels.stackSize++] = &ifLabels.labels[ifLabels.size++];
 }
 
-void pushLabelLastButOne() {
-	assert(labelsList.size < TAILLE_MAX - 1);
-	assert(labelsList.size > 0);
-
-	labelsStack.labels[labelsStack.size] = labelsStack.labels[labelsStack.size - 1];
-	labelsStack.labels[labelsStack.size++ - 1] = &labelsList.labels[labelsList.size++];
+void popIfLabel() {
+	assert(ifLabels.stackSize > 0);
+	ifLabels.stack[--ifLabels.stackSize]->adresseSaut = instructionsCount();
+	ifLabels.stack[ifLabels.stackSize] = NULL;
 }
 
-void popLabel() {
-	popLabelWithAddress(instructionsCount());
+void pushIfLabelLastButOne() {
+	assert(ifLabels.size < TAILLE_MAX - 1);
+	assert(ifLabels.size > 0);
+
+	ifLabels.stack[ifLabels.stackSize] = ifLabels.stack[ifLabels.stackSize - 1];
+	ifLabels.stack[ifLabels.stackSize++ - 1] = &ifLabels.labels[ifLabels.size++];
 }
 
-void popLabelWithAddress(int address) {
-	assert(labelsStack.size > 0);
-	--labelsStack.size;
-	labelsStack.labels[labelsStack.size]->adresseSaut = address;
-	labelsStack.labels[labelsStack.size] = NULL;
+void pushLoopLabel() {
+	assert(loopLabels.size < TAILLE_MAX - 1);
+	loopLabels.stack[loopLabels.stackSize++] = &loopLabels.labels[loopLabels.size++];
+}
+
+void popLoopLabel() {
+	assert(loopLabels.stackSize > 0);
+	loopLabels.stack[--loopLabels.stackSize]->adresseSaut = instructionsCount();
+	loopLabels.stack[loopLabels.stackSize] = NULL;
 }
 
 void addFunctionReturnAddress(int returnAddress) {

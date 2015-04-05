@@ -11,9 +11,10 @@
 
 /**
  * TODO:
- * char val[] = "machin" -> copie du tableau
- * break/continue
  * réparer (*p)++
+ * switch
+ * goto
+ * ternaires
  * …
  */
 

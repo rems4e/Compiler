@@ -85,6 +85,9 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "void const"		{ ECHO; return tVOID; }
 "const void"		{ ECHO; return tVOID; }
 
+"break"				{ ECHO; return tBREAK; }
+"continue"			{ ECHO; return tCONTINUE; }
+
 "if"				{ ECHO; return tIF; }
 "else"				{ ECHO; return tELSE; }
 "&&"				{ ECHO; return tET; }

@@ -13,9 +13,6 @@
 #include "assembly.h"
 #include "utility.h"
 
-#define SYM_COUNT 1000
-#define GLOBAL_COUNT 1000
-#define MAX_NESTING 20
 #define ADDRESS_SHIFT 2
 
 typedef struct {

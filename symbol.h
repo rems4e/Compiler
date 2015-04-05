@@ -11,6 +11,10 @@
 #include "constants.h"
 #include <stdint.h>
 
+#define SYM_COUNT 1000
+#define GLOBAL_COUNT 1000
+#define MAX_NESTING 20
+
 typedef unsigned int address_t;
 
 typedef struct symbol_t {

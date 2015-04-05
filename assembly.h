@@ -16,7 +16,8 @@
 
 //#define OPCODE_TEXT
 
-#define UNKNOWN_PREFIX "U_"
+#define UNKNOWN_IF_PREFIX "UI_"
+#define UNKNOWN_LOOP_PREFIX "UL_"
 #define UNKNOWN_ADDRESS "00000"
 
 #ifdef OPCODE_TEXT
@@ -37,8 +38,10 @@
 
 #define JMP "JMP"
 #define JMF "JMF"
-#define JMP_UNKNOWN "U_JMP"
-#define JMF_UNKNOWN "U_JMF"
+#define JMP_UNKNOWN_IF   "UI_JMP"
+#define JMP_UNKNOWN_LOOP "UL_JMP"
+#define JMF_UNKNOWN_IF   "UI_JMF"
+#define JMF_UNKNOWN_LOOP "UL_JMF"
 
 #define PRI "PRI"
 
@@ -64,8 +67,10 @@
 
 #define JMP "7"
 #define JMF "8"
-#define JMP_UNKNOWN "U_7"
-#define JMF_UNKNOWN "U_8"
+#define JMP_UNKNOWN_IF   "UI_7"
+#define JMP_UNKNOWN_LOOP "UL_7"
+#define JMF_UNKNOWN_IF   "UI_8"
+#define JMF_UNKNOWN_LOOP "UL_8"
 
 #define PRI "C"
 
@@ -82,13 +87,15 @@ void assemblyOutput(char const *lineFormat, ...) __printflike(1, 2);
 
 int instructionsCount(void);
 
+int lastInstructionCount(void);
 void pushInstructionCount(void);
 int popInstructionCount(void);
 
-void pushLabel(void);
-void pushLabelLastButOne(void);
-void popLabel(void);
-void popLabelWithAddress(int address);
+void pushIfLabel(void);
+void popIfLabel(void);
+void pushIfLabelLastButOne(void);
+void pushLoopLabel(void);
+void popLoopLabel(void);
 
 void addFunctionReturnAddress(int returnAddress);
 

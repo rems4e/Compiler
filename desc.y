@@ -25,6 +25,7 @@
 	static int paramsCount;
 	static int tabSize;
 	static bool lastInstructionIsReturn = false;
+	static int loop = 0;
 	static varType_t lastVarType, returnValueType;
 	static char const *idName = NULL;
 
@@ -34,6 +35,8 @@
 		symbol_t *data[MAX_INITIALIZER];
 		int count;
 	} initializerList;
+
+	static int loopMarkers[MAX_NESTING];
 
 	%}
 
@@ -65,7 +68,7 @@
 %token tF
 
 %token tRETURN tPRINTF
-%token tIF tELSE tWHILE tFOR tDO
+%token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE
 
 %right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
 
@@ -242,6 +245,27 @@ TabDef : {
 	}
 
 	initializerList.count = 0;
+}
+| tEGAL tSTRING_LITTERAL {
+	if(lastVarType.baseType != BT_CHAR || lastVarType.indirectionCount != 0) {
+		yyerror("Impossible d'affecter une chaîne de caractère à un tableau de ce type.");
+	}
+
+	size_t len = strlen($2) + 1;
+
+	if(tabSize >= 0 && tabSize != len) {
+		yyerror("Nombre d'éléments dans la liste d'initialisation de %s invalide.", idName);
+	}
+	else {
+		tabSize = len;
+
+		symbol_t *tab = createTable(idName, lastVarType, tabSize);
+		symbol_t *current = getTabIndex(tab->name, 0).symbol;
+		for(int i = 0; i < len; ++i, ++current) {
+			assemblyOutput(AFC" %d %d", current->address, (int)($2[i]));
+			current->initialized = true;
+		}
+	}
 };
 
 FinTab : Exp tBF {
@@ -251,8 +275,7 @@ FinTab : Exp tBF {
 	initializerList.data[initializerList.count++] = popSymbol();
 } FinTab;
 
-
-Instrucs:
+Instrucs :
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
 
 Instruc : tF
@@ -261,14 +284,25 @@ Instruc : tF
 | Exp tVIR Instruc
 | Exp tF
 | Return tF { lastInstructionIsReturn = true; }
-| tIF Cond Instruc %prec EndIf { popLabel(); }
-| tIF Cond Instruc tELSE { pushLabelLastButOne(); assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS); popLabel(); } Instruc { popLabel(); }
-| tWHILE { pushInstructionCount(); } Cond Instruc {
+| tIF CondIf Instruc %prec EndIf { popIfLabel(); }
+| tIF CondIf Instruc tELSE { pushIfLabelLastButOne(); assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS); popIfLabel(); } Instruc { popIfLabel(); }
+| tWHILE { pushInstructionCount(); } CondLoop { loopMarkers[loop++] = 0; } Instruc {
 	assemblyOutput(JMP" %d", popInstructionCount());
-	popLabel();
+	--loop;
+	for(int i = 0; i < loopMarkers[loop] + 1; ++i) {
+		popLoopLabel();
+	}
 }
-| tDO { pushInstructionCount(); } Instruc tWHILE Cond tF { assemblyOutput(JMP" %d", popInstructionCount()); popLabel(); }
-
+| tDO {
+	pushInstructionCount();
+	loopMarkers[loop++] = 0;
+} Instruc tWHILE CondLoop tF {
+	assemblyOutput(JMP" %d", popInstructionCount());
+	--loop;
+	for(int i = 0; i < loopMarkers[loop] + 1; ++i) {
+		popLoopLabel();
+	}
+}
 | tFOR { pushBlock(); } tPO ExpOrEmptyOrDef { // Initialisation
 	freeIfTemp(popSymbol());
 	pushInstructionCount();
@@ -279,11 +313,29 @@ Instruc : tF
 	freeIfTemp(popSymbol());
 	assemblyOutput(JMP" %d", retourConditionFor);
 } tPF {  // Corps de boucle
-	popLabel();
+	popLoopLabel();
+	loopMarkers[loop++] = 0;
 } Instruc { // Corps de boucle
 	assemblyOutput(JMP" %d", popInstructionCount()); // Action de fin de boucle
-	popLabel();
+	--loop;
+	for(int i = 0; i < loopMarkers[loop] + 1; ++i) {
+		popLoopLabel();
+	}
 	popBlock();
+}
+| tBREAK {
+	if(!loop) {
+		yyerror("Le mot clé break doit se trouver dans une boucle.");
+	}
+	++loopMarkers[loop - 1];
+	pushLoopLabel();
+	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS" ; Break");
+}
+| tCONTINUE {
+	if(!loop) {
+		yyerror("Le mot clé continue doit se trouver dans une boucle.");
+	}
+	assemblyOutput(JMP" %d ; Continue", lastInstructionCount());
 };
 
 ExpOrEmptyOrDef : tF {
@@ -297,25 +349,45 @@ ExpOrEmpty : {
 }
 | Exp;
 
-ForCondition : { // Condition
+ForCondition : { // Condition vide
 	symbol_t *cond = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d 1", cond->address);
-	pushLabel();
-	assemblyOutput(JMF_UNKNOWN" %d "UNKNOWN_ADDRESS, cond->address);
+	pushLoopLabel();
+	assemblyOutput(JMF_UNKNOWN_LOOP" %d "UNKNOWN_ADDRESS, cond->address);
 	freeIfTemp(cond);
-	pushLabel();
-	assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS);
+	pushLoopLabel();
+	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS);
 }
 | Exp { // Condition
 	symbol_t *cond = popSymbol();
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
 	}
-	pushLabel();
-	assemblyOutput(JMF_UNKNOWN" %d "UNKNOWN_ADDRESS, cond->address);
+	pushLoopLabel();
+	assemblyOutput(JMF_UNKNOWN_LOOP" %d "UNKNOWN_ADDRESS, cond->address);
 	freeIfTemp(cond);
-	pushLabel();
-	assemblyOutput(JMP_UNKNOWN" "UNKNOWN_ADDRESS);
+	pushLoopLabel();
+	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS);
+};
+
+CondIf : tPO Exp tPF {
+	symbol_t *cond = popSymbol();
+	if(isVoid(&cond->type)) {
+		yyerror("La condition ne peut pas être de type void.");
+	}
+	pushIfLabel();
+	assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, cond->address);
+	freeIfTemp(cond);
+};
+
+CondLoop : tPO Exp tPF {
+	symbol_t *cond = popSymbol();
+	if(isVoid(&cond->type)) {
+		yyerror("La condition ne peut pas être de type void.");
+	}
+	pushLoopLabel();
+	assemblyOutput(JMF_UNKNOWN_LOOP" %d "UNKNOWN_ADDRESS, cond->address);
+	freeIfTemp(cond);
 };
 
 DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
@@ -397,15 +469,6 @@ Terme :  tNOMBRE {
 	pushSymbol(s);
 };
 
-Cond : tPO Exp tPF {
-	symbol_t *cond = popSymbol();
-	if(isVoid(&cond->type)) {
-		yyerror("La condition ne peut pas être de type void.");
-	}
-	pushLabel();
-	assemblyOutput(JMF_UNKNOWN" %d "UNKNOWN_ADDRESS, cond->address);
-	freeIfTemp(cond);
-};
 
 Bool: tTRUE {
 	symbol_t *s = allocTemp(0, BT_INT);
