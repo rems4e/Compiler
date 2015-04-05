@@ -116,6 +116,27 @@ int getGlobalSymbolsCount() {
 	return symbolTable.globalCount;
 }
 
+int getSymbolSize(symbol_t const *symbol) {
+	if(symbol->type.indirectionCount > 0) {
+		if((symbol->type.constMask & (1 << symbol->type.indirectionCount)) != 0) {
+			dereferencedID_t first = getTabIndex(symbol->name, 0);
+			if(first.symbol != NULL) {
+				return getSymbolSize(first.symbol) * (symbol->address - first.symbol->address);
+			}
+		}
+
+		return SIZEOF_PTR;
+	}
+	else if(symbol->type.baseType == BT_CHAR) {
+		return 1;
+	}
+	else if(symbol->type.baseType == BT_INT) {
+		return SIZEOF_INT;
+	}
+
+	return 0;
+}
+
 dereferencedID_t createString(char const *value) {
 	bool const oldGlobalScope = getGlobalScope();
 

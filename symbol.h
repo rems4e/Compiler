@@ -15,6 +15,9 @@
 #define GLOBAL_COUNT 1000
 #define MAX_NESTING 20
 
+#define SIZEOF_PTR 1
+#define SIZEOF_INT 1
+
 typedef unsigned int address_t;
 
 typedef struct symbol_t {
@@ -33,6 +36,8 @@ int getGlobalSymbolsCount(void);
 
 bool getGlobalScope(void);
 void setGlobalScope(bool global);
+
+int getSymbolSize(symbol_t const *symbol);
 
 dereferencedID_t createString(char const *value);
 

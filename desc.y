@@ -73,6 +73,8 @@
 %token tRETURN tPRINTF
 %token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE
 
+%token tSIZEOF;
+
 %right tQUESTION tDEUXP
 
 %right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
@@ -83,6 +85,8 @@
 
 %left tPLUS tMOINS
 %left tDIV tSTAR tMOD
+
+%right tSIZEOF;
 
 %left tCRO tCRF
 
@@ -179,6 +183,10 @@ Type : tINT {
 } Indirections {
 	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
 };
+
+PureType : Type { tabSize = 1; }
+| Type tCRO tNOMBRE tCRF { if($3 < 0) { yyerror("Un tableau ne peut pas avoir de taille négative."); } tabSize = $3; };
+| Type tCRO tCRF { tabSize = -1; };
 
 TypedDefNext : tF
 | tVIR TypedDef;
@@ -573,6 +581,8 @@ Exp : Terme
 | Exp tSTAR Exp { binOp(MUL); }
 | Exp tDIV Exp { binOp(DIV); }
 | Exp tMOD Exp { modulo(); }
+| tMOINS Exp %prec tSTAR { symbol_t *tmp = allocTemp(0, BT_INT); assemblyOutput(AFC" %d -1", tmp->address); pushSymbol(tmp); binOp(MUL); }
+| tPLUS Exp %prec tSTAR
 | DereferencedID tMODEQ Exp {
 	symbol_t *sym = $1.symbol;
 	symbol_t *sym2 = popSymbol();
@@ -666,8 +676,29 @@ Exp : Terme
 	assemblyOutput(COP" %d %d", ternarySymbol->address, exp->address);
 	pushSymbol(ternarySymbol);
 	popIfLabel();
+}
+| tSIZEOF Exp {
+	symbol_t *s1 = popSymbol(), *s2 = allocTemp(0, BT_INT);
+	if(isVoid(&s1->type)) {
+		yyerror("Impossible de calculer la taille d'une expression de type void.");
+	}
+	assemblyOutput(AFC" %d %d", s2->address, getSymbolSize(s1));
+	freeIfTemp(s1);
+	pushSymbol(s2);
+}
+| tSIZEOF tPO PureType tPF {
+	if(isVoid(&lastVarType)) {
+		yyerror("Impossible de calculer la taille d'une expression de type incomplet.");
+	}
+	else if(tabSize == -1) {
+		yyerror("Impossible de calculer la taille d'une expression de type incomplet.");
+	}
+
+	symbol_t *s1 = allocTemp(lastVarType.indirectionCount, lastVarType.baseType), *s2 = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d %d", s2->address, getSymbolSize(s1) * tabSize);
+	freeIfTemp(s1);
+	pushSymbol(s2);
 };
-//| tIF CondIf Instruc tELSE { pushIfLabelLastButOne(); assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS); popIfLabel(); } Instruc { popIfLabel(); }
 
 %%
 

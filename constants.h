@@ -14,9 +14,7 @@
  * réparer (*p)++
  * switch
  * goto
- * ternaires
  * bitop
- * sizeof
  * …
  */
 

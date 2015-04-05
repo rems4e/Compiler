@@ -159,6 +159,10 @@ void printTruc() {
 int global2 = 43;
 
 int main() {
+	int tab[3] = {-1, 2, 3};
+	int *p = tab;
+	printf(sizeof(int[2]));
+
 	/*int i = 0;
 	for(int i = 0; i < 10; ++i) {
 		if(i > 5) {

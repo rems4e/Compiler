@@ -11,7 +11,7 @@
 int lineNumber = 1;
 
 char *cleanString(char const *string) {
-	// On enlève les 2 guillemets
+	// On enlève les 2 délimiteurs
 	size_t len = strlen(string) - 2;
 	char *val = malloc(len + 1);
 	strncpy(val, string + 1, len);
@@ -137,6 +137,8 @@ Delim				{ ECHO; }
 
 "?"				{ ECHO; return tQUESTION; }
 ":"				{ ECHO; return tDEUXP; }
+
+"sizeof"		{ ECHO; return tSIZEOF; }
 
 {Nom}			{ ECHO; yylval.string = strdup(yytext); return tID; }
 
