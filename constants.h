@@ -11,7 +11,7 @@
 
 /**
  * TODO:
- * réparer (*p)++
+ * réparer ++(*p)++
  * switch
  * goto
  * bitop
@@ -32,16 +32,18 @@ void yyerror(char const *s, ...);
 struct symbol_t;
 typedef enum { BT_INT, BT_VOID, BT_CHAR } baseType_t;
 
-typedef struct dereferencedID_t {
+typedef struct dereferencedSymbol_t {
 	struct symbol_t *symbol;
 	int dereferenceCount;
-} dereferencedID_t;
+} dereferencedSymbol_t;
 
 typedef struct {
 	uint32_t constMask;
 	int indirectionCount;
 	baseType_t baseType;
 } varType_t;
+
+#define DEREF(S, D) (dereferencedSymbol_t){.symbol = (S), .dereferenceCount = (D)}
 
 #endif
 

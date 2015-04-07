@@ -44,7 +44,7 @@
 %union {
 	int nb;
 	char const *string;
-	struct dereferencedID_t dereferencedID;
+	struct dereferencedSymbol_t dereferencedSymbol;
 	varType_t varType;
 }
 
@@ -53,20 +53,15 @@
 %token <string> tSTRING_LITTERAL
 %token <string> tCHAR_LITTERAL
 
-%type <dereferencedID> DereferencedID
+%type <dereferencedSymbol> Exp
 %type <varType> Type
 
 %token tPO tPF tVIR tBO tBF tCRO tCRF
 %token tCONST tINT tCHAR tCONSTC tVOID
 %token tINCR tDECR
-%token tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
-%token tPLUS tMOINS tDIV tSTAR tMOD
-%token tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tET tOU tDIFF
 
 %token tNULL tTRUE tFALSE
 %token tAMP
-
-%token tQUESTION tDEUXP
 
 %token tF
 
@@ -75,9 +70,10 @@
 
 %token tSIZEOF;
 
-%right tQUESTION tDEUXP
-
 %right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
+
+%right tQUESTION
+%right tDEUXP
 
 %left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tDIFF
 %left tET
@@ -86,9 +82,11 @@
 %left tPLUS tMOINS
 %left tDIV tSTAR tMOD
 
-%right tSIZEOF;
+%right tSIZEOF tAMP;
 
-%left tCRO tCRF
+%nonassoc tCRO tCRF
+
+%right tINCR tDECR
 
 %nonassoc EndIf
 %nonassoc tELSE
@@ -121,7 +119,7 @@ CorpsFonction : tBO Instrucs tBF {
 Return : tRETURN ReturnValue;
 
 ReturnValue : Exp {
-	symbol_t *returnValue = popSymbol();
+	symbol_t *returnValue = dereferenceExp($1);
 
 	if(!compatibleForAffectation(&currentFunction->returnType, &returnValue->type, true)) {
 		yyerror("L'expression est incompatible avec la valeur de retour de la fonction.");
@@ -205,7 +203,7 @@ TypedDef : tID {
 		yyerror("Impossible de déclarer une variable de type void.");
 	}
 	symbol_t *s = createSymbol($1, lastVarType);
-	affectation((dereferencedID_t){.symbol = s, .dereferenceCount = 0}, true);
+	affectation(DEREF(s, 0), dereferenceExp($3), true);
 } TypedDefNext
 | Tab TabDef TypedDefNext;
 
@@ -282,10 +280,10 @@ TabDef : {
 };
 
 FinTab : Exp tBF {
-	initializerList.data[initializerList.count++] = popSymbol();
+	initializerList.data[initializerList.count++] = dereferenceExp($1);
 }
 | Exp tVIR {
-	initializerList.data[initializerList.count++] = popSymbol();
+	initializerList.data[initializerList.count++] = dereferenceExp($1);
 } FinTab;
 
 Instrucs :
@@ -317,13 +315,11 @@ Instruc : tF
 	}
 }
 | tFOR { pushBlock(); } tPO ExpOrEmptyOrDef { // Initialisation
-	freeIfTemp(popSymbol());
 	pushInstructionCount();
 } ForCondition tF { // Action en fin de boucle
 	retourConditionFor = popInstructionCount();
 	pushInstructionCount();
 } ExpOrEmpty {
-	freeIfTemp(popSymbol());
 	assemblyOutput(JMP" %d", retourConditionFor);
 } tPF {  // Corps de boucle
 	popLoopLabel();
@@ -351,15 +347,11 @@ Instruc : tF
 	assemblyOutput(JMP" %d ; Continue", lastInstructionCount());
 };
 
-ExpOrEmptyOrDef : tF {
-	pushSymbol(allocTemp(0, BT_VOID));
-}
-| Exp tF
+ExpOrEmptyOrDef : tF;
+| Exp tF;
 | Def;
 
-ExpOrEmpty : {
-	pushSymbol(allocTemp(0, BT_VOID));
-}
+ExpOrEmpty :
 | Exp;
 
 ForCondition : { // Condition vide
@@ -372,7 +364,7 @@ ForCondition : { // Condition vide
 	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS);
 }
 | Exp { // Condition
-	symbol_t *cond = popSymbol();
+	symbol_t *cond = dereferenceExp($1);
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
 	}
@@ -384,7 +376,7 @@ ForCondition : { // Condition vide
 };
 
 CondIf : tPO Exp tPF {
-	symbol_t *cond = popSymbol();
+	symbol_t *cond = dereferenceExp($2);
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
 	}
@@ -394,7 +386,7 @@ CondIf : tPO Exp tPF {
 };
 
 CondLoop : tPO Exp tPF {
-	symbol_t *cond = popSymbol();
+	symbol_t *cond = dereferenceExp($2);
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
 	}
@@ -403,20 +395,46 @@ CondLoop : tPO Exp tPF {
 	freeIfTemp(cond);
 };
 
-DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.symbol, .dereferenceCount = $2.dereferenceCount + 1}; }
-| tID {
-	dereferencedID_t id = getExistingSymbol($1, true);
-	$$ = (dereferencedID_t){.symbol = id.symbol, .dereferenceCount = id.dereferenceCount};
-	pushSymbol(id.symbol);
+Args :
+| ArgsList;
+
+ArgsList : Exp { ++paramsCount; pushSymbol(dereferenceExp($1)); }
+| ArgsList tVIR Exp { ++paramsCount; pushSymbol(dereferenceExp($3)); };
+
+Exp : tID {
+	dereferencedSymbol_t id = getExistingSymbol($1, true);
+	$$ = DEREF(id.symbol, id.dereferenceCount);
 }
-| tPO Exp tPF {
-	symbol_t *s = popSymbol();
-	$$ = (dereferencedID_t){.symbol = s, .dereferenceCount = 0};
-	pushSymbol(s);
+| tNOMBRE {
+	symbol_t *s = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d %d", s->address, $1);
+	$$ = DEREF(s, 0);
 }
+| tTRUE {
+	symbol_t *s = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d 1", s->address);
+	$$ = DEREF(s, 0);
+}
+| tFALSE {
+	symbol_t *s = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d 0", s->address);
+	$$ = DEREF(s, 0);
+}
+| tNULL {
+	symbol_t *s = allocTemp(1, BT_VOID);
+	assemblyOutput(AFC" %d 0", s->address);
+	$$ = DEREF(s, 0);
+}
+| tCHAR_LITTERAL {
+	symbol_t *s = allocTemp(0, BT_CHAR);
+	assemblyOutput(AFC" %d %d", s->address, (int)($1[0]));
+	$$ = DEREF(s, 0);
+}
+| tSTAR Exp { $$ = DEREF($2.symbol, $2.dereferenceCount + 1); }
 | Exp tCRO Exp tCRF {
-	symbol_t *symbInd = popSymbol(), *ind, *ind2;
-	symbol_t * symbTab = popSymbol() ;
+	symbol_t *symbTab = dereferenceExp($1);
+	symbol_t *symbInd = dereferenceExp($3);
+	symbol_t *ind, *ind2;
 	int indCount = symbTab->type.indirectionCount;
 
 	checkBinOp(ADD, symbTab, symbInd);
@@ -426,89 +444,20 @@ DereferencedID : tSTAR DereferencedID { $$ = (dereferencedID_t){.symbol = $2.sym
 
 	freeIfTemp(symbTab);
 	freeIfTemp(symbInd);
-	
-	$$ = (dereferencedID_t){.symbol = ind2, .dereferenceCount = 1};
-	pushSymbol(ind2);
+
+	$$ = DEREF(ind2, 1);
 }
 | tSTRING_LITTERAL {
-	dereferencedID_t id = createString($1);
-	$$ = id;
-	pushSymbol(id.symbol);
-};
-	
-Terme :  tNOMBRE {
-	symbol_t *s = allocTemp(0, BT_INT);
-	assemblyOutput(AFC" %d %d", s->address, $1);
-	pushSymbol(s);
+	$$ = createString($1);
 }
-| DereferencedID {
-	symbol_t *s = $1.symbol;
-	if(!s->initialized && !isTemp(s)) {
-		yyerror("Variable %s non initialisée avant utilisation!", $1);
-	}
-
-	if($1.dereferenceCount > 0) {
-		popSymbol();
-		if ($1.dereferenceCount > s->type.indirectionCount){
-			yyerror("Impossible de déréférencer l'expresion %d fois.", $1.dereferenceCount);
-		}
-		else {
-			symbol_t *ind;
-
-			for(int i = 0; i < $1.dereferenceCount; ++i) {
-				ind = allocTemp(s->type.indirectionCount - 1, $1.symbol->type.baseType);
-				assemblyOutput(DR2" %d %d", ind->address, s->address);
-				freeIfTemp(s);
-				s = ind;
-			}
-			pushSymbol(ind);
-
-			if(isVoid(&ind->type)) {
-				yyerror("L'expression ne peut pas être de type void.");
-			}
-		}
-		
-	}
-}
-| Bool
-| tNULL {
-	symbol_t *s = allocTemp(1, BT_VOID);
-	pushSymbol(s);
-	assemblyOutput(AFC" %d 0", s->address);
-}
-| tCHAR_LITTERAL {
-	symbol_t *s = allocTemp(0, BT_CHAR);
-	assemblyOutput(AFC" %d %d", s->address, (int)($1[0]));
-	pushSymbol(s);
-};
-
-
-Bool: tTRUE {
-	symbol_t *s = allocTemp(0, BT_INT);
-	assemblyOutput(AFC" %d 1", s->address);
-	pushSymbol(s);
-}
-| tFALSE {
-	symbol_t *s = allocTemp(0, BT_INT);
-	assemblyOutput(AFC" %d 0", s->address);
-	pushSymbol(s);
-};
-
-Args :
-| ArgsList;
-
-ArgsList : Exp { ++paramsCount; }
-| ArgsList tVIR Exp { ++paramsCount; };
-
-Exp : Terme
 | tID tPO { paramsCount = 0; } Args tPF {
 	function_t *function = getFunction($1);
 	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount, function->returnType.baseType);
 	callFunction(function, paramsCount, returnValue);
-	pushSymbol(returnValue);
+	$$ = DEREF(returnValue, 0);
 }
 | tPRINTF tPO Exp tPF {
-	symbol_t *s = popSymbol();
+	symbol_t *s = dereferenceExp($3);
 	if(isVoid(&s->type)) {
 		yyerror("L'expression ne peut pas être de type void.");
 	}
@@ -525,9 +474,9 @@ Exp : Terme
 	assemblyOutput(PRI" %d %d", s->address, mode);
 	freeIfTemp(s);
 	symbol_t *ret = allocTemp(0, BT_VOID);
-	pushSymbol(ret);
+	DEREF(ret, 0);
 }
-| tAMP DereferencedID {
+| tAMP Exp {
 	symbol_t *s = $2.symbol;
 
 	if(isVoid(&s->type)) {
@@ -537,131 +486,110 @@ Exp : Terme
 	symbol_t *a = allocTemp(s->type.indirectionCount + 1 - $2.dereferenceCount, s->type.baseType);
 	assemblyOutput(AFC" %d %d", a->address, s->address);
 	assemblyOutput(ABS" %d", a->address);
-	pushSymbol(a);
+	$$ = DEREF(a, 0);
 }
-| DereferencedID tEGAL Exp { affectation($1, false); }
-| tINCR DereferencedID {
+| Exp tEGAL Exp { affectation($1, dereferenceExp($3), false); $$ = $1; }
+| tINCR Exp {
 	symbol_t *one = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d 1", one->address);
-	pushSymbol(one);
-	binOpEq(ADD, $2);
+	$$ = DEREF(binOpEq(ADD, $2, one), 0);
 }
-| DereferencedID tINCR {
-	symbol_t *one = allocTemp(0, BT_INT), *result = popSymbol();
+| Exp tINCR {
+	symbol_t *result = dereferenceExp($1);
+	symbol_t *one = allocTemp(0, BT_INT);
 	symbol_t *copy = allocTemp(result->type.indirectionCount, result->type.baseType);
+	assemblyOutput(COP" %d %d", copy->address, result->address);
 
 	assemblyOutput(AFC" %d 1", one->address);
-	pushSymbol(result);
-	affectation((dereferencedID_t){.symbol = copy, .dereferenceCount = 0}, false);
 
-	pushSymbol(one);
-	binOpEq(ADD, $1);
-	popSymbol();
+	binOpEq(ADD, $1, one);
+	$$ = DEREF(copy, 0);
 }
-| tDECR DereferencedID {
+| tDECR Exp {
 	symbol_t *one = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d 1", one->address);
-	pushSymbol(one);
-	binOpEq(SOU, $2);
+	$$ = DEREF(binOpEq(ADD, $2, one), 0);
 }
-| DereferencedID tDECR {
-	symbol_t *one = allocTemp(0, BT_INT), *result = popSymbol();
+| Exp tDECR {
+	symbol_t *result = dereferenceExp($1);
+	symbol_t *one = allocTemp(0, BT_INT);
 	symbol_t *copy = allocTemp(result->type.indirectionCount, result->type.baseType);
+	assemblyOutput(COP" %d %d", copy->address, result->address);
 
 	assemblyOutput(AFC" %d 1", one->address);
-	pushSymbol(result);
-	affectation((dereferencedID_t){.symbol = copy, .dereferenceCount = 0}, false);
 
-	pushSymbol(one);
-	binOpEq(SOU, $1);
-	popSymbol();
+	binOpEq(SOU, $1, one);
+	$$ = DEREF(copy, 0);
 }
-| Exp tPLUS Exp { binOp(ADD); }
-| Exp tMOINS Exp { binOp(SOU); }
-| Exp tSTAR Exp { binOp(MUL); }
-| Exp tDIV Exp { binOp(DIV); }
-| Exp tMOD Exp { modulo(); }
-| tMOINS Exp %prec tSTAR { symbol_t *tmp = allocTemp(0, BT_INT); assemblyOutput(AFC" %d -1", tmp->address); pushSymbol(tmp); binOp(MUL); }
-| tPLUS Exp %prec tSTAR
-| DereferencedID tMODEQ Exp {
-	symbol_t *sym = $1.symbol;
-	symbol_t *sym2 = popSymbol();
-	pushSymbol(sym);
-	pushSymbol(sym2);
-	modulo();
-	affectation($1, false);
+| Exp tPLUS Exp { $$ = DEREF(binOp(ADD, dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tMOINS Exp { $$ = DEREF(binOp(SOU, dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tSTAR Exp { $$ = DEREF(binOp(MUL, dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tDIV Exp { $$ = DEREF(binOp(DIV, dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tMOD Exp {  $$ = DEREF(modulo(dereferenceExp($1), dereferenceExp($3)), 0); }
+| tMOINS Exp %prec tSTAR {
+	symbol_t *tmp = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d -1", tmp->address);
+	$$ = DEREF(binOp(MUL, dereferenceExp($2), tmp), 0);
+}
+| tPLUS Exp %prec tSTAR { $$ = $2; }
+| Exp tMODEQ Exp {
+	if(isTemp($1.symbol)) {
+		yyerror("L'expression doit être une lvalue.");
+	}
+
+	affectation($1, modulo($1.symbol, dereferenceExp($3)), false);
+	$$ = $1;
 }
 
-| DereferencedID tPLUSEQ Exp { binOpEq(ADD, $1); }
-| DereferencedID tMOINSEQ Exp { binOpEq(SOU, $1); }
-| DereferencedID tDIVEQ Exp { binOpEq(DIV, $1); }
-| DereferencedID tMULEQ Exp { binOpEq(MUL, $1); }
+| Exp tPLUSEQ Exp { binOpEq(ADD, $1, dereferenceExp($3)); $$ = $1; }
+| Exp tMOINSEQ Exp { binOpEq(SOU, $1, dereferenceExp($3)); $$ = $1; }
+| Exp tDIVEQ Exp { binOpEq(DIV, $1, dereferenceExp($3)); $$ = $1; }
+| Exp tMULEQ Exp { binOpEq(MUL, $1, dereferenceExp($3)); $$ = $1; }
 
 | Exp tET Exp {
-	toBoolean();
-	symbol_t *op2 = popSymbol();
-	toBoolean();
-	symbol_t *op1 = popSymbol();
-
-	pushSymbol(op1);
-	pushSymbol(op2);
-	binOp(ADD);
+	symbol_t *s = binOp(ADD, toBoolean(dereferenceExp($1)), toBoolean(dereferenceExp($3)));
 
 	symbol_t *deux = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", deux->address, 2);
-	pushSymbol(deux);
-	binOp(EQU);
+	$$ = DEREF(binOp(EQU, s, deux), 0);
 }
 | Exp tOU Exp {
-	toBoolean();
-	symbol_t *op2 = popSymbol();
-	toBoolean();
-	symbol_t *op1 = popSymbol();
-
-	pushSymbol(op1);
-	pushSymbol(op2);
-	binOp(ADD);
+	symbol_t *s = binOp(ADD, toBoolean(dereferenceExp($1)), toBoolean(dereferenceExp($3)));
 
 	symbol_t *zero = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", zero->address, 0);
-	symbol_t *s = popSymbol();
-	pushSymbol(zero);
-	pushSymbol(s);
-	binOp(INF);
+	$$ = DEREF(binOp(INF, zero, s), 0);
 }
-| Exp tINF Exp { binOp(INF); }
+| Exp tINF Exp {
+	$$ = DEREF(binOp(INF, dereferenceExp($1), dereferenceExp($3)), 0);
+}
 | Exp tSUP Exp {
-	symbol_t *s1 = popSymbol(), *s2 = popSymbol();
-	pushSymbol(s1), pushSymbol(s2);
-	binOp(INF);
+	$$ = DEREF(binOp(INF, dereferenceExp($3), dereferenceExp($1)), 0);
 }
 | Exp tINFEGAL Exp {
-	symbol_t *s1 = popSymbol(), *s2 = popSymbol();
-	pushSymbol(s1), pushSymbol(s2);
-	binOp(INF);
-	negate();
+	$$ = DEREF(negate(binOp(INF, dereferenceExp($3), dereferenceExp($1))), 0);
 }
 | Exp tSUPEGAL Exp {
-	binOp(INF);
-	negate();
+	$$ = DEREF(negate(binOp(INF, dereferenceExp($1), dereferenceExp($3))), 0);
 }
-| Exp tBOOLEGAL Exp { binOp(EQU); }
+| Exp tBOOLEGAL Exp {
+	$$ = DEREF(binOp(EQU, dereferenceExp($1), dereferenceExp($3)) , 0);
+}
 
-| tPO Exp tPF
+| tPO Exp tPF { $$ = $2; }
 | Exp tDIFF Exp {
-	binOp(EQU);
-	negate();
+	$$ = DEREF(negate(binOp(EQU, dereferenceExp($1), dereferenceExp($3))) , 0);
 }
-| Exp {
-	symbol_t *cond = popSymbol();
+| Exp tQUESTION {
+	symbol_t *cond = dereferenceExp($1);
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
 	}
 	pushIfLabel();
 	assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, cond->address);
 	freeIfTemp(cond);
-} tQUESTION Exp tDEUXP {
-	symbol_t *exp = popSymbol();
+} Exp tDEUXP {
+	symbol_t *exp = dereferenceExp($4);
 	ternarySymbol = allocTemp(exp->type.indirectionCount, exp->type.baseType);
 	assemblyOutput(COP" %d %d", ternarySymbol->address, exp->address);
 
@@ -669,22 +597,23 @@ Exp : Terme
 	assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS);
 	popIfLabel();
 } Exp {
-	symbol_t *exp = popSymbol();
+	symbol_t *exp = dereferenceExp($7);
 	if(!sameType(&exp->type, &ternarySymbol->type)) {
 		yyerror("Les expressions de la condition ternaire doivent avoir le même type.");
 	}
 	assemblyOutput(COP" %d %d", ternarySymbol->address, exp->address);
-	pushSymbol(ternarySymbol);
+	$$ = DEREF(ternarySymbol, 0);
 	popIfLabel();
 }
 | tSIZEOF Exp {
-	symbol_t *s1 = popSymbol(), *s2 = allocTemp(0, BT_INT);
+	symbol_t *s1 = dereferenceExp($2), *s2 = allocTemp(0, BT_INT);
 	if(isVoid(&s1->type)) {
 		yyerror("Impossible de calculer la taille d'une expression de type void.");
 	}
 	assemblyOutput(AFC" %d %d", s2->address, getSymbolSize(s1));
 	freeIfTemp(s1);
-	pushSymbol(s2);
+
+	$$ = DEREF(s2, 0);
 }
 | tSIZEOF tPO PureType tPF {
 	if(isVoid(&lastVarType)) {
@@ -697,7 +626,7 @@ Exp : Terme
 	symbol_t *s1 = allocTemp(lastVarType.indirectionCount, lastVarType.baseType), *s2 = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", s2->address, getSymbolSize(s1) * tabSize);
 	freeIfTemp(s1);
-	pushSymbol(s2);
+	$$ = DEREF(s2, 0);
 };
 
 %%

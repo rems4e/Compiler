@@ -87,7 +87,9 @@ void cleanSymbols() {
 	resetSymbolTable();
 
 	for(int i = 0; i < GLOBAL_COUNT; ++i) {
-		free(symbolTable.globals[i].name);
+		if(!isTemp(&symbolTable.globals[i])) {
+			free(symbolTable.globals[i].name);
+		}
 	}
 
 	free(tempSymbol);
@@ -119,7 +121,7 @@ int getGlobalSymbolsCount() {
 int getSymbolSize(symbol_t const *symbol) {
 	if(symbol->type.indirectionCount > 0) {
 		if((symbol->type.constMask & (1 << symbol->type.indirectionCount)) != 0) {
-			dereferencedID_t first = getTabIndex(symbol->name, 0);
+			dereferencedSymbol_t first = getTabIndex(symbol->name, 0);
 			if(first.symbol != NULL) {
 				return getSymbolSize(first.symbol) * (symbol->address - first.symbol->address);
 			}
@@ -137,7 +139,7 @@ int getSymbolSize(symbol_t const *symbol) {
 	return 0;
 }
 
-dereferencedID_t createString(char const *value) {
+dereferencedSymbol_t createString(char const *value) {
 	bool const oldGlobalScope = getGlobalScope();
 
 	setGlobalScope(true);
@@ -146,11 +148,11 @@ dereferencedID_t createString(char const *value) {
 	char *interningName;
 	asprintf(&interningName, "__internedString__%s", value);
 
-	dereferencedID_t deref = getExistingSymbol(interningName, false);
+	dereferencedSymbol_t deref = getExistingSymbol(interningName, false);
 	symbol_t *tab = deref.symbol;
 	if(tab == NULL) {
 		tab = createTable(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
-		dereferencedID_t data = getTabIndex(interningName, 0);
+		dereferencedSymbol_t data = getTabIndex(interningName, 0);
 		assert(data.symbol);
 		for(int i = 0; i < len; ++i) {
 			assemblyOutput(AFC" %d %d", data.symbol->address + i, value[i]);
@@ -164,7 +166,7 @@ dereferencedID_t createString(char const *value) {
 	return getExistingSymbol(interningName, true);
 }
 
-dereferencedID_t getExistingSymbol(char const *name, bool failIfNotFound) {
+dereferencedSymbol_t getExistingSymbol(char const *name, bool failIfNotFound) {
 	int const maxLevel = getGlobalScope() ? 0 : symbolTable.nestingLevel;
 	// On cherche d'abord dans le niveau d'imbrication le plus élevé
 	for(int i = maxLevel; i >= 0; --i) {
@@ -181,10 +183,10 @@ dereferencedID_t getExistingSymbol(char const *name, bool failIfNotFound) {
 					assemblyOutput(AFC" %d %d ; Accès à la variable globale %s", s->address, sym->address, comment ? comment : NULL);
 					free(comment);
 
-					return (dereferencedID_t){.symbol = s, .dereferenceCount = 1};
+					return DEREF(s, 1);
 				}
 
-				return (dereferencedID_t){.symbol = sym, .dereferenceCount = 0};
+				return DEREF(sym, 0);
 			}
 		}
 	}
@@ -193,7 +195,7 @@ dereferencedID_t getExistingSymbol(char const *name, bool failIfNotFound) {
 		yyerror("Variable %s non déclarée\n", name);
 	}
 
-	return (dereferencedID_t){.symbol = NULL, .dereferenceCount = 0};
+	return DEREF(NULL, 0);
 }
 
 symbol_t *createSymbol(char const *name, varType_t type) {
@@ -310,11 +312,11 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 	return NULL;
 }
 
-dereferencedID_t getTabIndex(char const *name, int index) {
+dereferencedSymbol_t getTabIndex(char const *name, int index) {
 	char *toFind;
 	asprintf(&toFind, "%s__tabIndice%d", name, index);
 
-	dereferencedID_t ret = getExistingSymbol(toFind, false);
+	dereferencedSymbol_t ret = getExistingSymbol(toFind, false);
 
 	free(toFind);
 	return ret;
@@ -322,7 +324,7 @@ dereferencedID_t getTabIndex(char const *name, int index) {
 }
 
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType) {
-	symbol_t *symbols = symbolTable.symbols;
+	symbol_t *symbols = getGlobalScope() ? symbolTable.globals : symbolTable.symbols;
 
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name == NULL) {
@@ -386,6 +388,37 @@ void clearSymbolStack() {
 	while(symbolTable.symbolsStack[0] != NULL) {
 		popSymbol();
 	}
+}
+
+symbol_t *dereferenceExp(dereferencedSymbol_t exp) {
+	symbol_t *s = exp.symbol;
+	if(!s->initialized && !isTemp(s)) {
+		yyerror("Variable %s non initialisée avant utilisation!", s->name);
+	}
+
+	if(exp.dereferenceCount > 0) {
+		if (exp.dereferenceCount > s->type.indirectionCount){
+			yyerror("Impossible de déréférencer l'expresion %d fois.", exp.dereferenceCount);
+		}
+		else {
+			symbol_t *ind;
+
+			for(int i = 0; i < exp.dereferenceCount; ++i) {
+				ind = allocTemp(s->type.indirectionCount - 1, s->type.baseType);
+				ind->type.constMask = s->type.constMask & ~(1 << s->type.indirectionCount);
+				assemblyOutput(DR2" %d %d", ind->address, s->address);
+				freeIfTemp(s);
+				s = ind;
+			}
+			if(isVoid(&ind->type)) {
+				yyerror("L'expression ne peut pas être de type void.");
+			}
+
+			return ind;
+		}
+	}
+
+	return s;
 }
 
 void printSymbolTable() {

@@ -39,13 +39,13 @@ void setGlobalScope(bool global);
 
 int getSymbolSize(symbol_t const *symbol);
 
-dereferencedID_t createString(char const *value);
+dereferencedSymbol_t createString(char const *value);
 
-dereferencedID_t getExistingSymbol(char const *name, bool failIfNotFound);
+dereferencedSymbol_t getExistingSymbol(char const *name, bool failIfNotFound);
 symbol_t *createSymbol(char const *name, varType_t type);
 
 symbol_t *createTable(char const *name, varType_t type, int size);
-dereferencedID_t getTabIndex(char const *name, int index);
+dereferencedSymbol_t getTabIndex(char const *name, int index);
 
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType);
 bool isTemp(symbol_t *s);
@@ -57,6 +57,8 @@ void popBlock();
 void pushSymbol(symbol_t *s);
 symbol_t *popSymbol(void);
 void clearSymbolStack(void);
+
+symbol_t *dereferenceExp(dereferencedSymbol_t exp);
 
 bool topLevelConst(varType_t const *t);
 

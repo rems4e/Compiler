@@ -233,14 +233,14 @@ void addFunctionReturnAddress(int returnAddress) {
 	returnAddressStack.address[returnAddressStack.size++] = buf;
 }
 
-void affectation(dereferencedID_t id, bool allowConst) {
+symbol_t *affectation(dereferencedSymbol_t id, symbol_t *val, bool allowConst) {
 	symbol_t *sym = id.symbol;
-	symbol_t *val = popSymbol();
 
 	if(id.dereferenceCount > 0) {
 		symbol_t *temp;
 		for(int i = 0; i < id.dereferenceCount - 1; ++i) {
 			temp = allocTemp(sym->type.indirectionCount - 1, sym->type.baseType);
+			temp->type.constMask = sym->type.constMask & ~(1 << sym->type.indirectionCount);
 			assemblyOutput(DR2" %d %d", temp->address, sym->address);
 
 			freeIfTemp(sym);
@@ -258,7 +258,8 @@ void affectation(dereferencedID_t id, bool allowConst) {
 
 	freeIfTemp(val);
 	sym->initialized = true;
-	pushSymbol(sym);
+
+	return sym;
 }
 
 void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2) {
@@ -282,23 +283,20 @@ void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2) {
 	}
 }
 
-void binOp(char const *op) {
-	symbol_t *s2 = popSymbol();
-	symbol_t *s1 = popSymbol();
-
+symbol_t *binOp(char const *op, symbol_t *s1, symbol_t *s2) {
 	checkBinOp(op, s1, s2);
 
 	symbol_t *res = allocTemp(s1->type.indirectionCount, s1->type.baseType);
-	pushSymbol(res);
 
 	assemblyOutput("%s %d %d %d", op, res->address, s1->address, s2->address);
 	freeIfTemp(s2);
 	freeIfTemp(s1);
+
+	return res;
 }
 
-void binOpEq(char const *op, dereferencedID_t id) {
+symbol_t *binOpEq(char const *op, dereferencedSymbol_t id, symbol_t *value) {
 	symbol_t *r = id.symbol;
-	symbol_t *s = popSymbol();
 
 	if(id.dereferenceCount > 0) {
 		symbol_t *ind;
@@ -309,51 +307,40 @@ void binOpEq(char const *op, dereferencedID_t id) {
 			r = ind;
 		}
 
-		pushSymbol(ind);
-		pushSymbol(s);
-		binOp(op);
-		affectation(id, false);
+		symbol_t *res = binOp(op, ind, value);
+		affectation(id, res, false);
 	}
 	else {
-		checkBinOp(op, r, s);
-		checkScalar(s);
-		assemblyOutput("%s %d %d %d", op, r->address, r->address, s->address);
+		checkBinOp(op, r, value);
+		checkScalar(value);
+		assemblyOutput("%s %d %d %d", op, r->address, r->address, value->address);
 	}
 
-	pushSymbol(r);
-	freeIfTemp(s);
+	freeIfTemp(value);
+
+	return r;
 }
 
-void negate() {
+symbol_t *negate(symbol_t *s) {
 	symbol_t *zero = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d ; negate", zero->address, 0);
 
-	pushSymbol(zero);
-	binOp(EQU);
+	return binOp(EQU, s, zero);
 }
 
-void toBoolean() {
-	negate();
-	negate();
+symbol_t *toBoolean(symbol_t *s) {
+	return negate(negate(s));
 }
 
-void modulo() {
+symbol_t *modulo(symbol_t *left, symbol_t *right) {
 	symbol_t *leftBackup = allocTemp(0, BT_INT);
 	symbol_t *rightBackup = allocTemp(0, BT_INT);
-	symbol_t *right = popSymbol();
-	symbol_t *left = popSymbol();
 	assemblyOutput(COP" %d %d", leftBackup->address, left->address);
 	assemblyOutput(COP" %d %d", rightBackup->address, right->address);
 
-	pushSymbol(left);
-	pushSymbol(right);
-	binOp(DIV);
-	pushSymbol(rightBackup);
-	binOp(MUL);
+	symbol_t *tmp = binOp(DIV, left, right);
+	symbol_t *res = binOp(MUL, tmp, rightBackup);
 
-	symbol_t *res = popSymbol();
-	pushSymbol(leftBackup);
-	pushSymbol(res);
-	binOp(SOU);
+	return binOp(SOU, leftBackup, res);
 }
 

@@ -99,16 +99,16 @@ void popLoopLabel(void);
 
 void addFunctionReturnAddress(int returnAddress);
 
-void affectation(dereferencedID_t id, bool allowConst);
+symbol_t *affectation(dereferencedSymbol_t id, symbol_t *value, bool allowConst);
 
 void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2);
-void binOp(char const *op);
-void binOpEq(char const *op, dereferencedID_t id);
+symbol_t *binOp(char const *op, symbol_t *s1, symbol_t *s2);
+symbol_t *binOpEq(char const *op, dereferencedSymbol_t id, symbol_t *value);
 
-void negate();
-void toBoolean();
+symbol_t *negate(symbol_t *s);
+symbol_t *toBoolean(symbol_t *s);
 
-void modulo();
+symbol_t *modulo(symbol_t *s1, symbol_t *s2);
 
 
 #endif /* defined(__Syste_me_Info__assembly__) */

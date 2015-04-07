@@ -101,7 +101,7 @@ void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
 	}
 
 #ifndef STRIP_COMMENTS
-	assemblyOutput(COP" 0 0 ; Début de l'appel de la fonciton %s", function->name);
+	assemblyOutput(COP" 0 0 ; Début de l'appel de la fonction %s", function->name);
 #endif
 
 	for(int i = 0; i < argsCount; ++i) {
