@@ -329,6 +329,7 @@ symbol_t *allocTemp(int indirectionCount, baseType_t baseType) {
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name == NULL) {
 			symbols[i].name = tempSymbol;
+			symbols[i].type.constMask = 0;
 			symbols[i].type.indirectionCount = indirectionCount;
 			symbols[i].type.baseType = baseType;
 			return &symbols[i];
@@ -480,6 +481,7 @@ bool compatibleForAffectation(varType_t const *left, varType_t const *right, boo
 	
 	return true;
 }
+
 void checkCompatibilityForAffectation(symbol_t const *left, symbol_t const *right, bool allowConst) {
 	if((left->type.indirectionCount != right->type.indirectionCount) && !(left->type.indirectionCount > 0 && right->type.indirectionCount > 0 && (left->type.baseType == BT_VOID || right->type.baseType == BT_VOID))) {
 		yyerror("Le type de l'expression est incompatible avec le type de la variable %s (%d indirections à gauche, %d à droite).", left->name, left->type.indirectionCount, right->type.indirectionCount);

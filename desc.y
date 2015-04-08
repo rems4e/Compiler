@@ -56,7 +56,7 @@
 %type <dereferencedSymbol> Exp
 %type <varType> Type
 
-%token tPO tPF tVIR tBO tBF tCRO tCRF
+%token tPO tPF tVIR tBO tBF
 %token tCONST tINT tCHAR tCONSTC tVOID
 %token tINCR tDECR
 
@@ -203,7 +203,7 @@ TypedDef : tID {
 		yyerror("Impossible de déclarer une variable de type void.");
 	}
 	symbol_t *s = createSymbol($1, lastVarType);
-	affectation(DEREF(s, 0), dereferenceExp($3), true);
+	affectation(LDEREF(s, 0, true), dereferenceExp($3), true);
 } TypedDefNext
 | Tab TabDef TypedDefNext;
 
@@ -403,7 +403,7 @@ ArgsList : Exp { ++paramsCount; pushSymbol(dereferenceExp($1)); }
 
 Exp : tID {
 	dereferencedSymbol_t id = getExistingSymbol($1, true);
-	$$ = DEREF(id.symbol, id.dereferenceCount);
+	$$ = LDEREF(id.symbol, id.dereferenceCount, true);
 }
 | tNOMBRE {
 	symbol_t *s = allocTemp(0, BT_INT);
@@ -430,7 +430,16 @@ Exp : tID {
 	assemblyOutput(AFC" %d %d", s->address, (int)($1[0]));
 	$$ = DEREF(s, 0);
 }
-| tSTAR Exp { $$ = DEREF($2.symbol, $2.dereferenceCount + 1); }
+| tSTAR Exp {
+	if($2.dereferenceCount + 1 > $2.symbol->type.indirectionCount) {
+		yyerror("Impossible de déréférencer %d fois l'expression.", $2.dereferenceCount +1);
+	}
+	else if($2.symbol->type.baseType == BT_VOID && $2.dereferenceCount + 1 == $2.symbol->type.indirectionCount) {
+		yyerror("Impossible de déréférencer une expression de type void.");
+
+	}
+	$$ = LDEREF($2.symbol, $2.dereferenceCount + 1, true);
+}
 | Exp tCRO Exp tCRF {
 	symbol_t *symbTab = dereferenceExp($1);
 	symbol_t *symbInd = dereferenceExp($3);
@@ -445,7 +454,7 @@ Exp : tID {
 	freeIfTemp(symbTab);
 	freeIfTemp(symbInd);
 
-	$$ = DEREF(ind2, 1);
+	$$ = LDEREF(ind2, 1, $1.lvalue);
 }
 | tSTRING_LITTERAL {
 	$$ = createString($1);
@@ -488,7 +497,7 @@ Exp : tID {
 	assemblyOutput(ABS" %d", a->address);
 	$$ = DEREF(a, 0);
 }
-| Exp tEGAL Exp { affectation($1, dereferenceExp($3), false); $$ = $1; }
+| Exp tEGAL Exp { affectation($1, dereferenceExp($3), false); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | tINCR Exp {
 	symbol_t *one = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d 1", one->address);
@@ -538,13 +547,12 @@ Exp : tID {
 	}
 
 	affectation($1, modulo($1.symbol, dereferenceExp($3)), false);
-	$$ = $1;
+	$$ = DEREF($1.symbol, $1.dereferenceCount);
 }
-
-| Exp tPLUSEQ Exp { binOpEq(ADD, $1, dereferenceExp($3)); $$ = $1; }
-| Exp tMOINSEQ Exp { binOpEq(SOU, $1, dereferenceExp($3)); $$ = $1; }
-| Exp tDIVEQ Exp { binOpEq(DIV, $1, dereferenceExp($3)); $$ = $1; }
-| Exp tMULEQ Exp { binOpEq(MUL, $1, dereferenceExp($3)); $$ = $1; }
+| Exp tPLUSEQ Exp { binOpEq(ADD, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tMOINSEQ Exp { binOpEq(SOU, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tDIVEQ Exp { binOpEq(DIV, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tMULEQ Exp { binOpEq(MUL, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 
 | Exp tET Exp {
 	symbol_t *s = binOp(ADD, toBoolean(dereferenceExp($1)), toBoolean(dereferenceExp($3)));
@@ -573,12 +581,12 @@ Exp : tID {
 	$$ = DEREF(negate(binOp(INF, dereferenceExp($1), dereferenceExp($3))), 0);
 }
 | Exp tBOOLEGAL Exp {
-	$$ = DEREF(binOp(EQU, dereferenceExp($1), dereferenceExp($3)) , 0);
+	$$ = DEREF(binOp(EQU, dereferenceExp($1), dereferenceExp($3)), 0);
 }
 
 | tPO Exp tPF { $$ = $2; }
 | Exp tDIFF Exp {
-	$$ = DEREF(negate(binOp(EQU, dereferenceExp($1), dereferenceExp($3))) , 0);
+	$$ = DEREF(negate(binOp(EQU, dereferenceExp($1), dereferenceExp($3))), 0);
 }
 | Exp tQUESTION {
 	symbol_t *cond = dereferenceExp($1);

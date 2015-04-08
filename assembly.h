@@ -99,7 +99,7 @@ void popLoopLabel(void);
 
 void addFunctionReturnAddress(int returnAddress);
 
-symbol_t *affectation(dereferencedSymbol_t id, symbol_t *value, bool allowConst);
+void affectation(dereferencedSymbol_t id, symbol_t *value, bool allowConst);
 
 void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2);
 symbol_t *binOp(char const *op, symbol_t *s1, symbol_t *s2);
