@@ -83,7 +83,7 @@
 void initAssemblyOutput(char const *path);
 void closeAssemblyOutput(void);
 
-void assemblyOutput(char const *lineFormat, ...) __printflike(1, 2);
+void assemblyOutput(char const *lineFormat, ...)  __attribute__ ((__format__ (__printf__, 1, 2))) ;//__printflike(1, 2);
 
 int instructionsCount(void);
 
