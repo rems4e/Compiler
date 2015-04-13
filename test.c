@@ -162,11 +162,15 @@ int main() {
 	int val = 12;
 	int *p = &val;
 
-	printf(global);
-	printf("truc\n");
-	char const *globalString = "pas global";
+	int a = 3, b = 4;
 
-	printf(++(*p)++);
+	a = *p = b;
+
+	++*(p++);
+
+	/*printf(global);
+	printf("truc\n");
+	char const *globalString = "pas global";*/
 
 	printf(globalString[4]);
 	printf("truc\n");

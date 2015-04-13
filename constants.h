@@ -11,10 +11,10 @@
 
 /**
  * TODO:
- * réparer ++(*p)++
  * switch
  * goto
  * bitop
+ * gestion des erreurs
  * …
  */
 
@@ -35,6 +35,7 @@ typedef enum { BT_INT, BT_VOID, BT_CHAR } baseType_t;
 typedef struct dereferencedSymbol_t {
 	struct symbol_t *symbol;
 	int dereferenceCount;
+	bool lvalue;
 } dereferencedSymbol_t;
 
 typedef struct {
@@ -43,7 +44,8 @@ typedef struct {
 	baseType_t baseType;
 } varType_t;
 
-#define DEREF(S, D) (dereferencedSymbol_t){.symbol = (S), .dereferenceCount = (D)}
+#define DEREF(S, D) (dereferencedSymbol_t){.symbol = (S), .dereferenceCount = (D), .lvalue = false}
+#define LDEREF(S, D, L) (dereferencedSymbol_t){.symbol = (S), .dereferenceCount = (D), .lvalue = (L)}
 
 #endif
 

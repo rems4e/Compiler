@@ -233,7 +233,7 @@ void addFunctionReturnAddress(int returnAddress) {
 	returnAddressStack.address[returnAddressStack.size++] = buf;
 }
 
-symbol_t *affectation(dereferencedSymbol_t id, symbol_t *val, bool allowConst) {
+void affectation(dereferencedSymbol_t id, symbol_t *val, bool allowConst) {
 	symbol_t *sym = id.symbol;
 
 	if(id.dereferenceCount > 0) {
@@ -252,14 +252,15 @@ symbol_t *affectation(dereferencedSymbol_t id, symbol_t *val, bool allowConst) {
 		assemblyOutput(DR1" %d %d", sym->address, val->address);
 	}
 	else {
+		if(id.lvalue == false) {
+			yyerror("L'expression n'est pas une lvalue.");
+		}
 		checkCompatibilityForAffectation(sym, val, allowConst);
 		assemblyOutput(COP" %d %d ; %s", sym->address, val->address, id.symbol->name);
+		sym->initialized = true;
 	}
 
 	freeIfTemp(val);
-	sym->initialized = true;
-
-	return sym;
 }
 
 void checkBinOp(char const *op, symbol_t const *s1, symbol_t const *s2) {
@@ -299,18 +300,17 @@ symbol_t *binOpEq(char const *op, dereferencedSymbol_t id, symbol_t *value) {
 	symbol_t *r = id.symbol;
 
 	if(id.dereferenceCount > 0) {
-		symbol_t *ind;
-		for(int i = 0; i < id.dereferenceCount; ++i) {
-			ind = allocTemp(r->type.indirectionCount - 1, r->type.baseType);
-			assemblyOutput(DR2" %d %d", ind->address, r->address);
-			freeIfTemp(r);
-			r = ind;
-		}
-
-		symbol_t *res = binOp(op, ind, value);
+		char *oldName = id.symbol->name;
+		symbol_t *dOp = dereferenceExp(id);
+		id.symbol->name = "notTemp";
+		symbol_t *res = binOp(op, dOp, value);
+		id.symbol->name = oldName;
 		affectation(id, res, false);
 	}
 	else {
+		if(id.lvalue == false) {
+			yyerror("L'expression n'est pas une lvalue.");
+		}
 		checkBinOp(op, r, value);
 		checkScalar(value);
 		assemblyOutput("%s %d %d %d", op, r->address, r->address, value->address);
