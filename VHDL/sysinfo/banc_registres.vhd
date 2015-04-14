@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -48,15 +48,15 @@ architecture Behavioral of banc_registres is
 		constant MOT_ZERO : STD_LOGIC_VECTOR (7 downto 0) := (others => '0') ;
 		constant MOT_FFFF : STD_LOGIC_VECTOR (7 downto 0) := (others => '1') ;
 		--le type banc d'addresse / correspondance Integer <=> std_logic_vector
-		type BANC_ADD_TYPE_1 is array (NATURAL range <>) of STD_LOGIC_VECTOR (3 downto 0);
-		subtype BANC_ADD_TYPE is BANC_ADD_TYPE_1 (15 downto 0) ;
+		--type BANC_ADD_TYPE_1 is array (NATURAL range <>) of STD_LOGIC_VECTOR (3 downto 0);
+		--subtype BANC_ADD_TYPE is BANC_ADD_TYPE_1 (15 downto 0) ;
 		--le type banc correspondance addresse Natural / mot 8 bits
 		type BANC_TYPE_1 is array (NATURAL range <>) of STD_LOGIC_VECTOR (7 downto 0) ;
 		subtype BANC_TYPE is BANC_TYPE_1 (15 downto 0) ;
 		
-		constant banc_add : BANC_ADD_TYPE := (15 => MAX, 14 => "1110",13=>"1101",12=>"1100",11=>"1011",
-															10=>"1010",9=>"1001",8=>"1000",7=>"0111",6=>"0110",
-															5=>"0101",4=>"0100",3=>"0011",2=>"0010",1=>"0001",0 => MIN) ;
+		--constant banc_add : BANC_ADD_TYPE := (15 => MAX, 14 => "1110",13=>"1101",12=>"1100",11=>"1011",
+		--													10=>"1010",9=>"1001",8=>"1000",7=>"0111",6=>"0110",
+		--													5=>"0101",4=>"0100",3=>"0011",2=>"0010",1=>"0001",0 => MIN) ;
 		signal banc : BANC_TYPE ;
 begin
 		label_banc_registres : process
@@ -66,15 +66,18 @@ begin
 		begin
 		
 		--version for
-		for ind in BANC_ADD_TYPE'RANGE loop
-			if AA = banc_add(ind) then i:=ind ; end if ;
-			if AB = banc_add(ind) then j:=ind ; end if ;
-			if AW = banc_add(ind) then k:=ind ; end if ;
-		end loop ;
+		--for ind in BANC_ADD_TYPE'RANGE loop
+			--if AA = banc_add(ind) then i:=ind ; end if ;
+			--if AB = banc_add(ind) then j:=ind ; end if ;
+			--if AW = banc_add(ind) then k:=ind ; end if ;
+		--end loop ;
 		--version assert /!\ ?
 			--assert AA=banc_add(i) ;
 			--assert AB=banc_add(j) ;
 			--assert AW=banc_add(k) ;
+			i:= 	TO_INTEGER (UNSIGNED(AA)) ;
+			j:=	TO_INTEGER (UNSIGNED(AB)) ;
+			k:=	TO_INTEGER (UNSIGNED(AW)) ;
 			if RST='0' then banc <=(others =>MOT_ZERO) ; end if ; -- reset
 			-- banc <=(others =>MOT_ZERO) when RST='0'; --Reset
 			
