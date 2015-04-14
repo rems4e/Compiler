@@ -92,7 +92,7 @@ begin
 			QB <= banc(j) ;
 			
 			
-			wait on AA,AB,AW,W,RST,CK;
+			wait on AA,AB,W,RST,CK;
 		end process ;
 end Behavioral;
 
