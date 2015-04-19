@@ -1,0 +1,29 @@
+Command line:
+   banc_registres_isim_beh.exe
+     -simmode  gui
+     -simrunnum  0
+     -socket  54927
+
+Tue Apr 14 15:12:39 2015
+
+
+ Elaboration Time: 0.03 sec
+
+ Current Memory Usage: 180.625 Meg
+
+ Total Signals          : 10
+ Total Nets             : 167
+ Total Signal Drivers   : 3
+ Total Blocks           : 2
+ Total Primitive Blocks : 2
+ Total Processes        : 1
+ Total Traceable Variables  : 13
+ Total Scalar Nets and Variables : 615
+Total Line Count : 12
+
+ Total Simulation Time: 0.05 sec
+
+ Current Memory Usage: 256.127 Meg
+
+Tue Apr 14 15:12:46 2015
+

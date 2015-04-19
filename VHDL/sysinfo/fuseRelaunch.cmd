@@ -1,0 +1,1 @@
+-intstyle "ise" -incremental -lib "secureip" -o "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe" -prj "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test_beh.prj" "work.banc_registres_test" 

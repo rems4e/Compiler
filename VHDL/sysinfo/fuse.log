@@ -1,0 +1,23 @@
+Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -intstyle ise -incremental -lib secureip -o /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe -prj /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test_beh.prj work.banc_registres_test 
+ISim O.87xd (signature 0x8ddf5b5d)
+Number of CPUs detected in this system: 4
+Turning on mult-threading, number of parallel sub-compilation jobs: 8 
+Determining compilation order of HDL files
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres.vhd" into library work
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test.vhd" into library work
+Starting static elaboration
+Completed static elaboration
+Fuse Memory Usage: 96084 KB
+Fuse CPU Usage: 1260 ms
+Compiling package standard
+Compiling package std_logic_1164
+Compiling package numeric_std
+Compiling architecture behavioral of entity banc_registres [banc_registres_default]
+Compiling architecture behavior of entity banc_registres_test
+Time Resolution for simulation is 1ps.
+Waiting for 1 sub-compilation(s) to finish...
+Compiled 6 VHDL Units
+Built simulation executable /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe
+Fuse Memory Usage: 667876 KB
+Fuse CPU Usage: 1380 ms
+GCC CPU Usage: 340 ms

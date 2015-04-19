@@ -41,11 +41,17 @@ end li_di;
 architecture Behavioral of li_di is
 
 begin
+	lidi_process : process
+	begin
 --décomposition de l'instruction
 	Cible <= Instruc(23 downto 16) ;
 	OP <= Instruc(31 downto 24 ) ;
 	operande1 <= Instruc(15 downto 8) ;
 	operande2 <= Instruc(7 downto 0 ) ;
+	
+--TODO : propagation en fonction de "OP"
 
+	wait on CK ;
+	end process ;
 end Behavioral;
 
