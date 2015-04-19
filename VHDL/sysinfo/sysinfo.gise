@@ -34,6 +34,7 @@
     <file xil_pn:fileType="FILE_DIRECTORY" xil_pn:name="isim"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_CMD" xil_pn:name="isim.cmd"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_LOG" xil_pn:name="isim.log"/>
+    <file xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="li_di_stx_beh.prj"/>
     <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_INI" xil_pn:name="xilinxsim.ini"/>
   </files>
 
@@ -46,22 +47,24 @@
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
     </transform>
-    <transform xil_pn:end_ts="1429022292" xil_pn:in_ck="-2900738142017773013" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1429022292">
+    <transform xil_pn:end_ts="1429458789" xil_pn:in_ck="5349271767589755985" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1429458788">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
-      <status xil_pn:value="OutOfDateForInputs"/>
-      <status xil_pn:value="InputAdded"/>
       <outfile xil_pn:name="Instruc_Mem.vhd"/>
       <outfile xil_pn:name="banc_registres.vhd"/>
       <outfile xil_pn:name="banc_registres_test.vhd"/>
+      <outfile xil_pn:name="li_di.vhd"/>
+      <outfile xil_pn:name="mem_instruc_test.vhd"/>
     </transform>
     <transform xil_pn:end_ts="1429022339" xil_pn:name="TRAN_xawsToSimhdl" xil_pn:prop_ck="7588836247748250666" xil_pn:start_ts="1429022339">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForProperties"/>
     </transform>
     <transform xil_pn:end_ts="1429022339" xil_pn:name="TRAN_schematicsToHdlSim" xil_pn:prop_ck="684305423401334760" xil_pn:start_ts="1429022339">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForProperties"/>
     </transform>
     <transform xil_pn:end_ts="1429016448" xil_pn:name="TRAN_regenerateCoresSim" xil_pn:prop_ck="-6934221920823309230" xil_pn:start_ts="1429016448">
       <status xil_pn:value="SuccessfullyRun"/>
@@ -70,7 +73,10 @@
     <transform xil_pn:end_ts="1429022305" xil_pn:in_ck="-2900738142017773013" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1429022305">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
       <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="InputAdded"/>
+      <status xil_pn:value="InputChanged"/>
       <outfile xil_pn:name="Instruc_Mem.vhd"/>
       <outfile xil_pn:name="banc_registres.vhd"/>
       <outfile xil_pn:name="banc_registres_test.vhd"/>
@@ -78,9 +84,11 @@
     <transform xil_pn:end_ts="1429022341" xil_pn:in_ck="-2900738142017773013" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="4624817020702854122" xil_pn:start_ts="1429022339">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
       <status xil_pn:value="OutOfDateForProperties"/>
       <status xil_pn:value="OutOfDateForPredecessor"/>
       <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
       <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="banc_registres_test_beh.prj"/>
       <outfile xil_pn:name="banc_registres_test_isim_beh.exe"/>
