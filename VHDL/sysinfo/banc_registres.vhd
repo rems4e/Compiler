@@ -59,43 +59,25 @@ architecture Behavioral of banc_registres is
 		--													5=>"0101",4=>"0100",3=>"0011",2=>"0010",1=>"0001",0 => MIN) ;
 		signal banc : BANC_TYPE ;
 begin
-		label_banc_registres : process
-		variable i : NATURAL ;
-		variable j : NATURAL ;
-		variable k : NATURAL ;
-		begin
-		
-		--version for
-		--for ind in BANC_ADD_TYPE'RANGE loop
-			--if AA = banc_add(ind) then i:=ind ; end if ;
-			--if AB = banc_add(ind) then j:=ind ; end if ;
-			--if AW = banc_add(ind) then k:=ind ; end if ;
-		--end loop ;
-		--version assert /!\ ?
-			--assert AA=banc_add(i) ;
-			--assert AB=banc_add(j) ;
-			--assert AW=banc_add(k) ;
-			i:= 	TO_INTEGER (UNSIGNED(AA)) ;
-			j:=	TO_INTEGER (UNSIGNED(AB)) ;
-			k:=	TO_INTEGER (UNSIGNED(AW)) ;
-			if RST='0' then banc <=(others =>MOT_ZERO) ; end if ; -- reset
-			-- banc <=(others =>MOT_ZERO) when RST='0'; --Reset
-			
-			if W='1' then							--Ecriture
-				if AA=AW then QA <= banc(i) ; --gestiond des aléas
-				elsif AB=AW then QB <= banc(j) ; 
-				else banc(k) <= DATA ;			--ecriture de DATA
-				end if ;
-			end if ;
-			-- QA <= banc(i) when (AA=AW) and W='1' ; --Aléas de lecture/écriture
-			-- QB <= banc(j) when (AB=AW) and W='1' ;
-			-- banc(k) <= DATA when W='1' ; --Ecriture des données
 
-			QA <= banc(i) ; --Propagation vers la sortie
-			QB <= banc(j) ;
-			
-			
-			wait on AA,AB,W,RST,CK;
+		banc <=(others =>MOT_ZERO) when RST='0' ;
+		QA <= banc(TO_INTEGER (UNSIGNED(AA))) when W='0'; --Propagation vers la sortie
+		QB <= banc(TO_INTEGER (UNSIGNED(AB))) when W='0' ;
+		
+		label_banc_registres : process
+
+		begin
+			--Ecriture
+			if W='1' then
+				if AA = AW then QA <= DATA ; 
+				else QA <= banc(TO_INTEGER (UNSIGNED(AA))); end if ;
+				  --when AA=AW else banc(TO_INTEGER (UNSIGNED(AA)));
+				if AB = AW then QB<= DATA ; 
+				else QB <= banc(TO_INTEGER (UNSIGNED(AB))); end if ;
+				--QB <= DATA when AB=AW else banc(TO_INTEGER (UNSIGNED(AB)));	
+				banc(TO_INTEGER (UNSIGNED(AW))) <= DATA ;
+			end if ;
+			wait on CK; --AA,AB,W,RST,
 		end process ;
 end Behavioral;
 
