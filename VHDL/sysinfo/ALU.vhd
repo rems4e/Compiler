@@ -23,8 +23,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_SIGNED.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -41,21 +41,63 @@ entity ALU is
 end ALU;
 
 architecture Behavioral of ALU is
-
+	constant MOT_ZERO : STD_LOGIC_VECTOR (8 downto 0) := (others => '0') ;
+	
+	constant no_flag : STD_LOGIC_VECTOR(3 downto 0) := "0000" ; --Les flags
+	constant N : STD_LOGIC_VECTOR(3 downto 0) := "1000" ;
+	constant O : STD_LOGIC_VECTOR(3 downto 0) := "0100" ;
+	constant Z : STD_LOGIC_VECTOR(3 downto 0) := "0010" ;
+	constant C : STD_LOGIC_VECTOR(3 downto 0) := "0001" ;
+	
+	constant ADD : STD_LOGIC_VECTOR(2 downto 0) := "001" ; --ctr_ALU 2 bit aurait suffit Cf spec p.36
+	constant SUB : STD_LOGIC_VECTOR(2 downto 0) := "010" ;
+	constant MUL : STD_LOGIC_VECTOR(2 downto 0) := "011" ;
+	constant DIV : STD_LOGIC_VECTOR(2 downto 0) := "100" ;
+	
+	signal make_flag : STD_LOGIC ;							--signaux internes
+	signal buff : STD_LOGIC_VECTOR (8 downto 0);
+	signal RES : STD_LOGIC_VECTOR (3 downto 0) ;
+	
 begin
-	alu_process : process
-		constant MOT_ZERO : STD_LOGIC_VECTOR (7 downto 0) := (others => '0') ;
-		variable RES : STD_LOGIC_VECTOR (7 downto 0) ;
+	calcul_sync : process
+		--fait le calcul dans un buffer de taille n+1
+		--le n+1 iem bit défini s'il y a overflow / carry etc...
 	begin
 		case ctr_ALU is
-		when "001" => S <= op1 + op2 ;
-		when "010" => S <= op1 * op2 ;
-		when "011" => S <= op1 - op2 ;
-		--when "100" => S <= op1 / op2 ; -- operateur non reconnu 
-		when others => S<= MOT_ZERO ;
+		when ADD => buff <= op1 + op2 ;
+		when SUB => buff <= op1 - op2 ;
+		when MUL => buff <= op1 * op2 ;
+		-- when DIV => buff <= op1 mod op2 ; --opérateur mod non déclaré ???
+		when others => buff<= MOT_ZERO ;
 		end case;
-		S <= RES ;
+		make_flag<='1'; --déclache l'op de flag
+		S <= buff(7 downto 0) ;
 	wait on CK ;
+	end process ;
+	
+	flag_sync : process
+	begin
+		--détermine les flags une fois l'opération effectuée
+		--détection par make_flag
+		RES <= no_flag ;
+		if(TO_INTEGER(SIGNED(buff(7 downto 0)))< TO_INTEGER(SIGNED(MOT_ZERO(7 downto0 )))) then -- pas sure du fonctionnement : le mot est négatif
+			RES <= N ; -- /!\ ce sont des nombre signé, le premier bit a un sens !=
+		end if ;
+		if(buff=MOT_ZERO) then -- pas sure du fonctionnement : le mot est nul
+			RES <= RES + Z ;
+		end if ;
+		
+		if(buff(8)='1') then --G : il y a débordement
+			if(ctr_ALU = ADD or ctr_ALU = SUB) then --ce débordement est une retenue (nombre signés)
+				flag <= RES + C ;
+			else --sinon c'est un overflow
+				flag <= RES + 0; 
+			end if ;
+		end if ;
+		
+	
+	make_flag <= '0';
+	wait on make_flag ;
 	end process ;
 
 end Behavioral;

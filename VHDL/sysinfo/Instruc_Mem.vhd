@@ -38,15 +38,15 @@ end Instruc_Mem;
 architecture Behavioral of Instruc_Mem is
 	
 	type BANC_TYPE_1 is array (NATURAL range <>) of STD_LOGIC_VECTOR (31 downto 0) ;
-	subtype BANC_TYPE is BANC_TYPE_1 (1023 downto 0) ;
+	subtype BANC_TYPE is BANC_TYPE_1 (255 downto 0) ;
 		
 	signal banc_instruc : BANC_TYPE  ;
 begin
-	mem_instruc : process
-		variable AA_intern : NATURAL;
+	lecture_sync : process
 	begin
-		AA_intern := TO_INTEGER (UNSIGNED(AA)) ; --function TO_INTEGER (ARG: UNSIGNED) return NATURAL;
-		INS <= banc_instruc(AA_intern) ;
+		--lecture synchrone
+		--function TO_INTEGER (ARG: UNSIGNED) return NATURAL;
+		INS <= banc_instruc(TO_INTEGER (UNSIGNED(AA))) ;
 	wait on CK ;
 	end process ;
 end Behavioral;
