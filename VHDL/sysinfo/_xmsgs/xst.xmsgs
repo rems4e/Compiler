@@ -8,41 +8,5 @@
 <msg type="info" file="Xst" num="0" delta="new" >Part-select index evaluated to out of bound value may lead to incorrect synthesis results; it is recommended not to use them in RTL
 </msg>
 
-<msg type="warning" file="HDLCompiler" num="92" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 62: <arg fmt="%s" index="1">rst</arg> should be on the sensitivity list of the process
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="92" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 64: <arg fmt="%s" index="1">w</arg> should be on the sensitivity list of the process
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="92" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 65: <arg fmt="%s" index="1">aa</arg> should be on the sensitivity list of the process
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="92" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 66: <arg fmt="%s" index="1">banc</arg> should be on the sensitivity list of the process
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="92" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 68: <arg fmt="%s" index="1">ab</arg> should be on the sensitivity list of the process
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="92" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 69: <arg fmt="%s" index="1">banc</arg> should be on the sensitivity list of the process
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="92" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 71: <arg fmt="%s" index="1">data</arg> should be on the sensitivity list of the process
-</msg>
-
-<msg type="error" file="HDLCompiler" num="1401" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 55: Signal <arg fmt="%s" index="1">QA[7]</arg> in unit <arg fmt="%s" index="2">banc_registres</arg> is connected to following multiple drivers:
-</msg>
-
-<msg type="error" file="HDLCompiler" num="1379" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 58: Driver <arg fmt="%d" index="1">0</arg>: <arg fmt="%s" index="2">output signal QA[7] of instance Latch</arg>
-</msg>
-
-<msg type="error" file="HDLCompiler" num="1379" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 55: Driver <arg fmt="%d" index="1">1</arg>: <arg fmt="%s" index="2">output signal QA[7] of instance Latch</arg>
-</msg>
-
-<msg type="error" file="HDLCompiler" num="1401" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 56: Signal <arg fmt="%s" index="1">QB[7]</arg> in unit <arg fmt="%s" index="2">banc_registres</arg> is connected to following multiple drivers:
-</msg>
-
-<msg type="error" file="HDLCompiler" num="1379" delta="new" >"/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" Line 56: Driver <arg fmt="%d" index="1">1</arg>: <arg fmt="%s" index="2">output signal QB[7] of instance Latch</arg>
-</msg>
-
 </messages>
 

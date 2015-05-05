@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2015-05-05T10:32:59</DateModified>
+  <DateModified>2015-05-05T11:43:13</DateModified>
   <ModuleName>banc_registres</ModuleName>
-  <SummaryTimeStamp>2015-05-05T10:32:22</SummaryTimeStamp>
+  <SummaryTimeStamp>2015-05-05T11:41:45</SummaryTimeStamp>
   <SavedFilePath>/home/remi/Bureau/SysInfo/VHDL/sysinfo/iseconfig/ALU.xreport</SavedFilePath>
   <ImplementationReportsDirectory>/home/remi/Bureau/SysInfo/VHDL/sysinfo/</ImplementationReportsDirectory>
   <DateInitialized>2015-05-05T10:32:59</DateInitialized>

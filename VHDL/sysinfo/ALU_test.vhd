@@ -64,7 +64,12 @@ ARCHITECTURE behavior OF ALU_test IS
    -- appropriate port name 
  
    constant CK_period : time := 10 ns;
- 
+	
+ 	constant ADD : STD_LOGIC_VECTOR(2 downto 0) := "001" ; --ctr_ALU 2 bit aurait suffit Cf spec p.36
+	constant SUB : STD_LOGIC_VECTOR(2 downto 0) := "010" ;
+	constant MUL : STD_LOGIC_VECTOR(2 downto 0) := "011" ;
+	constant DIV : STD_LOGIC_VECTOR(2 downto 0) := "100" ;
+
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
@@ -90,14 +95,21 @@ BEGIN
    -- Stimulus process
    stim_proc: process
    begin		
+		--op1 <= "00000000";
       -- hold reset state for 100 ns.
-      wait for 100 ns;	
+			wait for 100 ns;	
+			--op1 <= "00000000";
+			op2 <= "00000001";
+			ctr_ALU <= ADD;
+     wait for 100 ns;	
+			op1 <= op2;
+
 
       wait for CK_period*10;
 
       -- insert stimulus here 
 
-      wait;
+      
    end process;
 
 END;

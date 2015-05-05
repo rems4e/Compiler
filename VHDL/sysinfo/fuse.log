@@ -1,23 +1,24 @@
-Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -intstyle ise -incremental -lib secureip -o /home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe -prj /home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_beh.prj work.banc_registres_test 
+Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -intstyle ise -incremental -lib secureip -o /home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU_test_isim_beh.exe -prj /home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU_test_beh.prj work.ALU_test 
 ISim O.87xd (signature 0x8ddf5b5d)
 Number of CPUs detected in this system: 8
 Turning on mult-threading, number of parallel sub-compilation jobs: 16 
 Determining compilation order of HDL files
-Parsing VHDL file "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" into library work
-Parsing VHDL file "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test.vhd" into library work
+Parsing VHDL file "/home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU.vhd" into library work
+Parsing VHDL file "/home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU_test.vhd" into library work
 Starting static elaboration
 Completed static elaboration
-Fuse Memory Usage: 96092 KB
-Fuse CPU Usage: 940 ms
+Fuse Memory Usage: 97620 KB
+Fuse CPU Usage: 1010 ms
 Compiling package standard
 Compiling package std_logic_1164
 Compiling package numeric_std
-Compiling architecture behavioral of entity banc_registres [banc_registres_default]
-Compiling architecture behavior of entity banc_registres_test
+Compiling package std_logic_arith
+Compiling package std_logic_signed
+Compiling architecture behavioral of entity ALU [alu_default]
+Compiling architecture behavior of entity alu_test
 Time Resolution for simulation is 1ps.
-Waiting for 1 sub-compilation(s) to finish...
-Compiled 6 VHDL Units
-Built simulation executable /home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe
-Fuse Memory Usage: 1192160 KB
-Fuse CPU Usage: 1050 ms
-GCC CPU Usage: 300 ms
+Compiled 8 VHDL Units
+Built simulation executable /home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU_test_isim_beh.exe
+Fuse Memory Usage: 1197736 KB
+Fuse CPU Usage: 1180 ms
+GCC CPU Usage: 230 ms

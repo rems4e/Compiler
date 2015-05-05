@@ -1,5 +1,6 @@
 ISim log file
-Running: /home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb /home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_isim_beh.wdb 
+Running: /home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU_test_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb /home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU_test_isim_beh.wdb 
+INFO: There is another simulation running in the same directory. Using database file name isim5.wdb.
 ISim O.87xd (signature 0x8ddf5b5d)
 WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
@@ -11,3 +12,13 @@ Time resolution is 1 ps
 # run 1000 ns
 Simulator is doing circuit initialization process.
 Finished circuit initialization process.
+at 0 ps, Instance /alu_test/uut/ : Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+ERROR: In process ALU.vhd:62 
+ Target Size 9 and source size 8 for array dimension 0 does not match. 
+
+INFO: Simulator is stopped.
+# run 10.00us
+INFO: Simulator is stopped.
+# run all
+INFO: Simulator is stopped.
+# exit 0

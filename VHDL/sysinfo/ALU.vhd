@@ -54,31 +54,18 @@ architecture Behavioral of ALU is
 	constant MUL : STD_LOGIC_VECTOR(2 downto 0) := "011" ;
 	constant DIV : STD_LOGIC_VECTOR(2 downto 0) := "100" ;
 	
-	signal make_flags : STD_LOGIC ;							--signaux internes
 	signal buff : STD_LOGIC_VECTOR (8 downto 0);
 	signal RES : STD_LOGIC_VECTOR (3 downto 0) ;
 	
 begin
-	calcul_sync : process (CK)
-		--fait le calcul dans un buffer de taille n+1
-		--le n+1 iem bit défini s'il y a overflow / carry etc...
-	begin
-		if CK='1' then
-			case ctr_ALU is
-			when ADD => buff <= op1 + op2 ;
-			when SUB => buff <= op1 - op2 ;
-			when MUL => buff <= op1 * op2 ;
-			--when DIV => buff <= op1 / op2 ; --opérateur mod non déclaré ???
-			when others => buff<= MOT_ZERO ;
-			end case;
-			make_flags<='1'; --déclache l'op de flag
-			S <= buff(7 downto 0) ;
-		end if;
-	end process ;
+		
+		buff <= op1 + op2 when ctr_ALU = ADD else op1 - op2 when ctr_ALU = SUB else op1 * op2 when ctr_ALU = MUL else MOT_ZERO;
+		S <= buff(7 downto 0);
+
 	
-	flag_sync : process (make_flags)
+	flag_sync : process (buff)
 	begin
-		if make_flags='1' then
+		if buff'event then
 			--détermine les flags une fois l'opération effectuée
 			--détection par make_flag
 			RES <= no_flag ;
@@ -96,8 +83,6 @@ begin
 					flag <= RES + O; 
 				end if ;
 			end if ;
-			
-			make_flags <= '0';
 		end if;
 	end process ;
 

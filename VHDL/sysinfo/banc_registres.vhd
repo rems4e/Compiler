@@ -57,7 +57,7 @@ begin
 		
 		ecriture_sync : process (CK)
 		begin
-			if CK='1' then
+			if CK'Event and CK='1' then
 				if (RST='0') then -- Reset synchrone
 					banc <=(others =>MOT_ZERO) ;
 				elsif W='1' then --Écriture synchrone					

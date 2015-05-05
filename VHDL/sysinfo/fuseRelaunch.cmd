@@ -1,1 +1,1 @@
--intstyle "ise" -incremental -lib "secureip" -o "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe" -prj "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_beh.prj" "work.banc_registres_test" 
+-intstyle "ise" -incremental -lib "secureip" -o "/home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU_test_isim_beh.exe" -prj "/home/remi/Bureau/SysInfo/VHDL/sysinfo/ALU_test_beh.prj" "work.ALU_test" 

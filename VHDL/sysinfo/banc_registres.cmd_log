@@ -9,3 +9,12 @@ map -intstyle ise -p xc6slx4-csg225-3 -w -logic_opt off -ol high -t 1 -xt 0 -reg
 par -w -intstyle ise -ol high -mt off banc_registres_map.ncd banc_registres.ncd banc_registres.pcf 
 trce -intstyle ise -v 3 -s 3 -n 3 -fastpaths -xml banc_registres.twx banc_registres.ncd -o banc_registres.twr banc_registres.pcf 
 xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
