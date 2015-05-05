@@ -5,35 +5,51 @@
     The structure and the elements are likely to change over the next few releases.
     This means code written to parse this file will need to be revisited each subsequent release.-->
 
-  <application stringID="Xst" timeStamp="Tue Apr 28 11:04:34 2015">
+  <application stringID="Xst" timeStamp="Tue May  5 10:33:03 2015">
     <section stringID="User_Env">
       <table stringID="User_EnvVar">
         <column stringID="variable"/>
         <column stringID="value"/>
         <row stringID="row" value="0">
-          <item stringID="variable" value="PATH"/>
-          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/ISE//bin/lin64:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"/>
+          <item stringID="variable" value="XILINX_DSP"/>
+          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/ISE"/>
         </row>
         <row stringID="row" value="1">
-          <item stringID="variable" value="XILINX"/>
-          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/ISE/"/>
+          <item stringID="variable" value="LD_LIBRARY_PATH"/>
+          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/ISE//lib/lin64:/opt/Xilinx/13.4/ISE_DS/common/lib/lin64:/opt/Xilinx/13.4/ISE_DS/ISE/sysgen/lib:/opt/Xilinx/13.4/ISE_DS/ISE/lib/lin64:/opt/Xilinx/13.4/ISE_DS/ISE/smartmodel/lin64/installed_lin64/lib:/opt/Xilinx/13.4/ISE_DS/EDK/lib/lin64"/>
         </row>
         <row stringID="row" value="2">
-          <item stringID="variable" value="LD_LIBRARY_PATH"/>
-          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/ISE//lib/lin64"/>
+          <item stringID="variable" value="XILINX_EDK"/>
+          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/EDK"/>
+        </row>
+        <row stringID="row" value="3">
+          <item stringID="variable" value="PATH"/>
+          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/ISE//bin/lin64:/opt/Xilinx/13.4/ISE_DS/common/bin/lin64:/opt/Xilinx/13.4/ISE_DS/ISE/sysgen/bin:/opt/Xilinx/13.4/ISE_DS/PlanAhead/bin:/opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64:/opt/Xilinx/13.4/ISE_DS/ISE/sysgen/util:/opt/Xilinx/13.4/ISE_DS/EDK/bin/lin64:/opt/Xilinx/13.4/ISE_DS/EDK/gnu/microblaze/lin64/bin:/opt/Xilinx/13.4/ISE_DS/EDK/gnu/powerpc-eabi/lin64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/rpi/arm-rpi-linux-gnueabi/bin/"/>
+        </row>
+        <row stringID="row" value="4">
+          <item stringID="variable" value="LMC_HOME"/>
+          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/ISE/smartmodel/lin64/installed_lin64"/>
+        </row>
+        <row stringID="row" value="5">
+          <item stringID="variable" value="XILINX_PLANAHEAD"/>
+          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/PlanAhead"/>
+        </row>
+        <row stringID="row" value="6">
+          <item stringID="variable" value="XILINX"/>
+          <item stringID="value" value="/opt/Xilinx/13.4/ISE_DS/ISE/"/>
         </row>
       </table>
       <item stringID="User_EnvOs" value="OS Information">
         <item stringID="User_EnvOsname" value="Ubuntu"/>
         <item stringID="User_EnvOsrelease" value="Ubuntu 14.04.2 LTS"/>
       </item>
-      <item stringID="User_EnvHost" value="yann-R540-R580-R780-SA41-E452"/>
+      <item stringID="User_EnvHost" value="remsUbuntu"/>
       <table stringID="User_EnvCpu">
         <column stringID="arch"/>
         <column stringID="speed"/>
         <row stringID="row" value="0">
-          <item stringID="arch" value="Intel(R) Core(TM) i3 CPU       M 370  @ 2.40GHz"/>
-          <item stringID="speed" value="933.000 MHz"/>
+          <item stringID="arch" value="Intel(R) Core(TM) i7-4850HQ CPU @ 2.30GHz"/>
+          <item stringID="speed" value="2299.098 MHz"/>
         </row>
       </table>
     </section>
@@ -41,7 +57,7 @@
       <item DEFAULT="" label="-ifn" stringID="XST_IFN" value="banc_registres.prj"/>
       <item DEFAULT="" label="-ofn" stringID="XST_OFN" value="banc_registres"/>
       <item DEFAULT="NGC" label="-ofmt" stringID="XST_OFMT" value="NGC"/>
-      <item DEFAULT="" label="-p" stringID="XST_P" value="xc6slx4-3-csg225"/>
+      <item DEFAULT="" label="-p" stringID="XST_P" value="xc6slx16-3-csg324"/>
       <item DEFAULT="" label="-top" stringID="XST_TOP" value="banc_registres"/>
       <item DEFAULT="Speed" label="-opt_mode" stringID="XST_OPTMODE" value="Speed"/>
       <item DEFAULT="1" label="-opt_level" stringID="XST_OPTLEVEL" value="1"/>
@@ -89,69 +105,10 @@
       <item DEFAULT="Yes" label="-equivalent_register_removal" stringID="XST_EQUIVALENTREGISTERREMOVAL" value="YES"/>
       <item DEFAULT="0" label="-slice_utilization_ratio_maxmargin" stringID="XST_SLICEUTILIZATIONRATIOMAXMARGIN" value="5"/>
     </section>
-    <section stringID="XST_HDL_SYNTHESIS_REPORT">
-      <item dataType="int" stringID="XST_COMPARATORS" value="2">
-        <item dataType="int" stringID="XST_4BIT_COMPARATOR_EQUAL" value="2"/>
-      </item>
-      <item dataType="int" stringID="XST_MULTIPLEXERS" value="720">
-        <item dataType="int" stringID="XST_1BIT_2TO1_MULTIPLEXER" value="704"/>
-      </item>
-    </section>
-    <section stringID="XST_ADVANCED_HDL_SYNTHESIS_REPORT">
-      <item dataType="int" stringID="XST_COMPARATORS" value="2">
-        <item dataType="int" stringID="XST_4BIT_COMPARATOR_EQUAL" value="2"/>
-      </item>
-      <item dataType="int" stringID="XST_MULTIPLEXERS" value="720">
-        <item dataType="int" stringID="XST_1BIT_2TO1_MULTIPLEXER" value="704"/>
-      </item>
-    </section>
-    <section stringID="XST_FINAL_REGISTER_REPORTFOUND_NO_MACRO"/>
-    <section stringID="XST_PARTITION_REPORT">
-      <section stringID="XST_PARTITION_IMPLEMENTATION_STATUS">
-        <section stringID="XST_NO_PARTITIONS_WERE_FOUND_IN_THIS_DESIGN"/>
-      </section>
-    </section>
-    <section stringID="XST_DESIGN_SUMMARY">
-      <section stringID="XST_">
-        <item stringID="XST_TOP_LEVEL_OUTPUT_FILE_NAME" value="banc_registres.ngc"/>
-      </section>
-      <section stringID="XST_PRIMITIVE_AND_BLACK_BOX_USAGE">
-        <item dataType="int" stringID="XST_BELS" value="312">
-          <item dataType="int" stringID="XST_LUT3" value="18"/>
-          <item dataType="int" stringID="XST_LUT4" value="34"/>
-          <item dataType="int" stringID="XST_LUT5" value="146"/>
-          <item dataType="int" stringID="XST_LUT6" value="66"/>
-          <item dataType="int" stringID="XST_MUXF7" value="32"/>
-          <item dataType="int" stringID="XST_MUXF8" value="16"/>
-        </item>
-        <item dataType="int" stringID="XST_FLIPFLOPSLATCHES" value="144"></item>
-        <item dataType="int" stringID="XST_IO_BUFFERS" value="38">
-          <item dataType="int" stringID="XST_IBUF" value="22"/>
-          <item dataType="int" stringID="XST_OBUF" value="16"/>
-        </item>
-      </section>
-    </section>
-    <section stringID="XST_DEVICE_UTILIZATION_SUMMARY">
-      <item stringID="XST_SELECTED_DEVICE" value="6slx4csg225-3"/>
-      <item AVAILABLE="4800" dataType="int" label="Number of Slice Registers" stringID="XST_NUMBER_OF_SLICE_REGISTERS" value="128"/>
-      <item AVAILABLE="2400" dataType="int" label="Number of Slice LUTs" stringID="XST_NUMBER_OF_SLICE_LUTS" value="264"/>
-      <item AVAILABLE="2400" dataType="int" label="Number used as Logic" stringID="XST_NUMBER_USED_AS_LOGIC" value="264"/>
-      <item dataType="int" label="Number of LUT Flip Flop pairs used" stringID="XST_NUMBER_OF_LUT_FLIP_FLOP_PAIRS_USED" value="264"/>
-      <item AVAILABLE="264" dataType="int" label="Number with an unused Flip Flop" stringID="XST_NUMBER_WITH_AN_UNUSED_FLIP_FLOP" value="136"/>
-      <item AVAILABLE="264" dataType="int" label="Number with an unused LUT" stringID="XST_NUMBER_WITH_AN_UNUSED_LUT" value="0"/>
-      <item AVAILABLE="264" dataType="int" label="Number of fully used LUT-FF pairs" stringID="XST_NUMBER_OF_FULLY_USED_LUTFF_PAIRS" value="128"/>
-      <item dataType="int" label="Number of unique control sets" stringID="XST_NUMBER_OF_UNIQUE_CONTROL_SETS" value="18"/>
-      <item dataType="int" label="Number of IOs" stringID="XST_NUMBER_OF_IOS" value="39"/>
-      <item AVAILABLE="132" dataType="int" label="Number of bonded IOBs" stringID="XST_NUMBER_OF_BONDED_IOBS" value="38"/>
-      <item dataType="int" label="IOB Flip Flops/Latches" stringID="XST_IOB_FLIP_FLOPSLATCHES" value="16"/>
-    </section>
-    <section stringID="XST_PARTITION_RESOURCE_SUMMARY">
-      <section stringID="XST_NO_PARTITIONS_WERE_FOUND_IN_THIS_DESIGN"/>
-    </section>
     <section stringID="XST_ERRORS_STATISTICS">
-      <item dataType="int" filtered="0" stringID="XST_NUMBER_OF_ERRORS" value="0"/>
-      <item dataType="int" filtered="0" stringID="XST_NUMBER_OF_WARNINGS" value="151"/>
-      <item dataType="int" filtered="0" stringID="XST_NUMBER_OF_INFOS" value="2"/>
+      <item dataType="int" filtered="0" stringID="XST_NUMBER_OF_ERRORS" value="5"/>
+      <item dataType="int" filtered="0" stringID="XST_NUMBER_OF_WARNINGS" value="7"/>
+      <item dataType="int" filtered="0" stringID="XST_NUMBER_OF_INFOS" value="1"/>
     </section>
   </application>
 

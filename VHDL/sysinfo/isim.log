@@ -1,5 +1,5 @@
 ISim log file
-Running: /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test_isim_beh.wdb 
+Running: /home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb /home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test_isim_beh.wdb 
 ISim O.87xd (signature 0x8ddf5b5d)
 WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
@@ -11,4 +11,3 @@ Time resolution is 1 ps
 # run 1000 ns
 Simulator is doing circuit initialization process.
 Finished circuit initialization process.
-# exit 0

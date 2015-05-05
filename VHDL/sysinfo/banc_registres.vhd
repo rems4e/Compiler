@@ -52,35 +52,19 @@ architecture Behavioral of banc_registres is
 begin
 
 		--la lecture est asynchrone
-		QA <= banc(TO_INTEGER (UNSIGNED(AA))) when W='0'; --Propagation vers la sortie
-		QB <= banc(TO_INTEGER (UNSIGNED(AB))) when W='0' ;
+		QA <= DATA when W='1' and AA=AW and RST='1' else banc(TO_INTEGER (UNSIGNED(AA))); --Propagation vers la sortie
+		QB <= DATA when W='1' and AB=AW and RST='1' else banc(TO_INTEGER (UNSIGNED(AB))); --Propagation vers la sortie
 		
-		ecriture_sync : process
-
+		ecriture_sync : process (CK)
 		begin
-			--Ecriture Synchrone
-			if W='1' then
-				if AA = AW then QA <= DATA ; 
-				else QA <= banc(TO_INTEGER (UNSIGNED(AA))); end if ;
-
-				if AB = AW then QB<= DATA ; 
-				else QB <= banc(TO_INTEGER (UNSIGNED(AB))); end if ;
-					
-				banc(TO_INTEGER (UNSIGNED(AW))) <= DATA ;
+			if CK='1' then
+				if (RST='0') then -- Reset synchrone
+					banc <=(others =>MOT_ZERO) ;
+				elsif W='1' then --Écriture synchrone					
+					banc(TO_INTEGER (UNSIGNED(AW))) <= DATA ;
+				end if ;
 			end if ;
-		wait on CK;
 		end process ;
-		
-		reset_sync : process
-		
-		begin
-			--Reset synchrone
-			if (RST='0') then
-				banc <=(others =>MOT_ZERO) ;
-			end if ;
-
-		wait on CK ;
-		end process ;
-		
+				
 end Behavioral;
 

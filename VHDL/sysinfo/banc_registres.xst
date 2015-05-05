@@ -4,7 +4,7 @@ run
 -ifn banc_registres.prj
 -ofn banc_registres
 -ofmt NGC
--p xc6slx4-3-csg225
+-p xc6slx16-3-csg324
 -top banc_registres
 -opt_mode Speed
 -opt_level 1
