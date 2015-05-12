@@ -44,14 +44,15 @@ end pipe_line;
 architecture Behavioral of pipe_line is
 
 begin
-	pipe_line : process
+	pipe_line : process(CK)
 	begin
 	--mémorise ses entrées le temps d'un clock ;
-		OUT_A <= IN_A ;
-		OUT_B <= IN_B ;
-		OUT_C <= IN_C ;
-		OUT_OP <= IN_OP ;
-	wait on CK ;
+		if CK'event and CK='1' then
+			OUT_A <= IN_A ;
+			OUT_B <= IN_B ;
+			OUT_C <= IN_C ;
+			OUT_OP <= IN_OP ;
+		end if ;
 	end process ;
 end Behavioral;
 

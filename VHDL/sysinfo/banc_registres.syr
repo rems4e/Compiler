@@ -5,14 +5,14 @@ Parameter TMPDIR set to xst/projnav.tmp
 
 
 Total REAL time to Xst completion: 0.00 secs
-Total CPU time to Xst completion: 0.06 secs
+Total CPU time to Xst completion: 0.07 secs
  
 --> 
 Parameter xsthdpdir set to xst
 
 
 Total REAL time to Xst completion: 0.00 secs
-Total CPU time to Xst completion: 0.06 secs
+Total CPU time to Xst completion: 0.07 secs
  
 --> 
 Reading design: banc_registres.prj
@@ -109,7 +109,7 @@ INFO:Xst - Part-select index evaluated to out of bound value may lead to incorre
 =========================================================================
 *                          HDL Parsing                                  *
 =========================================================================
-Parsing VHDL file "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd" into library work
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres.vhd" into library work
 Parsing entity <banc_registres>.
 Parsing architecture <Behavioral> of entity <banc_registres>.
 
@@ -124,7 +124,7 @@ Elaborating entity <banc_registres> (architecture <Behavioral>) from library <wo
 =========================================================================
 
 Synthesizing Unit <banc_registres>.
-    Related source file is "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.vhd".
+    Related source file is "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres.vhd".
     Found 8-bit register for signal <banc<14>>.
     Found 8-bit register for signal <banc<13>>.
     Found 8-bit register for signal <banc<12>>.
@@ -141,10 +141,10 @@ Synthesizing Unit <banc_registres>.
     Found 8-bit register for signal <banc<1>>.
     Found 8-bit register for signal <banc<0>>.
     Found 8-bit register for signal <banc<15>>.
-    Found 8-bit 16-to-1 multiplexer for signal <AA[3]_banc[15][7]_wide_mux_1_OUT> created at line 55.
-    Found 8-bit 16-to-1 multiplexer for signal <AB[3]_banc[15][7]_wide_mux_4_OUT> created at line 56.
-    Found 4-bit comparator equal for signal <AW[3]_AA[3]_equal_1_o> created at line 55
-    Found 4-bit comparator equal for signal <AW[3]_AB[3]_equal_4_o> created at line 56
+    Found 8-bit 16-to-1 multiplexer for signal <AA[3]_banc[15][7]_wide_mux_1_OUT> created at line 54.
+    Found 8-bit 16-to-1 multiplexer for signal <AB[3]_banc[15][7]_wide_mux_4_OUT> created at line 55.
+    Found 4-bit comparator equal for signal <AW[3]_AA[3]_equal_1_o> created at line 54
+    Found 4-bit comparator equal for signal <AW[3]_AB[3]_equal_4_o> created at line 55
     Summary:
 	inferred 128 D-type flip-flop(s).
 	inferred   2 Comparator(s).
@@ -377,13 +377,13 @@ Cross Clock Domains Report:
 =========================================================================
 
 
-Total REAL time to Xst completion: 4.00 secs
-Total CPU time to Xst completion: 4.60 secs
+Total REAL time to Xst completion: 9.00 secs
+Total CPU time to Xst completion: 8.11 secs
  
 --> 
 
 
-Total memory usage is 390944 kilobytes
+Total memory usage is 392208 kilobytes
 
 Number of errors   :    0 (   0 filtered)
 Number of warnings :    0 (   0 filtered)

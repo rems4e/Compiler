@@ -45,8 +45,7 @@ architecture Behavioral of banc_registres is
 
 		constant MOT_ZERO : STD_LOGIC_VECTOR (7 downto 0) := (others => '0') ;
 
-		type BANC_TYPE_1 is array (NATURAL range <>) of STD_LOGIC_VECTOR (7 downto 0) ;
-		subtype BANC_TYPE is BANC_TYPE_1 (15 downto 0) ;
+		type BANC_TYPE is array (15 downto 0) of STD_LOGIC_VECTOR (7 downto 0) ;
 		
 		signal banc : BANC_TYPE ;
 begin
@@ -59,7 +58,7 @@ begin
 		begin
 			if CK'Event and CK='1' then
 				if (RST='0') then -- Reset synchrone
-					banc <=(others =>MOT_ZERO) ;
+					banc <=(others => MOT_ZERO) ;
 				elsif W='1' then --Écriture synchrone					
 					banc(TO_INTEGER (UNSIGNED(AW))) <= DATA ;
 				end if ;

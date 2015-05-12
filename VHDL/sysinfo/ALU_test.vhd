@@ -41,7 +41,6 @@ ARCHITECTURE behavior OF ALU_test IS
  
     COMPONENT ALU
     PORT(
-         CK : IN  std_logic;
          op1 : IN  std_logic_vector(7 downto 0);
          op2 : IN  std_logic_vector(7 downto 0);
          ctr_ALU : IN  std_logic_vector(2 downto 0);
@@ -52,37 +51,31 @@ ARCHITECTURE behavior OF ALU_test IS
     
 
    --Inputs
-   signal CK : std_logic := '0';
+	signal CK : std_logic := '0' ;
    signal op1 : std_logic_vector(7 downto 0) := (others => '0');
    signal op2 : std_logic_vector(7 downto 0) := (others => '0');
-   signal ctr_ALU : std_logic_vector(2 downto 0) := (others => '0');
+   signal ctr_ALU : std_logic_vector(2 downto 0) := "001";
+	
 
  	--Outputs
    signal S : std_logic_vector(7 downto 0);
    signal flag : std_logic_vector(3 downto 0);
-   -- No clocks detected in port list. Replace <clock> below with 
-   -- appropriate port name 
- 
-   constant CK_period : time := 10 ns;
 	
- 	constant ADD : STD_LOGIC_VECTOR(2 downto 0) := "001" ; --ctr_ALU 2 bit aurait suffit Cf spec p.36
-	constant SUB : STD_LOGIC_VECTOR(2 downto 0) := "010" ;
-	constant MUL : STD_LOGIC_VECTOR(2 downto 0) := "011" ;
-	constant DIV : STD_LOGIC_VECTOR(2 downto 0) := "100" ;
+	--constants
+	constant CK_period : time := 10 ns;
 
 BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: ALU PORT MAP (
-          CK => CK,
           op1 => op1,
           op2 => op2,
           ctr_ALU => ctr_ALU,
           S => S,
           flag => flag
-        );
+        ); 
 
-   -- Clock process definitions
+	-- Clock process definitions
    CK_process :process
    begin
 		CK <= '0';
@@ -94,22 +87,17 @@ BEGIN
 
    -- Stimulus process
    stim_proc: process
-   begin		
-		--op1 <= "00000000";
-      -- hold reset state for 100 ns.
-			wait for 100 ns;	
-			--op1 <= "00000000";
-			op2 <= "00000001";
-			ctr_ALU <= ADD;
-     wait for 100 ns;	
-			op1 <= op2;
-
-
-      wait for CK_period*10;
-
-      -- insert stimulus here 
-
-      
+   begin
+			ctr_ALU<="000" ;
+			wait for 100 ns ;
+			ctr_ALU<="001" ;
+			op1<="10000000" ;
+			op2<="10000001" ;
+			wait for CK_period*10;
+			op2<="00000001" ;
+			wait for CK_period*10 ;
+			op2<="01100011" ;
+			wait ;
    end process;
 
 END;

@@ -21,7 +21,7 @@
 #include <malloc.h>
 #define alloca _alloca
 #endif
-static const char *ng0 = "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres_test.vhd";
+static const char *ng0 = "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test.vhd";
 
 
 
@@ -130,7 +130,7 @@ LAB6:    *((char **)t1) = &&LAB7;
 
 LAB1:    return;
 LAB4:    xsi_set_current_line(105, ng0);
-    t2 = (t0 + 7136);
+    t2 = (t0 + 7392);
     t4 = (t0 + 4344);
     t5 = (t4 + 56U);
     t6 = *((char **)t5);
@@ -139,7 +139,7 @@ LAB4:    xsi_set_current_line(105, ng0);
     memcpy(t9, t2, 8U);
     xsi_driver_first_trans_fast(t4);
     xsi_set_current_line(106, ng0);
-    t2 = (t0 + 7144);
+    t2 = (t0 + 7400);
     t4 = (t0 + 4408);
     t5 = (t4 + 56U);
     t6 = *((char **)t5);
@@ -171,7 +171,7 @@ LAB5:    goto LAB4;
 LAB7:    goto LAB5;
 
 LAB8:    xsi_set_current_line(111, ng0);
-    t2 = (t0 + 7148);
+    t2 = (t0 + 7404);
     t4 = (t0 + 4344);
     t5 = (t4 + 56U);
     t6 = *((char **)t5);
@@ -180,7 +180,7 @@ LAB8:    xsi_set_current_line(111, ng0);
     memcpy(t9, t2, 8U);
     xsi_driver_first_trans_fast(t4);
     xsi_set_current_line(112, ng0);
-    t2 = (t0 + 7156);
+    t2 = (t0 + 7412);
     t4 = (t0 + 4408);
     t5 = (t4 + 56U);
     t6 = *((char **)t5);
@@ -212,7 +212,7 @@ LAB12:    xsi_set_current_line(117, ng0);
     *((unsigned char *)t6) = (unsigned char)2;
     xsi_driver_first_trans_fast(t2);
     xsi_set_current_line(118, ng0);
-    t2 = (t0 + 7160);
+    t2 = (t0 + 7416);
     t4 = (t0 + 4536);
     t5 = (t4 + 56U);
     t6 = *((char **)t5);
@@ -221,7 +221,7 @@ LAB12:    xsi_set_current_line(117, ng0);
     memcpy(t9, t2, 4U);
     xsi_driver_first_trans_fast(t4);
     xsi_set_current_line(119, ng0);
-    t2 = (t0 + 7164);
+    t2 = (t0 + 7420);
     t4 = (t0 + 4600);
     t5 = (t4 + 56U);
     t6 = *((char **)t5);

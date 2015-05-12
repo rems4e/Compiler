@@ -18,3 +18,8 @@ xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xs
 xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
 xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
 xst -intstyle ise -ifn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/remi/Bureau/SysInfo/VHDL/sysinfo/banc_registres.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx16-csg324-3 banc_registres.ngc banc_registres.ngd  
+netgen -intstyle ise -insert_glbl true -w -dir netgen/translate -ofmt verilog -sim banc_registres.ngd banc_registres_translate.v 
+map -intstyle ise -p xc6slx16-csg324-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o banc_registres_map.ncd banc_registres.ngd banc_registres.pcf 
+netgen -intstyle ise -s 3  -pcf banc_registres.pcf -sdf_anno true -sdf_path "netgen/map" -insert_glbl true -w -dir netgen/map -ofmt verilog -sim banc_registres_map.ncd banc_registres_map.v 

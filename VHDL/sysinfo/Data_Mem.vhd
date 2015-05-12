@@ -41,38 +41,23 @@ end Data_Mem;
 architecture Behavioral of Data_Mem is
 
 	constant MOT_ZERO : STD_LOGIC_VECTOR (7 downto 0) := (others => '0') ;
-	
-	type BANC_TYPE_1 is array (NATURAL range <>) of STD_LOGIC_VECTOR (31 downto 0) ;
-	subtype BANC_TYPE is BANC_TYPE_1 (255 downto 0) ;
-
+	type BANC_TYPE is array (255 downto 0) of STD_LOGIC_VECTOR (7 downto 0) ;
 	signal banc : BANC_TYPE  ;
 	
 begin
-	lecture_sync : process 
+
+	process (CK)
 	begin
-		--lecture synchrone
-		if(RW='1') then
-			Q <= banc(TO_INTEGER (UNSIGNED(Add))) ;
+		if CK'Event and CK='1' then
+			if(RW='1') and RST='1' then
+				Q <= banc(TO_INTEGER (UNSIGNED(Add))) ;
+			elsif RW='0' and RST='1' then
+				banc(TO_INTEGER (UNSIGNED(Add))) <= DATA ;
+			else 
+				banc<=(others => MOT_ZERO) ;
+			end if ;
 		end if ;
-	wait on CK ;
 	end process ;
 	
-	ecriture_sync : process
-	begin
-		--ecriture synchrone
-		if(RW='0') then
-			banc(TO_INTEGER (UNSIGNED(Add))) <= DATA ;
-		end if ;
-	wait on CK ;
-	end process ;
-	
-	reset_sync : process
-	begin
-		--Reset synchrone
-		if(RST='0') then
-			banc <=	(others => MOT_ZERO) ;
-		end if ;
-	wait on CK ;
-	end process ;
 end Behavioral;
 

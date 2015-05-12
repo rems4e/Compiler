@@ -91,12 +91,23 @@ BEGIN
    stim_proc: process
    begin		
       -- hold reset state for 100 ns.
+		RST <= '0' ;
+		
       wait for 100 ns;	
-
+		RST<= '1' ;
+		Add <= "00000000" ;
+		DATA <= "10101010" ;
+		
       wait for CK_period*10;
-
+		DATA <= "10111011" ;
+		Add <= "00000000" ;
+		RW<='1';
+		wait for CK_period*10;
+		RW<='0' ;
+		Add<="00000010" ;
       -- insert stimulus here 
-
+		wait for CK_period*10 ;
+		RW<='1' ;
       wait;
    end process;
 

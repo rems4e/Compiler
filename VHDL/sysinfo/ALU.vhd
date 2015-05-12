@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
 --use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_SIGNED.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -32,8 +32,7 @@ use IEEE.STD_LOGIC_SIGNED.ALL;
 --use UNISIM.VComponents.all;
 
 entity ALU is
-    Port ( CK : in  STD_LOGIC;
-           op1 : in  STD_LOGIC_VECTOR (7 downto 0);
+    Port ( op1 : in  STD_LOGIC_VECTOR (7 downto 0);
            op2 : in  STD_LOGIC_VECTOR (7 downto 0);
            ctr_ALU : in  STD_LOGIC_VECTOR (2 downto 0);
            S : out  STD_LOGIC_VECTOR (7 downto 0);
@@ -59,30 +58,48 @@ architecture Behavioral of ALU is
 	
 begin
 		
-		buff <= op1 + op2 when ctr_ALU = ADD else op1 - op2 when ctr_ALU = SUB else op1 * op2 when ctr_ALU = MUL else MOT_ZERO;
-		S <= buff(7 downto 0);
-
+		--
+		
 	
-	flag_sync : process (buff)
+--		calc_async : process(ctr_ALU)
+--	begin
+--		if(ctr_ALU'event) then
+--			buff <= std_logic_vector(UNSIGNED ("0" & op1) + UNSIGNED("0" &op2)) when (ctr_ALU = ADD) 
+--				else (op1 - op2) when (ctr_ALU = SUB) 
+--				else (op1 * op2) when (ctr_ALU = MUL) 
+--				else MOT_ZERO;
+--		end if ;
+--		S <= buff(7 downto 0);
+--	end process ;
+		with ctr_ALU select
+		buff <=  std_logic_vector(UNSIGNED("0" & op1) + UNSIGNED("0" & op2)) when ADD, --On charge le controle a une valeur != de ZERO pour les op de calcul CF ALU
+					std_logic_vector(UNSIGNED("0" & op1) - UNSIGNED("0" & op2)) when SUB,
+					std_logic_vector(UNSIGNED("0" & op1) * UNSIGNED("0" & op2)) when MUL,
+				MOT_ZERO when others ;
+			
+		S <= buff(7 downto 0);
+		
+		
+	flag_async : process (buff)
 	begin
+
 		if buff'event then
 			--détermine les flags une fois l'opération effectuée
-			--détection par make_flag
+			--détection par écoute du signal buff
 			RES <= no_flag ;
 			if(TO_INTEGER(SIGNED(buff(7 downto 0))) < TO_INTEGER(SIGNED(MOT_ZERO(7 downto 0 )))) then -- pas sure du fonctionnement : le mot est négatif
-				RES <= N ; -- /!\ ce sont des nombre signé, le premier bit a un sens !=
+				RES <= N;
 			end if ;
-			if(buff=MOT_ZERO(7 downto 0 )) then -- pas sure du fonctionnement : le mot est nul
-				RES <= RES + Z ;
+			if(buff= MOT_ZERO) then -- pas sure du fonctionnement : le mot est nul
+				RES <= Z ;
 			end if ;
-			
-			if(buff(8)='1') then --G : il y a débordement
-				if(ctr_ALU = ADD or ctr_ALU = SUB) then --ce débordement est une retenue (nombre signés)
-					flag <= RES + C ;
-				else --sinon c'est un overflow
-					flag <= RES + O; 
-				end if ;
+			if op1(7)=op2(7) and op1(7)/=buff(7) then --sinon overflow= si signé
+				RES <= std_logic_vector(RES + O); 
 			end if ;
+			if(buff(8)='1') and (ctr_ALU = ADD or ctr_ALU = SUB) then --ce débordement est une retenue (nombre signés)
+				RES <= std_logic_vector(RES + C) ;
+			end if ;
+			flag <= RES ;
 		end if;
 	end process ;
 

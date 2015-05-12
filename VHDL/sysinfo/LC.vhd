@@ -47,7 +47,7 @@ architecture Behavioral of LC is
 	
 begin
 	with IN_LC select
-		OUT_LC <= '0' when AFC, --On charge le controle a 0 pour les op d'écriture
+		OUT_LC <= '0' when LOAD, --On charge le controle a 0 pour les op d'écriture
 					 '0' when STORE,
 				'1' when others ;
 

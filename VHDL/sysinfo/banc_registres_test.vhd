@@ -105,19 +105,14 @@ BEGIN
 		DATA <= "11001100" ;
 		AW <= "0001" ;
 		W<='1';
-		
       wait for CK_period*10;
-		
 		DATA <= "10101010" ;
 		AW <= "0010" ;
-		
 		wait for CK_period*10;
-		
       -- insert stimulus here 
 		W<='0';
 		AA <= "0001";
 		AB <= "0010";
-		
       wait;
    end process;
 
