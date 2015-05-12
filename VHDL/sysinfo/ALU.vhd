@@ -58,19 +58,6 @@ architecture Behavioral of ALU is
 	
 begin
 		
-		--
-		
-	
---		calc_async : process(ctr_ALU)
---	begin
---		if(ctr_ALU'event) then
---			buff <= std_logic_vector(UNSIGNED ("0" & op1) + UNSIGNED("0" &op2)) when (ctr_ALU = ADD) 
---				else (op1 - op2) when (ctr_ALU = SUB) 
---				else (op1 * op2) when (ctr_ALU = MUL) 
---				else MOT_ZERO;
---		end if ;
---		S <= buff(7 downto 0);
---	end process ;
 		with ctr_ALU select
 		buff <=  std_logic_vector(UNSIGNED("0" & op1) + UNSIGNED("0" & op2)) when ADD, --On charge le controle a une valeur != de ZERO pour les op de calcul CF ALU
 					std_logic_vector(UNSIGNED("0" & op1) - UNSIGNED("0" & op2)) when SUB,

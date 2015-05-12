@@ -1,21 +1,22 @@
-Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -intstyle ise -incremental -lib secureip -o /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/mem_data_test_isim_map.exe -prj /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/mem_data_test_map.prj work.mem_data_test 
+Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -intstyle ise -incremental -lib secureip -o /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_test_isim_par.exe -prj /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_test_par.prj work.ALU_test 
 ISim O.87xd (signature 0x8ddf5b5d)
 Number of CPUs detected in this system: 4
 Turning on mult-threading, number of parallel sub-compilation jobs: 8 
 Determining compilation order of HDL files
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/mem_data_test.vhd" into library work
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_Test.vhd" into library work
 Starting static elaboration
-WARNING:HDLCompiler:89 - "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/mem_data_test.vhd" Line 71: <data_mem> remains a black-box since it has no binding entity.
+WARNING:HDLCompiler:89 - "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_Test.vhd" Line 70: <alu> remains a black-box since it has no binding entity.
 Completed static elaboration
-Fuse Memory Usage: 94560 KB
+Fuse Memory Usage: 94564 KB
 Fuse CPU Usage: 1230 ms
-WARNING:Simulator:648 - "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/mem_data_test.vhd" Line 71. Instance data_mem is unbound
+WARNING:Simulator:648 - "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_Test.vhd" Line 70. Instance alu is unbound
 Compiling package standard
 Compiling package std_logic_1164
-Compiling architecture behavior of entity mem_data_test
+Compiling architecture behavior of entity alu_test
 Time Resolution for simulation is 1ps.
+Waiting for 1 sub-compilation(s) to finish...
 Compiled 3 VHDL Units
-Built simulation executable /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/mem_data_test_isim_map.exe
-Fuse Memory Usage: 660256 KB
+Built simulation executable /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_test_isim_par.exe
+Fuse Memory Usage: 660260 KB
 Fuse CPU Usage: 1340 ms
-GCC CPU Usage: 240 ms
+GCC CPU Usage: 230 ms

@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    18:04:26 05/02/2015 
+-- Create Date:    11:38:52 05/12/2015 
 -- Design Name: 
--- Module Name:    LC_ALU - Behavioral 
+-- Module Name:    MUX_MemData - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -29,26 +29,31 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity LC is
-    Port ( IN_LC : in  STD_LOGIC_VECTOR (7 downto 0);
-           OUT_LC : out STD_LOGIC );
-end LC;
+entity MUX_Pre_MemData is
+    Port ( CK : in  STD_LOGIC;
+           IN_1 : in  STD_LOGIC_VECTOR (7 downto 0);
+           IN_2 : in  STD_LOGIC_VECTOR (7 downto 0);
+           sel : in  STD_LOGIC_VECTOR (7 downto 0);
+           S : out  STD_LOGIC_VECTOR (7 downto 0));
+end MUX_Pre_MemData;
 
-architecture Behavioral of LC is
---valeurs possibles en entrée
+architecture Behavioral of MUX_Pre_MemData is
+
+--valeur possibles en entrée
 	--constant ADD : STD_LOGIC_VECTOR(7 downto 0) := "00000001" ;
 	--constant MUL : STD_LOGIC_VECTOR(7 downto 0) := "00000010" ;
 	--constant SUB : STD_LOGIC_VECTOR(7 downto 0) := "00000011" ;
 	--constant DIV : STD_LOGIC_VECTOR(7 downto 0) := "00000100" ;
 	--constant COP : STD_LOGIC_VECTOR(7 downto 0) := "00000101" ;
 	--constant AFC : STD_LOGIC_VECTOR(7 downto 0) := "00000110" ;
-	constant LOAD : STD_LOGIC_VECTOR(7 downto 0) := "00000111" ;
+	--constant LOAD : STD_LOGIC_VECTOR(7 downto 0) := "00000111" ;
 	constant STORE : STD_LOGIC_VECTOR(7 downto 0) := "00001000" ;
 	
+	
 begin
-	with IN_LC select
-		OUT_LC <= '0' when LOAD, --On charge le controle a 0 pour les op d'écriture
-					 '0' when STORE,
-				'1' when others ;
+	with sel select
+	S <= 	IN_1 when STORE, 
+			IN_2 when others;
 
 end Behavioral;
+

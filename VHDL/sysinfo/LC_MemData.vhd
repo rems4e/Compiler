@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    18:04:26 05/02/2015 
+-- Create Date:    11:20:45 05/12/2015 
 -- Design Name: 
--- Module Name:    LC_ALU - Behavioral 
+-- Module Name:    LC_MemData - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -29,12 +29,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity LC is
+entity LC_MemData is
     Port ( IN_LC : in  STD_LOGIC_VECTOR (7 downto 0);
-           OUT_LC : out STD_LOGIC );
-end LC;
+           OUT_LC : out  STD_LOGIC);
+end LC_MemData;
 
-architecture Behavioral of LC is
+architecture Behavioral of LC_MemData is
 --valeurs possibles en entrée
 	--constant ADD : STD_LOGIC_VECTOR(7 downto 0) := "00000001" ;
 	--constant MUL : STD_LOGIC_VECTOR(7 downto 0) := "00000010" ;
@@ -52,3 +52,4 @@ begin
 				'1' when others ;
 
 end Behavioral;
+
