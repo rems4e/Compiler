@@ -37,13 +37,14 @@ end IP;
 
 architecture Behavioral of IP is
 		signal temp : std_logic_vector (7 downto 0) := (others => '0') ;
-		signal un : std_logic_vector(7 downto 0) := "00000001" ;
 begin
 	process (CK)
 	begin
 		if CK'event and CK='1' then
+			if RST = '1' then
 			Add <= temp  ;
 			temp <= std_logic_vector(to_unsigned(to_integer(unsigned( temp )) + 1, 8));
+			end if ;
 		end if ;
 	end process ;
 	

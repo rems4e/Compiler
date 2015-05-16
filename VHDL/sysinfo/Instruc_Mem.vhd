@@ -37,10 +37,18 @@ end Instruc_Mem;
 
 architecture Behavioral of Instruc_Mem is
 	
+	signal instruc_zero : std_logic_vector(31 downto 0) := (others => '0') ;
 	type BANC_TYPE is array (255 downto 0) of STD_LOGIC_VECTOR (31 downto 0) ;
-	signal banc_instruc : BANC_TYPE  ;
+	signal banc_instruc : BANC_TYPE :=(1=>"00000001000000100000000100000100", -- ADD R2 R1 R4
+													0=> "00000110000000010000100100000000",--AFC R1 9 -
+													2=> "00000001000000000000000100000010", --ADD R0 R1 R2
+													others => instruc_zero ) ;
+	
+	--debug : opération ADD R1 R9 R4
+	--signal operation : std_logic_vector(31 downto 0) := "00000001" & "00000001" & "00001001" & "00000100" ;
 begin
 	lecture_sync : process (CK)
+
 	begin
 		--lecture synchrone
 		--function TO_INTEGER (ARG: UNSIGNED) return NATURAL;

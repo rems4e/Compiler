@@ -1,4 +1,4 @@
-Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -intstyle ise -incremental -lib secureip -o /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_isim_beh.exe -prj /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_beh.prj work.test_processor 
+Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -relaunch -intstyle "ise" -incremental -lib "secureip" -o "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_isim_beh.exe" -prj "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_beh.prj" "work.test_processor" 
 ISim O.87xd (signature 0x8ddf5b5d)
 Number of CPUs detected in this system: 4
 Turning on mult-threading, number of parallel sub-compilation jobs: 8 
@@ -20,8 +20,8 @@ Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/proce
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor.vhd" into library work
 Starting static elaboration
 Completed static elaboration
-Fuse Memory Usage: 97948 KB
-Fuse CPU Usage: 1310 ms
+Fuse Memory Usage: 97952 KB
+Fuse CPU Usage: 1260 ms
 Compiling package standard
 Compiling package std_logic_1164
 Compiling package numeric_std
@@ -43,9 +43,9 @@ Compiling architecture behavioral of entity MUX_MemData [mux_memdata_default]
 Compiling architecture behavioral of entity processor [processor_default]
 Compiling architecture behavior of entity test_processor
 Time Resolution for simulation is 1ps.
-Waiting for 8 sub-compilation(s) to finish...
+Waiting for 1 sub-compilation(s) to finish...
 Compiled 34 VHDL Units
 Built simulation executable /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_isim_beh.exe
-Fuse Memory Usage: 674048 KB
-Fuse CPU Usage: 1570 ms
-GCC CPU Usage: 1500 ms
+Fuse Memory Usage: 674056 KB
+Fuse CPU Usage: 1460 ms
+GCC CPU Usage: 220 ms
