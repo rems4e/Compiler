@@ -1,6 +1,5 @@
 ISim log file
-Running: /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_test_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_test_isim_beh.wdb 
-INFO: There is another simulation running in the same directory. Using database file name isim2.wdb.
+Running: /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_isim_beh.wdb 
 ISim O.87xd (signature 0x8ddf5b5d)
 WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
@@ -11,6 +10,105 @@ Time resolution is 1 ps
 # wave add /
 # run 1000 ns
 Simulator is doing circuit initialization process.
+at 0 ps, Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ps, Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 Finished circuit initialization process.
-# exit 0
+at 0 ps, Instance /test_processor/uut/alu_comp/ : Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
+at 0 ps, Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ps, Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 5 ns(1), Instance /test_processor/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 5 ns(2), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 5 ns(2), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 35 ns(2), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 35 ns(2), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 125 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 135 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 145 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 155 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 165 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 175 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 185 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 195 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 205 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 215 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 225 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 235 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 245 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 255 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 265 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 275 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 285 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 295 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 305 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 315 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 325 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 335 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 345 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 355 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 365 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 375 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 385 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 395 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 405 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 415 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 425 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 435 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 445 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 455 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 465 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 475 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 485 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 495 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 505 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 515 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 525 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 535 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 545 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 555 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 565 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 575 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 585 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 595 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 605 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 615 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 625 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 635 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 645 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 655 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 665 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 675 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 685 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 695 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 705 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 715 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 725 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 735 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 745 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 755 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 765 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 775 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 785 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 795 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 805 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 815 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 825 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 835 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 845 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 855 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 865 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 875 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 885 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 895 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 905 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 915 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 925 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 935 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 945 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 955 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 965 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 975 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 985 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 995 ns(1), Instance /test_processor/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 # exit 0

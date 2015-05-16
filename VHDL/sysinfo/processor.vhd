@@ -175,6 +175,7 @@ architecture Behavioral of processor is
 	signal out_mem_data : std_logic_vector (7 downto 0) ;
 	signal out_mux_data : std_logic_vector(7 downto 0) ;
 	signal out_op_mem : std_logic_vector(7 downto 0) ;
+	signal blank : std_logic_vector(7 downto 0) := (others => '0') ;
 begin
 	--instanciation
 	ipTest : IP port map(
@@ -209,9 +210,9 @@ begin
 	banc_registre : banc_registres port map(
 		CK => CK,
 		RST=>rst,
-		AA => out_b_li,
-		AB => out_c_li,
-		AW =>	in_aw_br,
+		AA => out_b_li(3 downto 0),
+		AB => out_c_li(3 downto 0),
+		AW =>	in_aw_br(3 downto 0),
 		W	=> in_w_br,
 		DATA => in_data_br,
 		QA => out_a_br,
@@ -261,11 +262,11 @@ begin
 			CK=>CK,
 			IN_A=>out_a_di,
 			IN_B=>out_mux_alu,
-			IN_C=>"00000000",
+			IN_C=>blank,
 			IN_OP=>out_op_di,
 			OUT_A=>out_a_ex,
 			OUT_B=>out_b_ex,
-			OUT_C=>"00000000",
+			OUT_C=>blank,
 			OUT_OP=>out_op_ex
 		);
 			
@@ -303,11 +304,11 @@ begin
 			CK => CK,
 			IN_A=>out_a_ex,
 			IN_B=>out_mux_data,
-			IN_C=>"00000000",
+			IN_C=>blank,
 			IN_OP=>out_op_ex,
 			OUT_A=>in_aw_br,
 			OUT_B=>in_data_br,
-			OUT_C=>"00000000",
+			OUT_C=>blank,
 			OUT_OP=>out_op_mem
 		);
 		
