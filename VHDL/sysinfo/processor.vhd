@@ -82,7 +82,7 @@ architecture Behavioral of processor is
          RST : IN  std_logic;
          W : IN  std_logic
         );
-		   END COMPONENT;
+	END COMPONENT;
 	COMPONENT MUX_BancRegistres
 	Port ( CK : in  STD_LOGIC;
 	  IN_1 : in  STD_LOGIC_VECTOR (7 downto 0);

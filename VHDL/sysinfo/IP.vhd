@@ -42,8 +42,10 @@ begin
 	begin
 		if CK'event and CK='1' then
 			if RST = '1' then
-			Add <= temp  ;
-			temp <= std_logic_vector(to_unsigned(to_integer(unsigned( temp )) + 1, 8));
+				Add <= temp  ;
+				temp <= std_logic_vector(to_unsigned(to_integer(unsigned( temp )) + 1, 8));
+			else
+				temp <= (others => '0') ;
 			end if ;
 		end if ;
 	end process ;

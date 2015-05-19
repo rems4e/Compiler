@@ -1,51 +1,35 @@
-Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -relaunch -intstyle "ise" -incremental -lib "secureip" -o "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_isim_beh.exe" -prj "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_beh.prj" "work.test_processor" 
+Running: /opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/fuse -intstyle ise -incremental -lib secureip -o /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process_isim_beh.exe -prj /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process_beh.prj work.test_etape_process 
 ISim O.87xd (signature 0x8ddf5b5d)
 Number of CPUs detected in this system: 4
 Turning on mult-threading, number of parallel sub-compilation jobs: 8 
 Determining compilation order of HDL files
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/pipe_line.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_Pre_MemData.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_MemData.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_BancRegistres.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_ALU.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/LC_ALU.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/LC.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/IP.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/Instruc_Mem.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/decod.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/Data_Mem.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/processor.vhd" into library work
-Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor.vhd" into library work
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd" into library work
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process.vhd" into library work
 Starting static elaboration
 Completed static elaboration
-Fuse Memory Usage: 97952 KB
-Fuse CPU Usage: 1260 ms
+Fuse Memory Usage: 96252 KB
+Fuse CPU Usage: 1280 ms
 Compiling package standard
 Compiling package std_logic_1164
 Compiling package numeric_std
-Compiling package std_logic_arith
-Compiling package std_logic_unsigned
 Compiling architecture behavioral of entity IP [ip_default]
 Compiling architecture behavioral of entity Instruc_Mem [instruc_mem_default]
 Compiling architecture behavioral of entity decod [decod_default]
 Compiling architecture behavioral of entity pipe_line [pipe_line_default]
 Compiling architecture behavioral of entity banc_registres [banc_registres_default]
-Compiling architecture behavioral of entity MUX_BancRegistres [mux_bancregistres_default]
-Compiling architecture behavioral of entity LC_ALU [lc_alu_default]
-Compiling architecture behavioral of entity ALU [alu_default]
-Compiling architecture behavioral of entity MUX_ALU [mux_alu_default]
-Compiling architecture behavioral of entity MUX_Pre_MemData [mux_pre_memdata_default]
 Compiling architecture behavioral of entity LC [lc_default]
-Compiling architecture behavioral of entity Data_Mem [data_mem_default]
-Compiling architecture behavioral of entity MUX_MemData [mux_memdata_default]
-Compiling architecture behavioral of entity processor [processor_default]
-Compiling architecture behavior of entity test_processor
+Compiling architecture behavioral of entity etape_process [etape_process_default]
+Compiling architecture behavior of entity test_etape_process
 Time Resolution for simulation is 1ps.
 Waiting for 1 sub-compilation(s) to finish...
-Compiled 34 VHDL Units
-Built simulation executable /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor_isim_beh.exe
-Fuse Memory Usage: 674056 KB
-Fuse CPU Usage: 1460 ms
-GCC CPU Usage: 220 ms
+Compiled 18 VHDL Units
+Built simulation executable /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process_isim_beh.exe
+Fuse Memory Usage: 668120 KB
+Fuse CPU Usage: 1430 ms
+GCC CPU Usage: 810 ms
