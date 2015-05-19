@@ -95,6 +95,27 @@ architecture Behavioral of etape_process is
 	  sel : in  STD_LOGIC_VECTOR (7 downto 0);
 	  S : out  STD_LOGIC_VECTOR (7 downto 0));
   END COMPONENT ;
+  
+  COMPONENT ALU
+    PORT(
+         op1 : IN  std_logic_vector(7 downto 0);
+         op2 : IN  std_logic_vector(7 downto 0);
+         ctr_ALU : IN  std_logic_vector(2 downto 0);
+         S : OUT  std_logic_vector(7 downto 0);
+         flag : OUT  std_logic_vector(3 downto 0)
+        );
+    END COMPONENT;
+	 COMPONENT MUX_ALU
+	     Port ( CK : in  STD_LOGIC;
+           IN_1 : in  STD_LOGIC_VECTOR (7 downto 0);
+           IN_2 : in  STD_LOGIC_VECTOR (7 downto 0);
+           sel : in  STD_LOGIC_VECTOR (7 downto 0);
+           S : out  STD_LOGIC_VECTOR (7 downto 0));
+	  END COMPONENT ;
+	  COMPONENT LC_ALU
+	      Port ( IN_LC : in  STD_LOGIC_VECTOR (7 downto 0);
+           OUT_LC : out  STD_LOGIC_VECTOR (2 downto 0));
+		END COMPONENT ;
 	
 	signal out_ip : std_logic_vector(7 downto 0) ;
 	signal ins : std_logic_vector(31 downto 0) ;
@@ -121,6 +142,11 @@ architecture Behavioral of etape_process is
 	signal out_op_ex : std_logic_vector(7 downto 0);
 	signal out_op_mem : std_logic_vector(7 downto 0) ;
 	signal out_mux_br : std_logic_vector(7 downto 0) ;
+	signal ctr_alu : std_logic_vector (2 downto 0) ;
+	signal out_alu : std_logic_vector(7 downto 0) ;
+	signal flag : std_logic_vector(3 downto 0) ;
+	signal out_mux_alu : std_logic_vector(7 downto 0) ;
+
 begin
 	--instanciation
 	ipTest : IP port map(
@@ -162,24 +188,24 @@ begin
 		W	=> in_w_br,
 		DATA => in_data_br,
 		QA =>	out_a_br,
-		QB =>	blank--out_b_br
+		QB =>	out_b_br
 	) ;
 	
 	di_ex : pipe_line port map(
 		CK=>CK,
 		IN_A=>out_a_li,
 		IN_B=>out_mux_br,
-		IN_C=>blank,--out_b_br,
+		IN_C=>out_b_br,
 		IN_OP=>out_op_li,
 		OUT_A=>out_a_di,
 		OUT_B=>out_b_di,
-		OUT_C=>blank,--out_c_di,
+		OUT_C=>out_c_di,
 		OUT_OP=>out_op_di
 		);
 	ex_Mem : pipe_line port map (
 		CK=>CK,
 		IN_A=>out_a_di,
-		IN_B=>out_b_di,
+		IN_B=>out_mux_alu,
 		IN_C=>blank,
 		IN_OP=>out_op_di,
 		OUT_A=>out_a_ex,
@@ -212,7 +238,25 @@ begin
 		S=> out_mux_br
 	);
 	
-	
+	lctr_alu : LC_ALU port map(
+			IN_LC =>out_op_di,
+			OUT_LC => ctr_alu
+		);
+		
+	mux_alu_comp : MUX_ALU port map(
+			CK=> CK,
+			IN_1=>out_b_di,
+			IN_2=>out_alu,
+			sel => out_op_di,
+			S => out_mux_alu
+		) ;
+		alu_comp :ALU port map(
+			op1=>out_b_di,
+			op2=>out_c_di,
+			ctr_alu => ctr_alu,
+			S=> out_alu,
+			flag=>flag
+		);
 
 end Behavioral;
 

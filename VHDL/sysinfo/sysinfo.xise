@@ -16,7 +16,7 @@
 
   <files>
     <file xil_pn:name="banc_registres.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="7"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="9"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="banc_registres_test.vhd" xil_pn:type="FILE_VHDL">
@@ -26,7 +26,7 @@
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="Instruc_Mem.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="5"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="7"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="mem_instruc_test.vhd" xil_pn:type="FILE_VHDL">
@@ -56,7 +56,7 @@
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="decod.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="6"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="8"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="MUX_BancRegistres.vhd" xil_pn:type="FILE_VHDL">
@@ -68,11 +68,11 @@
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="LC.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="3"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="5"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="ALU.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="10"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="ALU_Test.vhd" xil_pn:type="FILE_VHDL">
@@ -82,7 +82,7 @@
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="134"/>
     </file>
     <file xil_pn:name="IP.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="4"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="6"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="1"/>
     </file>
     <file xil_pn:name="processor.vhd" xil_pn:type="FILE_VHDL">
@@ -90,11 +90,11 @@
       <association xil_pn:name="Implementation" xil_pn:seqID="139"/>
     </file>
     <file xil_pn:name="MUX_ALU.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="3"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="140"/>
     </file>
     <file xil_pn:name="LC_ALU.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="4"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="141"/>
     </file>
     <file xil_pn:name="MUX_Pre_MemData.vhd" xil_pn:type="FILE_VHDL">
@@ -108,11 +108,11 @@
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="138"/>
     </file>
     <file xil_pn:name="etape_process.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="8"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="11"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="144"/>
     </file>
     <file xil_pn:name="test_etape_process.vhd" xil_pn:type="FILE_VHDL">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="9"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="12"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="151"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="151"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="151"/>
