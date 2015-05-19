@@ -88,6 +88,14 @@ architecture Behavioral of etape_process is
 			OUT_LC : out STD_LOGIC );
 	END COMPONENT ;
 	
+	COMPONENT MUX_BancRegistres
+	Port ( 
+	  IN_1 : in  STD_LOGIC_VECTOR (7 downto 0);
+	  IN_2 : in  STD_LOGIC_VECTOR (7 downto 0);
+	  sel : in  STD_LOGIC_VECTOR (7 downto 0);
+	  S : out  STD_LOGIC_VECTOR (7 downto 0));
+  END COMPONENT ;
+	
 	signal out_ip : std_logic_vector(7 downto 0) ;
 	signal ins : std_logic_vector(31 downto 0) ;
 	signal out_a_decod : std_logic_vector(7 downto 0) ;
@@ -112,6 +120,7 @@ architecture Behavioral of etape_process is
 	signal out_b_ex : std_logic_vector(7 downto 0);
 	signal out_op_ex : std_logic_vector(7 downto 0);
 	signal out_op_mem : std_logic_vector(7 downto 0) ;
+	signal out_mux_br : std_logic_vector(7 downto 0) ;
 begin
 	--instanciation
 	ipTest : IP port map(
@@ -147,19 +156,19 @@ begin
 	banc_registre : banc_registres port map(
 		CK => CK,
 		RST=>rst,
-		AA => blank(3 downto 0),--out_b_li(3 downto 0),
-		AB => blank(3 downto 0),--out_c_li(3 downto 0),
+		AA => out_b_li(3 downto 0),
+		AB => out_c_li(3 downto 0),
 		AW =>	in_aw_br(3 downto 0),
 		W	=> in_w_br,
 		DATA => in_data_br,
-		QA => blank,--out_a_br,
+		QA =>	out_a_br,
 		QB =>	blank--out_b_br
 	) ;
 	
 	di_ex : pipe_line port map(
 		CK=>CK,
 		IN_A=>out_a_li,
-		IN_B=>out_b_li,
+		IN_B=>out_mux_br,
 		IN_C=>blank,--out_b_br,
 		IN_OP=>out_op_li,
 		OUT_A=>out_a_di,
@@ -195,6 +204,14 @@ begin
 		IN_LC => out_op_mem,
 		OUT_LC=> in_w_br
 	);
+	
+	mux_banc_registres : MUX_BancRegistres port map(
+		IN_1 =>out_b_li,
+		IN_2 =>out_a_br,
+		sel =>out_op_li,
+		S=> out_mux_br
+	);
+	
 	
 
 end Behavioral;

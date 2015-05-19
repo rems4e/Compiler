@@ -30,8 +30,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity MUX_BancRegistres is
-    Port ( CK : in  STD_LOGIC;
-           IN_1 : in  STD_LOGIC_VECTOR (7 downto 0);
+    Port ( IN_1 : in  STD_LOGIC_VECTOR (7 downto 0);
            IN_2 : in  STD_LOGIC_VECTOR (7 downto 0);
            sel : in  STD_LOGIC_VECTOR (7 downto 0);
            S : out  STD_LOGIC_VECTOR (7 downto 0));
@@ -43,7 +42,7 @@ architecture Behavioral of MUX_BancRegistres is
 	--constant MUL : STD_LOGIC_VECTOR(7 downto 0) := "00000010" ;
 	--constant SUB : STD_LOGIC_VECTOR(7 downto 0) := "00000011" ;
 	--constant DIV : STD_LOGIC_VECTOR(7 downto 0) := "00000100" ;
-	--constant COP : STD_LOGIC_VECTOR(7 downto 0) := "00000101" ;
+	constant COP : STD_LOGIC_VECTOR(7 downto 0) := "00000101" ;
 	constant AFC : STD_LOGIC_VECTOR(7 downto 0) := "00000110" ;
 	constant LOAD : STD_LOGIC_VECTOR(7 downto 0) := "00000111" ;
 	--constant STORE : STD_LOGIC_VECTOR(7 downto 0) := "00001000" ;
@@ -53,6 +52,7 @@ begin
 	with sel select
 	S <= 	IN_1 when AFC, 
 			IN_1 when LOAD,
+			IN_2 when COP,
 			IN_2 when others;
 
 end Behavioral;

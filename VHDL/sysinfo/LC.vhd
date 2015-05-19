@@ -36,19 +36,23 @@ end LC;
 
 architecture Behavioral of LC is
 --valeurs possibles en entrée
-	--constant ADD : STD_LOGIC_VECTOR(7 downto 0) := "00000001" ;
-	--constant MUL : STD_LOGIC_VECTOR(7 downto 0) := "00000010" ;
-	--constant SUB : STD_LOGIC_VECTOR(7 downto 0) := "00000011" ;
-	--constant DIV : STD_LOGIC_VECTOR(7 downto 0) := "00000100" ;
-	--constant COP : STD_LOGIC_VECTOR(7 downto 0) := "00000101" ;
-	--constant AFC : STD_LOGIC_VECTOR(7 downto 0) := "00000110" ;
-	constant LOAD : STD_LOGIC_VECTOR(7 downto 0) := "00000111" ;
-	constant STORE : STD_LOGIC_VECTOR(7 downto 0) := "00001000" ;
+	constant ADD : STD_LOGIC_VECTOR(7 downto 0) := "00000001" ;
+	constant MUL : STD_LOGIC_VECTOR(7 downto 0) := "00000010" ;
+	constant SUB : STD_LOGIC_VECTOR(7 downto 0) := "00000011" ;
+	constant DIV : STD_LOGIC_VECTOR(7 downto 0) := "00000100" ;
+	constant COP : STD_LOGIC_VECTOR(7 downto 0) := "00000101" ;
+	constant AFC : STD_LOGIC_VECTOR(7 downto 0) := "00000110" ;
+	--constant LOAD : STD_LOGIC_VECTOR(7 downto 0) := "00000111" ;
+	--constant STORE : STD_LOGIC_VECTOR(7 downto 0) := "00001000" ;
 	
 begin
 	with IN_LC select
-		OUT_LC <= '0' when LOAD, --On charge le controle a 0 pour les op d'écriture
-					 '0' when STORE,
-				'1' when others ;
+		OUT_LC <= '1' when ADD, 
+					 '1' when MUL,
+					 '1' when SUB,
+					 '1' when DIV,
+					 '1' when COP,
+					 '1' when AFC,
+				'0' when others ;
 
 end Behavioral;
