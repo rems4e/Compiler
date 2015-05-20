@@ -41,7 +41,9 @@ architecture Behavioral of Instruc_Mem is
 	type BANC_TYPE is array (255 downto 0) of STD_LOGIC_VECTOR (31 downto 0) ;
 	signal banc_instruc : BANC_TYPE :=(	0=> "00000110000000000000100100000000", -- AFC R0 9 -
 													1=> "00000101000000010000000000000000", -- COP R1 R0
-													3=> "00000001000000100000000000000000", --ADD R2 R1 R0
+													3=> "00000001000000100000000000000000", -- ADD R2 R1 R0
+													4=> "00000111000000000000000000000000", -- LOAD R0 [0] (l'addresse 0 contient 0
+													5=> "00001000111111110000000100000000", -- STORE [255] R1
 													others => instruc_zero ) ;
 	
 	--debug : opération ADD R1 R9 R4

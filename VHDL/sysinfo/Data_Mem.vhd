@@ -49,12 +49,12 @@ begin
 	process (CK)
 	begin
 		if CK'Event and CK='1' then
-			if(RW='1') and RST='1' then
+			if RST='0' then
+				banc<=(others => MOT_ZERO) ;
+			elsif(RW='1') and RST='1' then
 				Q <= banc(TO_INTEGER (UNSIGNED(Add))) ;
 			elsif RW='0' and RST='1' then
 				banc(TO_INTEGER (UNSIGNED(Add))) <= DATA ;
-			else 
-				banc<=(others => MOT_ZERO) ;
 			end if ;
 		end if ;
 	end process ;

@@ -42,7 +42,7 @@ architecture Behavioral of LC is
 	constant DIV : STD_LOGIC_VECTOR(7 downto 0) := "00000100" ;
 	constant COP : STD_LOGIC_VECTOR(7 downto 0) := "00000101" ;
 	constant AFC : STD_LOGIC_VECTOR(7 downto 0) := "00000110" ;
-	--constant LOAD : STD_LOGIC_VECTOR(7 downto 0) := "00000111" ;
+	constant LOAD : STD_LOGIC_VECTOR(7 downto 0) := "00000111" ;
 	--constant STORE : STD_LOGIC_VECTOR(7 downto 0) := "00001000" ;
 	
 begin
@@ -53,6 +53,7 @@ begin
 					 '1' when DIV,
 					 '1' when COP,
 					 '1' when AFC,
+					 '1' when LOAD,
 				'0' when others ;
 
 end Behavioral;

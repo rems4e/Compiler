@@ -4,6 +4,8 @@ Number of CPUs detected in this system: 4
 Turning on mult-threading, number of parallel sub-compilation jobs: 8 
 Determining compilation order of HDL files
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/pipe_line.vhd" into library work
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_Pre_MemData.vhd" into library work
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_MemData.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_BancRegistres.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_ALU.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/LC_ALU.vhd" into library work
@@ -11,14 +13,15 @@ Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/LC.vh
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/IP.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/Instruc_Mem.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/decod.vhd" into library work
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/Data_Mem.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd" into library work
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process.vhd" into library work
 Starting static elaboration
 Completed static elaboration
-Fuse Memory Usage: 97764 KB
-Fuse CPU Usage: 1270 ms
+Fuse Memory Usage: 97948 KB
+Fuse CPU Usage: 1330 ms
 Compiling package standard
 Compiling package std_logic_1164
 Compiling package numeric_std
@@ -34,12 +37,15 @@ Compiling architecture behavioral of entity MUX_BancRegistres [mux_bancregistres
 Compiling architecture behavioral of entity LC_ALU [lc_alu_default]
 Compiling architecture behavioral of entity MUX_ALU [mux_alu_default]
 Compiling architecture behavioral of entity ALU [alu_default]
+Compiling architecture behavioral of entity Data_Mem [data_mem_default]
+Compiling architecture behavioral of entity MUX_MemData [mux_memdata_default]
+Compiling architecture behavioral of entity MUX_Pre_MemData [mux_pre_memdata_default]
 Compiling architecture behavioral of entity etape_process [etape_process_default]
 Compiling architecture behavior of entity test_etape_process
 Time Resolution for simulation is 1ps.
 Waiting for 1 sub-compilation(s) to finish...
-Compiled 28 VHDL Units
+Compiled 34 VHDL Units
 Built simulation executable /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process_isim_beh.exe
-Fuse Memory Usage: 673928 KB
-Fuse CPU Usage: 1460 ms
-GCC CPU Usage: 190 ms
+Fuse Memory Usage: 674084 KB
+Fuse CPU Usage: 1530 ms
+GCC CPU Usage: 180 ms

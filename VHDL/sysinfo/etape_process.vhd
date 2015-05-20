@@ -116,7 +116,33 @@ architecture Behavioral of etape_process is
 	      Port ( IN_LC : in  STD_LOGIC_VECTOR (7 downto 0);
            OUT_LC : out  STD_LOGIC_VECTOR (2 downto 0));
 		END COMPONENT ;
+		
+		COMPONENT Data_Mem
+    PORT(
+         CK : IN  std_logic;
+         RST : IN  std_logic;
+         RW : IN  std_logic;
+         DATA : IN  std_logic_vector(7 downto 0);
+         Add : IN  std_logic_vector(7 downto 0);
+         Q : OUT  std_logic_vector(7 downto 0)
+        );
+    END COMPONENT;
+	 COMPONENT MUX_MemData
+	     Port ( CK : in  STD_LOGIC;
+           IN_1 : in  STD_LOGIC_VECTOR (7 downto 0);
+           IN_2 : in  STD_LOGIC_VECTOR (7 downto 0);
+           sel : in  STD_LOGIC_VECTOR (7 downto 0);
+           S : out  STD_LOGIC_VECTOR (7 downto 0));
+	END COMPONENT ;
 	
+	COMPONENT MUX_Pre_MemData
+		 Port ( CK : in  STD_LOGIC;
+		  IN_1 : in  STD_LOGIC_VECTOR (7 downto 0);
+		  IN_2 : in  STD_LOGIC_VECTOR (7 downto 0);
+		  sel : in  STD_LOGIC_VECTOR (7 downto 0);
+		  S : out  STD_LOGIC_VECTOR (7 downto 0));
+	END COMPONENT ;
+
 	signal out_ip : std_logic_vector(7 downto 0) ;
 	signal ins : std_logic_vector(31 downto 0) ;
 	signal out_a_decod : std_logic_vector(7 downto 0) ;
@@ -146,6 +172,10 @@ architecture Behavioral of etape_process is
 	signal out_alu : std_logic_vector(7 downto 0) ;
 	signal flag : std_logic_vector(3 downto 0) ;
 	signal out_mux_alu : std_logic_vector(7 downto 0) ;
+	signal out_lc_data : std_logic ;
+	signal out_mem_data : std_logic_vector (7 downto 0) ;
+	signal out_mux_data : std_logic_vector(7 downto 0) ;
+	signal out_mux_pre_data : std_logic_vector(7 downto 0) ;
 
 begin
 	--instanciation
@@ -217,7 +247,7 @@ begin
 	mem_re : pipe_line port map(
 		CK => CK,
 		IN_A=>out_a_ex,
-		IN_B=>out_b_ex,
+		IN_B=>out_mux_data,
 		IN_C=>blank,
 		IN_OP=>out_op_ex,
 		OUT_A=>in_aw_br,
@@ -250,13 +280,44 @@ begin
 			sel => out_op_di,
 			S => out_mux_alu
 		) ;
-		alu_comp :ALU port map(
-			op1=>out_b_di,
-			op2=>out_c_di,
-			ctr_alu => ctr_alu,
-			S=> out_alu,
-			flag=>flag
-		);
+	alu_comp :ALU port map(
+		op1=>out_b_di,
+		op2=>out_c_di,
+		ctr_alu => ctr_alu,
+		S=> out_alu,
+		flag=>flag
+	);
+	
+	
+	lc_data : LC port map (
+		IN_LC => out_op_ex,
+		OUT_LC => out_lc_data
+	);
+	
+	mem_data : Data_Mem port map (
+		 CK => CK,
+		 RST => RST,
+		 RW => out_lc_data,
+		 DATA => out_b_ex,
+		 Add => out_mux_pre_data,
+		 Q => out_mem_data
+	);
+	
+	mux_mem_data : MUX_MemData port map (
+		CK => CK,
+		IN_1=>out_mem_data,
+		IN_2 =>out_b_ex,
+		sel=> out_op_ex,
+		S=> out_mux_data
+	);
+	
+	mux_pre_data : MUX_Pre_MemData port map (
+		CK => CK ,
+		IN_1 => out_a_ex,
+		IN_2 => out_b_ex,
+		sel => out_op_ex,
+		S => out_mux_pre_data
+	);
 
 end Behavioral;
 
