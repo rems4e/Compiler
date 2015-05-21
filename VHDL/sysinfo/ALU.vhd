@@ -55,6 +55,7 @@ architecture Behavioral of ALU is
 	
 	signal buff : STD_LOGIC_VECTOR (8 downto 0);
 	signal RES : STD_LOGIC_VECTOR (3 downto 0) ;
+	signal modif : STD_LOGIC ;
 	
 begin
 		
@@ -64,12 +65,13 @@ begin
 					 std_logic_vector(TO_UNSIGNED(TO_INTEGER(UNSIGNED("0" & op1) * UNSIGNED("0" & op2)), 9)) when MUL,
 				MOT_ZERO when others ;
 		S <= buff(7 downto 0);
+		modif <= '1' when modif = '0' else '0';
 		
 		
-	flag_async : process (buff)
+	flag_async : process (modif)
 	begin
 
-		if buff'event then
+		if modif'Event and modif = '1' then
 			--détermine les flags une fois l'opération effectuée
 			--détection par écoute du signal buff
 			RES <= no_flag ;
