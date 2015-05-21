@@ -59,11 +59,10 @@ architecture Behavioral of ALU is
 begin
 		
 		with ctr_ALU select
-		buff <=  std_logic_vector(UNSIGNED("0" & op1) + UNSIGNED("0" & op2)) when ADD, --On charge le controle a une valeur != de ZERO pour les op de calcul CF ALU
-					std_logic_vector(UNSIGNED("0" & op1) - UNSIGNED("0" & op2)) when SUB,
-					std_logic_vector(UNSIGNED("0" & op1) * UNSIGNED("0" & op2)) when MUL,
+		buff	<=  std_logic_vector(UNSIGNED("0" & op1) + UNSIGNED("0" & op2)) when ADD, --On charge le controle a une valeur != de ZERO pour les op de calcul CF ALU
+				 	 std_logic_vector(UNSIGNED("0" & op1) - UNSIGNED("0" & op2)) when SUB,
+					 std_logic_vector(TO_UNSIGNED(TO_INTEGER(UNSIGNED("0" & op1) * UNSIGNED("0" & op2)), 9)) when MUL,
 				MOT_ZERO when others ;
-			
 		S <= buff(7 downto 0);
 		
 		
@@ -74,7 +73,7 @@ begin
 			--détermine les flags une fois l'opération effectuée
 			--détection par écoute du signal buff
 			RES <= no_flag ;
-			if(TO_INTEGER(SIGNED(buff(7 downto 0))) < TO_INTEGER(SIGNED(MOT_ZERO(7 downto 0 )))) then -- pas sure du fonctionnement : le mot est négatif
+			if(buff(8) = '1') then -- pas sure du fonctionnement : le mot est négatif
 				RES <= N;
 			end if ;
 			if(buff= MOT_ZERO) then -- pas sure du fonctionnement : le mot est nul
