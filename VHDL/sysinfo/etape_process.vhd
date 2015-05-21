@@ -158,7 +158,8 @@ architecture Behavioral of etape_process is
 	signal in_data_br : std_logic_vector(7 downto 0) ;
 	signal out_a_br : std_logic_vector(7 downto 0) ;
 	signal out_b_br : std_logic_vector(7 downto 0) ;
-	signal blank : std_logic_vector(7 downto 0) := (others => '0') ;
+	signal blank1 : std_logic_vector(7 downto 0) := (others => '0') ;
+	signal blank2 : std_logic_vector(7 downto 0) := (others => '0') ;
 	signal out_a_di : std_logic_vector (7 downto 0) ;
 	signal out_b_di : std_logic_vector (7 downto 0) ;
 	signal out_c_di : std_logic_vector (7 downto 0) ;
@@ -236,11 +237,10 @@ begin
 		CK=>CK,
 		IN_A=>out_a_di,
 		IN_B=>out_mux_alu,
-		IN_C=>blank,
+		IN_C=>blank1,
 		IN_OP=>out_op_di,
 		OUT_A=>out_a_ex,
 		OUT_B=>out_b_ex,
-		OUT_C=>blank,
 		OUT_OP=>out_op_ex
 	);
 			
@@ -248,11 +248,10 @@ begin
 		CK => CK,
 		IN_A=>out_a_ex,
 		IN_B=>out_mux_data,
-		IN_C=>blank,
+		IN_C=>blank2,
 		IN_OP=>out_op_ex,
 		OUT_A=>in_aw_br,
 		OUT_B=>in_data_br,
-		OUT_C=>blank,
 		OUT_OP=>out_op_mem
 	);
 	
