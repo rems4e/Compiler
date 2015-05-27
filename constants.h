@@ -12,7 +12,6 @@
 /**
  * TODO:
  * switch
- * goto
  * bitop
  * enum
  * …

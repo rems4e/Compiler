@@ -69,7 +69,7 @@
 
 %token tF
 
-%token tRETURN tPRINTF
+%token tRETURN tGOTO tPRINTF
 %token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE
 
 %token tSIZEOF;
@@ -115,7 +115,7 @@ DefCorps : Def
 } Params tPF { idName = $2; } FonctionEnd;
 
 FonctionEnd : { createFunction(&returnValueType, idName, false, paramsCount); } EndOrError
-| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction { currentFunction = NULL; popBlock(); setGlobalScope(true); };
+| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction;
 
 CorpsFonction : tBO Instrucs tBF {
 	if(!lastInstructionIsReturn && !isVoid(&currentFunction->returnType)) {
@@ -124,6 +124,11 @@ CorpsFonction : tBO Instrucs tBF {
 	else if(!lastInstructionIsReturn) {
 		assemblyOutput(RET" ; Retour à la fonction appelante");
 	}
+
+	resetGotoLabels();
+	currentFunction = NULL;
+	popBlock();
+	setGlobalScope(true);
 };
 
 Return : tRETURN ReturnValue;
@@ -305,6 +310,13 @@ Instruc : EndOrError
 | tBO { pushBlock(); } Instrucs tBF { popBlock(); }
 | Exp tVIR Instruc
 | Exp EndOrError
+| tID tDEUXP {
+	addGotoLabel($1);
+}
+| tGOTO tID EndOrError {
+	pushGotoLabel($2);
+	assemblyOutput(JMP_UNKNOWN_GOTO" "UNKNOWN_ADDRESS" ; goto %s", $2);
+}
 | Return EndOrError { lastInstructionIsReturn = true; }
 | tIF CondIf Instruc %prec EndIf { popIfLabel(); }
 | tIF CondIf Instruc tELSE { pushIfLabelLastButOne(); assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS); popIfLabel(); } Instruc { popIfLabel(); }

@@ -16,6 +16,7 @@
 
 //#define OPCODE_TEXT
 
+#define UNKNOWN_GOTO_PREFIX "UG_"
 #define UNKNOWN_IF_PREFIX "UI_"
 #define UNKNOWN_LOOP_PREFIX "UL_"
 #define UNKNOWN_ADDRESS "00000"
@@ -40,8 +41,11 @@
 #define JMF "JMF"
 #define JMP_UNKNOWN_IF   "UI_JMP"
 #define JMP_UNKNOWN_LOOP "UL_JMP"
+#define JMP_UNKNOWN_GOTO "UG_JMP"
+
 #define JMF_UNKNOWN_IF   "UI_JMF"
 #define JMF_UNKNOWN_LOOP "UL_JMF"
+#define JMF_UNKNOWN_GOTO "UG_JMF"
 
 #define PRI "PRI"
 
@@ -69,8 +73,11 @@
 #define JMF "8"
 #define JMP_UNKNOWN_IF   "UI_7"
 #define JMP_UNKNOWN_LOOP "UL_7"
+#define JMP_UNKNOWN_GOTO "UG_7"
+
 #define JMF_UNKNOWN_IF   "UI_8"
 #define JMF_UNKNOWN_LOOP "UL_8"
+#define JMF_UNKNOWN_GOTO "UG_8"
 
 #define PRI "C"
 
@@ -96,6 +103,10 @@ void popIfLabel(void);
 void pushIfLabelLastButOne(void);
 void pushLoopLabel(void);
 void popLoopLabel(void);
+
+void addGotoLabel(char const *name);
+void pushGotoLabel(char const *name);
+void resetGotoLabels(void);
 
 void addFunctionReturnAddress(int returnAddress);
 
