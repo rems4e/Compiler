@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_arith" />
+            <top_module name="std_logic_unsigned" />
+            <top_module name="test_etape_process" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="7" />
+   <wvobject fp_name="/test_etape_process/ck" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">ck</obj_property>
+      <obj_property name="ObjectShortName">ck</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_etape_process/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_etape_process/ck_period" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">ck_period</obj_property>
+      <obj_property name="ObjectShortName">ck_period</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_etape_process/uut/banc_registre/banc[0]" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">[0]</obj_property>
+      <obj_property name="ObjectShortName">banc[0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_etape_process/uut/banc_registre/banc[1]" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">[1]</obj_property>
+      <obj_property name="ObjectShortName">banc[1]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_etape_process/uut/banc_registre/banc[2]" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">[2]</obj_property>
+      <obj_property name="ObjectShortName">banc[2]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_etape_process/uut/mem_data/banc[255]" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">[255]</obj_property>
+      <obj_property name="ObjectShortName">banc[255]</obj_property>
+   </wvobject>
+</wave_config>

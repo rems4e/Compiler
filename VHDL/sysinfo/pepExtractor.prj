@@ -1,0 +1,7 @@
+work	"IP.vhd"
+work	"Instruc_Mem.vhd"
+work	"LC.vhd"
+work	"banc_registres.vhd"
+work	"decod.vhd"
+work	"etape_process.vhd"
+work	"pipe_line.vhd"

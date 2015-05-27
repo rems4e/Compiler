@@ -1,0 +1,272 @@
+--------------------------------------------------------------------------------
+Release 13.4 Trace  (lin64)
+Copyright (c) 1995-2011 Xilinx, Inc.  All rights reserved.
+
+/opt/Xilinx/13.4/ISE_DS/ISE/bin/lin64/unwrapped/trce -intstyle ise -v 3 -s 3 -n
+3 -fastpaths -xml banc_registres.twx banc_registres.ncd -o banc_registres.twr
+banc_registres.pcf
+
+Design file:              banc_registres.ncd
+Physical constraint file: banc_registres.pcf
+Device,package,speed:     xc6slx16,csg324,C,-3 (PRODUCTION 1.21 2012-01-07)
+Report level:             verbose report
+
+Environment Variable      Effect 
+--------------------      ------ 
+NONE                      No environment variables were set
+--------------------------------------------------------------------------------
+
+INFO:Timing:2698 - No timing constraints found, doing default enumeration.
+INFO:Timing:3412 - To improve timing, see the Timing Closure User Guide (UG612).
+INFO:Timing:2752 - To get complete path coverage, use the unconstrained paths 
+   option. All paths that are not constrained will be reported in the 
+   unconstrained paths section(s) of the report.
+INFO:Timing:3339 - The clock-to-out numbers in this timing report are based on 
+   a 50 Ohm transmission line loading model.  For the details of this model, 
+   and for more information on accounting for different loading conditions, 
+   please see the device datasheet.
+
+
+
+Data Sheet report:
+-----------------
+All values displayed in nanoseconds (ns)
+
+Setup/Hold to clock CK
+------------+------------+------------+------------+------------+------------------+--------+
+            |Max Setup to|  Process   |Max Hold to |  Process   |                  | Clock  |
+Source      | clk (edge) |   Corner   | clk (edge) |   Corner   |Internal Clock(s) | Phase  |
+------------+------------+------------+------------+------------+------------------+--------+
+AW<0>       |    2.558(R)|      SLOW  |   -0.487(R)|      SLOW  |CK_BUFGP          |   0.000|
+AW<1>       |    3.019(R)|      SLOW  |   -0.105(R)|      SLOW  |CK_BUFGP          |   0.000|
+AW<2>       |    3.237(R)|      SLOW  |   -0.636(R)|      SLOW  |CK_BUFGP          |   0.000|
+AW<3>       |    2.418(R)|      SLOW  |   -0.168(R)|      SLOW  |CK_BUFGP          |   0.000|
+DATA<0>     |    1.287(R)|      SLOW  |   -0.278(R)|      SLOW  |CK_BUFGP          |   0.000|
+DATA<1>     |    2.782(R)|      SLOW  |   -0.234(R)|      SLOW  |CK_BUFGP          |   0.000|
+DATA<2>     |    1.847(R)|      SLOW  |   -0.391(R)|      SLOW  |CK_BUFGP          |   0.000|
+DATA<3>     |    1.554(R)|      SLOW  |   -0.349(R)|      SLOW  |CK_BUFGP          |   0.000|
+DATA<4>     |    1.521(R)|      SLOW  |    0.004(R)|      SLOW  |CK_BUFGP          |   0.000|
+DATA<5>     |    1.575(R)|      SLOW  |   -0.103(R)|      SLOW  |CK_BUFGP          |   0.000|
+DATA<6>     |    1.593(R)|      SLOW  |   -0.327(R)|      SLOW  |CK_BUFGP          |   0.000|
+DATA<7>     |    1.645(R)|      SLOW  |    0.091(R)|      SLOW  |CK_BUFGP          |   0.000|
+RST         |    2.451(R)|      SLOW  |   -0.468(R)|      SLOW  |CK_BUFGP          |   0.000|
+W           |    2.354(R)|      SLOW  |   -0.148(R)|      SLOW  |CK_BUFGP          |   0.000|
+------------+------------+------------+------------+------------+------------------+--------+
+
+Clock CK to Pad
+------------+-----------------+------------+-----------------+------------+------------------+--------+
+            |Max (slowest) clk|  Process   |Min (fastest) clk|  Process   |                  | Clock  |
+Destination |  (edge) to PAD  |   Corner   |  (edge) to PAD  |   Corner   |Internal Clock(s) | Phase  |
+------------+-----------------+------------+-----------------+------------+------------------+--------+
+QA<0>       |         9.714(R)|      SLOW  |         4.673(R)|      FAST  |CK_BUFGP          |   0.000|
+QA<1>       |         9.434(R)|      SLOW  |         4.626(R)|      FAST  |CK_BUFGP          |   0.000|
+QA<2>       |         9.604(R)|      SLOW  |         4.596(R)|      FAST  |CK_BUFGP          |   0.000|
+QA<3>       |         9.768(R)|      SLOW  |         4.662(R)|      FAST  |CK_BUFGP          |   0.000|
+QA<4>       |        10.258(R)|      SLOW  |         4.790(R)|      FAST  |CK_BUFGP          |   0.000|
+QA<5>       |         9.387(R)|      SLOW  |         4.544(R)|      FAST  |CK_BUFGP          |   0.000|
+QA<6>       |         9.310(R)|      SLOW  |         4.452(R)|      FAST  |CK_BUFGP          |   0.000|
+QA<7>       |         9.197(R)|      SLOW  |         4.358(R)|      FAST  |CK_BUFGP          |   0.000|
+QB<0>       |         9.442(R)|      SLOW  |         4.398(R)|      FAST  |CK_BUFGP          |   0.000|
+QB<1>       |         9.168(R)|      SLOW  |         4.331(R)|      FAST  |CK_BUFGP          |   0.000|
+QB<2>       |         9.829(R)|      SLOW  |         4.699(R)|      FAST  |CK_BUFGP          |   0.000|
+QB<3>       |         9.335(R)|      SLOW  |         4.408(R)|      FAST  |CK_BUFGP          |   0.000|
+QB<4>       |         9.430(R)|      SLOW  |         4.608(R)|      FAST  |CK_BUFGP          |   0.000|
+QB<5>       |         9.818(R)|      SLOW  |         4.598(R)|      FAST  |CK_BUFGP          |   0.000|
+QB<6>       |         9.851(R)|      SLOW  |         4.814(R)|      FAST  |CK_BUFGP          |   0.000|
+QB<7>       |        10.112(R)|      SLOW  |         4.694(R)|      FAST  |CK_BUFGP          |   0.000|
+------------+-----------------+------------+-----------------+------------+------------------+--------+
+
+Pad to Pad
+---------------+---------------+---------+
+Source Pad     |Destination Pad|  Delay  |
+---------------+---------------+---------+
+AA<0>          |QA<0>          |    9.179|
+AA<0>          |QA<1>          |    8.503|
+AA<0>          |QA<2>          |    8.563|
+AA<0>          |QA<3>          |    8.897|
+AA<0>          |QA<4>          |    8.735|
+AA<0>          |QA<5>          |    8.610|
+AA<0>          |QA<6>          |    8.267|
+AA<0>          |QA<7>          |    8.657|
+AA<1>          |QA<0>          |    9.241|
+AA<1>          |QA<1>          |    8.235|
+AA<1>          |QA<2>          |    8.977|
+AA<1>          |QA<3>          |   10.016|
+AA<1>          |QA<4>          |    9.598|
+AA<1>          |QA<5>          |    8.608|
+AA<1>          |QA<6>          |    7.877|
+AA<1>          |QA<7>          |    8.522|
+AA<2>          |QA<0>          |    9.958|
+AA<2>          |QA<1>          |    9.227|
+AA<2>          |QA<2>          |    9.318|
+AA<2>          |QA<3>          |    9.689|
+AA<2>          |QA<4>          |    9.289|
+AA<2>          |QA<5>          |    8.313|
+AA<2>          |QA<6>          |    8.155|
+AA<2>          |QA<7>          |    8.391|
+AA<3>          |QA<0>          |    9.091|
+AA<3>          |QA<1>          |    8.331|
+AA<3>          |QA<2>          |    8.855|
+AA<3>          |QA<3>          |    9.023|
+AA<3>          |QA<4>          |    8.794|
+AA<3>          |QA<5>          |    8.424|
+AA<3>          |QA<6>          |    7.912|
+AA<3>          |QA<7>          |    8.458|
+AB<0>          |QB<0>          |    8.665|
+AB<0>          |QB<1>          |    8.443|
+AB<0>          |QB<2>          |    8.627|
+AB<0>          |QB<3>          |    8.597|
+AB<0>          |QB<4>          |    8.608|
+AB<0>          |QB<5>          |    8.918|
+AB<0>          |QB<6>          |    8.495|
+AB<0>          |QB<7>          |    9.127|
+AB<1>          |QB<0>          |    8.658|
+AB<1>          |QB<1>          |    8.290|
+AB<1>          |QB<2>          |    8.827|
+AB<1>          |QB<3>          |    8.744|
+AB<1>          |QB<4>          |    8.535|
+AB<1>          |QB<5>          |    9.185|
+AB<1>          |QB<6>          |    8.473|
+AB<1>          |QB<7>          |    9.100|
+AB<2>          |QB<0>          |    8.962|
+AB<2>          |QB<1>          |    8.740|
+AB<2>          |QB<2>          |    9.503|
+AB<2>          |QB<3>          |    9.415|
+AB<2>          |QB<4>          |    8.833|
+AB<2>          |QB<5>          |    9.449|
+AB<2>          |QB<6>          |    8.606|
+AB<2>          |QB<7>          |   10.063|
+AB<3>          |QB<0>          |    8.567|
+AB<3>          |QB<1>          |    8.057|
+AB<3>          |QB<2>          |    8.396|
+AB<3>          |QB<3>          |    8.416|
+AB<3>          |QB<4>          |    7.999|
+AB<3>          |QB<5>          |    8.245|
+AB<3>          |QB<6>          |    8.056|
+AB<3>          |QB<7>          |    8.630|
+AW<0>          |QA<0>          |    8.685|
+AW<0>          |QA<1>          |    8.524|
+AW<0>          |QA<2>          |    8.586|
+AW<0>          |QA<3>          |    8.329|
+AW<0>          |QA<4>          |    8.510|
+AW<0>          |QA<5>          |    8.286|
+AW<0>          |QA<6>          |    8.161|
+AW<0>          |QA<7>          |    8.252|
+AW<0>          |QB<0>          |    8.698|
+AW<0>          |QB<1>          |    8.476|
+AW<0>          |QB<2>          |    8.660|
+AW<0>          |QB<3>          |    8.630|
+AW<0>          |QB<4>          |    8.372|
+AW<0>          |QB<5>          |    8.476|
+AW<0>          |QB<6>          |    8.243|
+AW<0>          |QB<7>          |    8.216|
+AW<1>          |QA<0>          |    9.270|
+AW<1>          |QA<1>          |    9.109|
+AW<1>          |QA<2>          |    9.171|
+AW<1>          |QA<3>          |    8.914|
+AW<1>          |QA<4>          |    9.095|
+AW<1>          |QA<5>          |    8.871|
+AW<1>          |QA<6>          |    8.746|
+AW<1>          |QA<7>          |    8.837|
+AW<1>          |QB<0>          |    8.303|
+AW<1>          |QB<1>          |    8.081|
+AW<1>          |QB<2>          |    8.265|
+AW<1>          |QB<3>          |    8.235|
+AW<1>          |QB<4>          |    7.977|
+AW<1>          |QB<5>          |    8.081|
+AW<1>          |QB<6>          |    7.848|
+AW<1>          |QB<7>          |    7.821|
+AW<2>          |QA<0>          |    8.991|
+AW<2>          |QA<1>          |    8.830|
+AW<2>          |QA<2>          |    8.892|
+AW<2>          |QA<3>          |    8.635|
+AW<2>          |QA<4>          |    8.816|
+AW<2>          |QA<5>          |    8.592|
+AW<2>          |QA<6>          |    8.467|
+AW<2>          |QA<7>          |    8.558|
+AW<2>          |QB<0>          |    8.513|
+AW<2>          |QB<1>          |    8.291|
+AW<2>          |QB<2>          |    8.475|
+AW<2>          |QB<3>          |    8.445|
+AW<2>          |QB<4>          |    8.187|
+AW<2>          |QB<5>          |    8.291|
+AW<2>          |QB<6>          |    8.058|
+AW<2>          |QB<7>          |    8.031|
+AW<3>          |QA<0>          |    7.805|
+AW<3>          |QA<1>          |    7.644|
+AW<3>          |QA<2>          |    7.706|
+AW<3>          |QA<3>          |    7.449|
+AW<3>          |QA<4>          |    7.630|
+AW<3>          |QA<5>          |    7.406|
+AW<3>          |QA<6>          |    7.281|
+AW<3>          |QA<7>          |    7.372|
+AW<3>          |QB<0>          |    7.976|
+AW<3>          |QB<1>          |    7.754|
+AW<3>          |QB<2>          |    7.938|
+AW<3>          |QB<3>          |    7.908|
+AW<3>          |QB<4>          |    7.650|
+AW<3>          |QB<5>          |    7.754|
+AW<3>          |QB<6>          |    7.521|
+AW<3>          |QB<7>          |    7.494|
+DATA<0>        |QA<0>          |    6.958|
+DATA<0>        |QB<0>          |    7.662|
+DATA<1>        |QA<1>          |    6.801|
+DATA<1>        |QB<1>          |    8.037|
+DATA<2>        |QA<2>          |    6.804|
+DATA<2>        |QB<2>          |    7.297|
+DATA<3>        |QA<3>          |    6.667|
+DATA<3>        |QB<3>          |    7.670|
+DATA<4>        |QA<4>          |    7.433|
+DATA<4>        |QB<4>          |    8.323|
+DATA<5>        |QA<5>          |    6.525|
+DATA<5>        |QB<5>          |    7.422|
+DATA<6>        |QA<6>          |    6.716|
+DATA<6>        |QB<6>          |    7.275|
+DATA<7>        |QA<7>          |    6.435|
+DATA<7>        |QB<7>          |    6.898|
+RST            |QA<0>          |    7.984|
+RST            |QA<1>          |    7.823|
+RST            |QA<2>          |    7.885|
+RST            |QA<3>          |    7.628|
+RST            |QA<4>          |    7.809|
+RST            |QA<5>          |    7.585|
+RST            |QA<6>          |    7.460|
+RST            |QA<7>          |    7.551|
+RST            |QB<0>          |    7.996|
+RST            |QB<1>          |    7.774|
+RST            |QB<2>          |    7.958|
+RST            |QB<3>          |    7.928|
+RST            |QB<4>          |    7.670|
+RST            |QB<5>          |    7.774|
+RST            |QB<6>          |    7.541|
+RST            |QB<7>          |    7.514|
+W              |QA<0>          |    7.364|
+W              |QA<1>          |    7.203|
+W              |QA<2>          |    7.265|
+W              |QA<3>          |    7.008|
+W              |QA<4>          |    7.189|
+W              |QA<5>          |    6.965|
+W              |QA<6>          |    6.840|
+W              |QA<7>          |    6.931|
+W              |QB<0>          |    7.839|
+W              |QB<1>          |    7.617|
+W              |QB<2>          |    7.801|
+W              |QB<3>          |    7.771|
+W              |QB<4>          |    7.513|
+W              |QB<5>          |    7.617|
+W              |QB<6>          |    7.384|
+W              |QB<7>          |    7.357|
+---------------+---------------+---------+
+
+
+Analysis completed Tue May 12 12:13:53 2015 
+--------------------------------------------------------------------------------
+
+Trace Settings:
+-------------------------
+Trace Settings 
+
+Peak Memory Usage: 389 MB
+
+
+

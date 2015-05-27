@@ -1,0 +1,2 @@
+vhdl isim_temp "pipe_line.vhd"
+vhdl isim_temp "pipe_line_test.vhd"

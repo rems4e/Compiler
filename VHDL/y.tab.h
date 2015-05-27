@@ -1,0 +1,13 @@
+#define ADD 257
+#define MUL 258
+#define SOU 259
+#define DIV 260
+#define COP 261
+#define AFC 262
+#define JMP 263
+#define JMF 264
+#define INF 265
+#define SUP 266
+#define EQU 267
+#define PRI 268
+#define ENT 269
