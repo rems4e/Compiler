@@ -123,7 +123,6 @@ Delim				{ ECHO; }
 "+="				{ ECHO; return tPLUSEQ; }
 "&="                { ECHO; return tBITANDEQ; }
 "|="                { ECHO; return tBITOREQ; }
-"~="                { ECHO; return tBITNOTEQ; }
 "^="                { ECHO; return tBITXOREQ; }
 "<<="               { ECHO; return tSHIFTLEQ; }
 ">>="               { ECHO; return tSHIFTREQ; }
