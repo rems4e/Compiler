@@ -36,7 +36,7 @@ entity gest_aleas is
 			  OP : in  STD_LOGIC_VECTOR (7 downto 0);
            B : in  STD_LOGIC_VECTOR (7 downto 0);
            C : in  STD_LOGIC_VECTOR (7 downto 0);
-			  out_OP: out std_logic_vector(7 downto 0);
+			  out_OP,out_a,out_b,out_c: out std_logic_vector(7 downto 0);
            clock : out  STD_LOGIC);
 end gest_aleas;
 
@@ -77,12 +77,24 @@ begin
 	lecture : process(CK)
 	begin
 		if rising_edge(CK) then
-			if RST='1' and (banc(to_integer(unsigned(B))) = "00" or banc(to_integer(unsigned(C))) = "00") then
+			if RST='1' and (banc(to_integer(unsigned(B))) = "11" or banc(to_integer(unsigned(C))) = "11") then
+				out_OP <= OP ;
+				out_a <=A;
+				out_b <=B;
+				out_c <=C;
+				Inhib <='1' ;
+			elsif RST='1' and (banc(to_integer(unsigned(B))) = "00" or banc(to_integer(unsigned(C))) = "00") then
 				Inhib <='0' ;
 				out_OP <= OP ;
-			else
+				out_a <=A;
+				out_b <=B;
+				out_c <=C;
+			else 
 				Inhib <='1' ;
 				out_OP <= NOP ;
+				out_a <=A;
+				out_b <=B;
+				out_c <=C;
 			end if ;	
 		end if ;
 	end process ;
