@@ -74,19 +74,24 @@
 
 %token tSIZEOF;
 
-%right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
+%right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL tBITANDEQ tBITOREQ tBITNOTEQ tBITXOREQ tSHIFTLEQ tSHIFTREQ
 
-%right tQUESTION
-%right tDEUXP
+%right tQUESTION tDEUXP
 
-%left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tDIFF
-%left tET
 %left tOU
+%left tET
+%left tBITOR
+%left tBITXOR
+%left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tDIFF
+
+%left tSHIFTL tSHIFTR
 
 %left tPLUS tMOINS
 %left tDIV tSTAR tMOD
 
 %right tSIZEOF tAMP;
+
+%right tNOT tBITNOT
 
 %nonassoc tCRO tCRF
 
@@ -558,12 +563,19 @@ Exp : tID {
 | Exp tSTAR Exp { $$ = DEREF(binOp(MUL, dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tDIV Exp { $$ = DEREF(binOp(DIV, dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tMOD Exp {  $$ = DEREF(modulo(dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tAMP Exp %prec tBITXOR {  $$ = DEREF(bitand(dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tBITOR Exp {  $$ = DEREF(bitor(dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tBITXOR Exp {  $$ = DEREF(bitxor(dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tSHIFTL Exp { $$ = DEREF(binOp(MUL, dereferenceExp($1), powerOfTwo(dereferenceExp($3))), 0); }
+| Exp tSHIFTR Exp { $$ = DEREF(binOp(DIV, dereferenceExp($1), powerOfTwo(dereferenceExp($3))), 0); }
 | tMOINS Exp %prec tSTAR {
 	symbol_t *tmp = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d -1", tmp->address);
 	$$ = DEREF(binOp(MUL, dereferenceExp($2), tmp), 0);
 }
 | tPLUS Exp %prec tSTAR { $$ = $2; }
+| tBITNOT Exp { $$ = DEREF(bitnot(dereferenceExp($2)), 0); }
+| tNOT Exp { $$ = DEREF(negate(dereferenceExp($2)), 0); }
 | Exp tMODEQ Exp {
 	if(isTemp($1.symbol)) {
 		yyerror("L'expression doit être une lvalue.");
@@ -572,10 +584,42 @@ Exp : tID {
 	affectation($1, modulo($1.symbol, dereferenceExp($3)), false);
 	$$ = DEREF($1.symbol, $1.dereferenceCount);
 }
+| Exp tBITANDEQ Exp {
+	if(isTemp($1.symbol)) {
+		yyerror("L'expression doit être une lvalue.");
+	}
+
+	affectation($1, bitand($1.symbol, dereferenceExp($3)), false);
+	$$ = DEREF($1.symbol, $1.dereferenceCount);
+}
+| Exp tBITOREQ Exp {
+	if(isTemp($1.symbol)) {
+		yyerror("L'expression doit être une lvalue.");
+	}
+
+	affectation($1, bitor($1.symbol, dereferenceExp($3)), false);
+	$$ = DEREF($1.symbol, $1.dereferenceCount);
+}
+| Exp tBITXOREQ Exp {
+	if(isTemp($1.symbol)) {
+		yyerror("L'expression doit être une lvalue.");
+	}
+
+	affectation($1, bitxor($1.symbol, dereferenceExp($3)), false);
+	$$ = DEREF($1.symbol, $1.dereferenceCount);
+}
 | Exp tPLUSEQ Exp { binOpEq(ADD, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | Exp tMOINSEQ Exp { binOpEq(SOU, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | Exp tDIVEQ Exp { binOpEq(DIV, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | Exp tMULEQ Exp { binOpEq(MUL, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tSHIFTLEQ Exp {
+	symbol_t *tmp = powerOfTwo(dereferenceExp($3));
+	binOpEq(MUL, $1, tmp); $$ = DEREF($1.symbol, $1.dereferenceCount);
+}
+| Exp tSHIFTREQ Exp {
+	symbol_t *tmp = powerOfTwo(dereferenceExp($3));
+	binOpEq(DIV, $1, tmp); $$ = DEREF($1.symbol, $1.dereferenceCount);
+}
 
 | Exp tET Exp {
 	symbol_t *s = binOp(ADD, toBoolean(dereferenceExp($1)), toBoolean(dereferenceExp($3)));

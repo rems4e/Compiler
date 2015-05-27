@@ -121,5 +121,11 @@ symbol_t *toBoolean(symbol_t *s);
 
 symbol_t *modulo(symbol_t *s1, symbol_t *s2);
 
+symbol_t *powerOfTwo(symbol_t *power);
+symbol_t *bitand(symbol_t *s1, symbol_t *s2);
+symbol_t *bitor(symbol_t *s1, symbol_t *s2);
+symbol_t *bitxor(symbol_t *s1, symbol_t *s2);
+symbol_t *bitnot(symbol_t *s1);
+
 
 #endif /* defined(__Syste_me_Info__assembly__) */

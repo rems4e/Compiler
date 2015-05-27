@@ -99,6 +99,11 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 
 "NULL"				{ ECHO; return tNULL; }
 "&"                 { ECHO; return tAMP; }
+"|"                 { ECHO; return tBITOR; }
+"~"                 { ECHO; return tBITNOT; }
+"^"                 { ECHO; return tBITXOR; }
+"<<"                { ECHO; return tSHIFTL; }
+">>"                { ECHO; return tSHIFTR; }
 
 "("					{ ECHO; return tPO; }
 ")"					{ ECHO; return tPF; }
@@ -116,6 +121,12 @@ Delim				{ ECHO; }
 "%="				{ ECHO; return tMODEQ; }
 "-="				{ ECHO; return tMOINSEQ; }
 "+="				{ ECHO; return tPLUSEQ; }
+"&="                { ECHO; return tBITANDEQ; }
+"|="                { ECHO; return tBITOREQ; }
+"~="                { ECHO; return tBITNOTEQ; }
+"^="                { ECHO; return tBITXOREQ; }
+"<<="               { ECHO; return tSHIFTLEQ; }
+">>="               { ECHO; return tSHIFTREQ; }
 
 "/"					{ ECHO; return tDIV; }
 "*"					{ ECHO; return tSTAR; }
@@ -124,6 +135,7 @@ Delim				{ ECHO; }
 "+"					{ ECHO; return tPLUS; }
 "="					{ ECHO; return tEGAL ; }
 ";"					{ ECHO; return tF; }
+"!"					{ ECHO; return tNOT; }
 
 "=="				{ ECHO; return tBOOLEGAL; }
 "<="				{ ECHO; return tINFEGAL; }

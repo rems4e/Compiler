@@ -424,3 +424,27 @@ symbol_t *modulo(symbol_t *left, symbol_t *right) {
 	return binOp(SOU, leftBackup, res);
 }
 
+symbol_t *powerOfTwo(symbol_t *power) {
+	// TODO
+	return power;
+}
+
+symbol_t *bitand(symbol_t *s1, symbol_t *s2) {
+	// TODO
+	return s1;
+}
+
+symbol_t *bitor(symbol_t *s1, symbol_t *s2) {
+	// TODO
+	return s1;
+}
+
+symbol_t *bitxor(symbol_t *s1, symbol_t *s2) {
+	// TODO
+	return s1;
+}
+
+symbol_t *bitnot(symbol_t *s1) {
+	// TODO
+	return s1;
+}
