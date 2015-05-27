@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_gest_alea_isim_beh1.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="std_logic_1164" />
+            <top_module name="test_gest_alea" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="11" />
+   <wvobject fp_name="/test_gest_alea/ck" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">ck</obj_property>
+      <obj_property name="ObjectShortName">ck</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/a1" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">a1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">a1[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/a2" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">a2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">a2[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/b1" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">b1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">b1[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/b2" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">b2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">b2[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/op1" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">op1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">op1[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/op2" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">op2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">op2[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/inhib" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">inhib</obj_property>
+      <obj_property name="ObjectShortName">inhib</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/ck_period" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">ck_period</obj_property>
+      <obj_property name="ObjectShortName">ck_period</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_gest_alea/uut/temp_op2" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">temp_op2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">temp_op2[7:0]</obj_property>
+   </wvobject>
+</wave_config>
