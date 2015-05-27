@@ -17,6 +17,8 @@
 
 #define TAILLE_MAX 1000
 
+extern int errno;
+
 static char *assemblyBuffer = NULL;
 static char *globalBuffer = NULL;
 static FILE *output = NULL;
@@ -49,9 +51,14 @@ static returnStack_t returnAddressStack;
 static int linesCount = 0, globalCount = 0;
 
 static void replaceLabels(char *txt, char const *prefix, labelList_t *labels, char *buf, size_t unknownLength);
+static void removeAssembyOutput(char const *path);
 
 void initAssemblyOutput(char const *path) {
-	output = fopen(path, "w+");
+	output = fopen(path, "w");
+	if(output == NULL) {
+		fprintf(stderr, "Le fichier de sortie \"%s\" n'a pas pu être ouvert : %s\n", path, strerror(errno));
+		exit(OPEN_OUTPUT_FAILURE);
+	}
 	assemblyBuffer = malloc(1);
 	assemblyBuffer[0] = '\0';
 	globalBuffer = malloc(1);
@@ -79,7 +86,7 @@ void initAssemblyOutput(char const *path) {
 #endif
 }
 
-void closeAssemblyOutput() {
+void closeAssemblyOutput(bool error, char const *path) {
 	char *pos;
 	char labelBuf[6];
 	int unknownLength = strlen(UNKNOWN_ADDRESS);
@@ -134,14 +141,22 @@ void closeAssemblyOutput() {
 
 #endif
 
-	fputs(assemblyBuffer, output);
-	fclose(output);
+	if(error) {
+		fclose(output);
+		remove(path);
+	}
+	else {
+		fputs(assemblyBuffer, output);
+		fclose(output);
+	}
 	free(assemblyBuffer);
 	
 	for(int i = 0; i < TAILLE_MAX; ++i) {
 		free(returnAddressStack.address[i]);
 	}
 }
+
+
 
 void replaceLabels(char *txt, char const *prefix, labelList_t *labels, char *buf, size_t unknownLength) {
 	int currentLabel = 0;

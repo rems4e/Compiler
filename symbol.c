@@ -242,12 +242,16 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 		}
 	}
 
-	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
+	compilerError("La table des symboles est trop petite, impossible de réserver l'espace pour le symbole %s. Essayez avec moins de variables/tableaux, ou contactez l'éditeur pour réduire cette limitation.", name);
 	return NULL;
 }
 
 symbol_t *createTable(char const *name, varType_t type, int size) {
 	int const nestingLevel = getGlobalScope() ? 0 : symbolTable.nestingLevel;
+
+	if(size == 0) {
+		size = 1;
+	}
 
 	symbol_t **newSym = NULL;
 	for(int i = 0; i <= SYM_COUNT - size && newSym == NULL; ++i) {
@@ -308,7 +312,7 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 		}
 	}
 
-	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
+	compilerError("La table des symboles est trop petite, impossible de réserver l'espace pour le symbole %s. Essayez avec moins de variables/tableaux, ou contactez l'éditeur pour réduire cette limitation.", name);
 	return NULL;
 }
 
@@ -336,7 +340,7 @@ symbol_t *allocTemp(int indirectionCount, baseType_t baseType) {
 		}
 	}
 
-	fprintf(stderr, "Symbol table too small, couldn't get room for new temporary symbol.\n");
+	compilerError("La table des symboles est trop petite, impossible de réserver l'espace pour un symbole temporaire. Essayez avec moins de variables/tableaux, ou contactez l'éditeur pour réduire cette limitation.");
 	return NULL;
 }
 
@@ -398,8 +402,13 @@ symbol_t *dereferenceExp(dereferencedSymbol_t exp) {
 	}
 
 	if(exp.dereferenceCount > 0) {
-		if (exp.dereferenceCount > s->type.indirectionCount){
-			yyerror("Impossible de déréférencer l'expresion %d fois.", exp.dereferenceCount);
+		if (exp.dereferenceCount > s->type.indirectionCount) {
+			if(exp.dereferenceCount == 1) {
+				yyerror("Impossible de déréférencer l'expression.");
+			}
+			else {
+				yyerror("Impossible de déréférencer l'expression %d fois.", exp.dereferenceCount);
+			}
 		}
 		else {
 			symbol_t *ind;
@@ -443,7 +452,7 @@ bool topLevelConst(varType_t const *t) {
 
 void checkScalar(symbol_t const *s) {
 	if(s->type.indirectionCount > 0) {
-		yyerror("L'expresion n'est pas un scalaire.");
+		yyerror("L'expression n'est pas un scalaire.");
 	}
 }
 

@@ -14,7 +14,7 @@
  * switch
  * goto
  * bitop
- * gestion des erreurs
+ * enum
  * …
  */
 
@@ -27,7 +27,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define OPEN_OUTPUT_FAILURE 3
+#define INVALID_INVOCATION 4
+#define INTERNAL_FAILURE 5
+#define COMPILATION_FAILURE 6
+
 void yyerror(char const *s, ...);
+void compilerError(char const *s, ...);
 
 struct symbol_t;
 typedef enum { BT_INT, BT_VOID, BT_CHAR } baseType_t;

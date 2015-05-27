@@ -81,7 +81,7 @@
 #endif
 
 void initAssemblyOutput(char const *path);
-void closeAssemblyOutput(void);
+void closeAssemblyOutput(bool error, char const *path);
 
 void assemblyOutput(char const *lineFormat, ...) __printflike(1, 2);
 

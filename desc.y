@@ -14,6 +14,7 @@
 	#define YYERROR_VERBOSE
 
 	#define MAX_INITIALIZER 2048
+	#define MAX_ERROR 20
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
@@ -38,6 +39,9 @@
 	} initializerList;
 
 	static int loopMarkers[MAX_NESTING];
+
+	static int errorCount = 0;
+	static bool errorToManage = false;
 
 	%}
 
@@ -98,13 +102,19 @@
 Corps :
 | Corps DefCorps;
 
+EndOrError : error tF {
+	yyerrok;
+	errorToManage = false;
+}
+| tF;
+
 DefCorps : Def
 | Type tID tPO {
 	paramsCount = 0;
 	returnValueType = $1;
 } Params tPF { idName = $2; } FonctionEnd;
 
-FonctionEnd : { createFunction(&returnValueType, idName, false, paramsCount); } tF
+FonctionEnd : { createFunction(&returnValueType, idName, false, paramsCount); } EndOrError
 | { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction { currentFunction = NULL; popBlock(); setGlobalScope(true); };
 
 CorpsFonction : tBO Instrucs tBF {
@@ -186,7 +196,7 @@ PureType : Type { tabSize = 1; }
 | Type tCRO tNOMBRE tCRF { if($3 < 0) { yyerror("Un tableau ne peut pas avoir de taille négative."); } tabSize = $3; };
 | Type tCRO tCRF { tabSize = -1; };
 
-TypedDefNext : tF
+TypedDefNext : EndOrError
 | tVIR TypedDef;
         
 TypedDef : tID {
@@ -207,7 +217,15 @@ TypedDef : tID {
 } TypedDefNext
 | Tab TabDef TypedDefNext;
 
-Tab :  tID tCRO tNOMBRE tCRF {
+Tab : {
+	if(tabSize == -1) {
+		yyerror("Un tableau dont la dimension n'a pas été spécifiée doit être initialisé.");
+	}
+	else {
+		symbol_t *symTab = createTable(idName, lastVarType, tabSize);
+	}
+}
+| tID tCRO tNOMBRE tCRF {
 	if($3 < 0) {
 		yyerror("Impossible de créer un tableau de dimension négative.");
 	}
@@ -218,17 +236,10 @@ Tab :  tID tCRO tNOMBRE tCRF {
 | tID tCRO tCRF {
 	tabSize = -1;
 	idName = $1;
-};
-
-TabDef : {
-	if(tabSize == -1) {
-		yyerror("Un tableau dont la dimension n'a pas été spécifiée doit être initialisé.");
-	}
-	else {
-		symbol_t *symTab = createTable(idName, lastVarType, tabSize);
-	}
 }
-| tEGAL tBO FinTab {
+| EndOrError;
+
+TabDef : tEGAL tBO FinTab {
 	if(tabSize == -1) {
 		tabSize = initializerList.count;
 	}
@@ -289,12 +300,12 @@ FinTab : Exp tBF {
 Instrucs :
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
 
-Instruc : tF
+Instruc : EndOrError
 | Def
 | tBO { pushBlock(); } Instrucs tBF { popBlock(); }
 | Exp tVIR Instruc
-| Exp tF
-| Return tF { lastInstructionIsReturn = true; }
+| Exp EndOrError
+| Return EndOrError { lastInstructionIsReturn = true; }
 | tIF CondIf Instruc %prec EndIf { popIfLabel(); }
 | tIF CondIf Instruc tELSE { pushIfLabelLastButOne(); assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS); popIfLabel(); } Instruc { popIfLabel(); }
 | tWHILE { pushInstructionCount(); } CondLoop { loopMarkers[loop++] = 0; } Instruc {
@@ -307,7 +318,7 @@ Instruc : tF
 | tDO {
 	pushInstructionCount();
 	loopMarkers[loop++] = 0;
-} Instruc tWHILE CondLoop tF {
+} Instruc tWHILE CondLoop EndOrError {
 	assemblyOutput(JMP" %d", popInstructionCount());
 	--loop;
 	for(int i = 0; i < loopMarkers[loop] + 1; ++i) {
@@ -347,8 +358,8 @@ Instruc : tF
 	assemblyOutput(JMP" %d ; Continue", lastInstructionCount());
 };
 
-ExpOrEmptyOrDef : tF;
-| Exp tF;
+ExpOrEmptyOrDef : EndOrError;
+| Exp EndOrError;
 | Def;
 
 ExpOrEmpty :
@@ -640,6 +651,12 @@ Exp : tID {
 %%
 
 void yyerror(const char *s, ...) {
+	if(errorToManage == true) {
+		// On n'affiche qu'une erreurs pour la même instruction
+		return;
+	}
+	errorToManage = true;
+
 	va_list args;
 	va_start(args, s);
 
@@ -647,9 +664,27 @@ void yyerror(const char *s, ...) {
 	vfprintf(stderr, s, args);
 	fputc('\n', stderr);
 
+	++errorCount;
+
+	if(errorCount >= MAX_ERROR) {
+		fprintf(stderr, "Trop d'erreurs, on abandonne.\n");
+		exit(COMPILATION_FAILURE);
+	}
+
+	va_end(args);
+}
+
+void compilerError(const char *s, ...) {
+	va_list args;
+	va_start(args, s);
+
+	fprintf(stderr, "Erreur interne du compilateur (ligne courante : %d) : ", lineNumber);
+	vfprintf(stderr, s, args);
+	fputc('\n', stderr);
+
 	va_end(args);
 
-	exit(1);
+	exit(INTERNAL_FAILURE);
 }
 
 int main(int argc, char const **argv) {
@@ -669,7 +704,7 @@ int main(int argc, char const **argv) {
 
 		if(len < 3 || argv[1][len - 1] != 'c' || argv[1][len - 2] != '.') {
 			fprintf(stderr, "Le fichier doit avoir l'extension \".c\" !\n");
-			return 1;
+			return INVALID_INVOCATION;
 		}
 		FILE *f = fopen(argv[1], "rb");
 		char *name = strdup(argv[1]);
@@ -693,18 +728,23 @@ int main(int argc, char const **argv) {
 			yy_scan_string(buf);
 		}
 		else {
-			return 1;
+			compilerError("Impossible de lire le fichier \"%s\".", argv[1]); // noreturn
 		}
 	}
 
 	initAssemblyOutput(outputName);
-	free(outputName);
 
 	yyparse();
 	free(buf);
 
-	closeAssemblyOutput();
+	closeAssemblyOutput(errorCount > 0, outputName);
+	free(outputName);
 	cleanSymbols();
+
+	if(errorCount > 0) {
+		fprintf(stderr, "Des erreurs sont survenues durant la compilation. Abandon.\n");
+		return COMPILATION_FAILURE;
+	}
 
 	return 0;
 }
