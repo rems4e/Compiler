@@ -1,0 +1,10 @@
+
+
+
+// Instantiate the module
+etape_process instance_name (
+    .CK(CK), 
+    .RST(RST)
+    );
+
+

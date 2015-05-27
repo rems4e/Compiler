@@ -1,0 +1,48 @@
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+netgen -intstyle ise -insert_glbl true -w -dir netgen/synthesis -ofmt verilog -sim etape_process.ngc etape_process_synthesis.v 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+vhdtdtfi -lib work pipe_line.vhd -lib work MUX_Pre_MemData.vhd -lib work MUX_MemData.vhd -lib work MUX_BancRegistres.vhd -lib work MUX_ALU.vhd -lib work LC_ALU.vhd -lib work LC.vhd -lib work IP.vhd -lib work Instruc_Mem.vhd -lib work decod.vhd -lib work Data_Mem.vhd -lib work banc_registres.vhd -lib work ALU.vhd -lib work etape_process.vhd -prj sysinfo -o etape_process.spl -module etape_process -template /opt/Xilinx/13.4/ISE_DS/ISE//data/splfile.tft -deleteonerror 
+spl2sym -intstyle ise -family spartan6 etape_process.spl /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.sym 
+vhdtdtfi -prj sysinfo -o /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.tfi -module etape_process -template /opt/Xilinx/13.4/ISE_DS/ISE//data/tfi.tft -deleteonerror -lib work pipe_line.vhd -lib work MUX_Pre_MemData.vhd -lib work MUX_MemData.vhd -lib work MUX_BancRegistres.vhd -lib work MUX_ALU.vhd -lib work LC_ALU.vhd -lib work LC.vhd -lib work IP.vhd -lib work Instruc_Mem.vhd -lib work decod.vhd -lib work Data_Mem.vhd -lib work banc_registres.vhd -lib work ALU.vhd -lib work etape_process.vhd 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx16-csg324-3 etape_process.ngc etape_process.ngd  
+netgen -intstyle ise -insert_glbl true -w -dir netgen/translate -ofmt verilog -sim etape_process.ngd etape_process_translate.v 
+map -intstyle ise -p xc6slx16-csg324-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o etape_process_map.ncd etape_process.ngd etape_process.pcf 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx16-csg324-3 etape_process.ngc etape_process.ngd  
+netgen -intstyle ise -insert_glbl true -w -dir netgen/translate -ofmt verilog -sim etape_process.ngd etape_process_translate.v 
+map -intstyle ise -p xc6slx16-csg324-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o etape_process_map.ncd etape_process.ngd etape_process.pcf 
+netgen -intstyle ise -insert_glbl true -w -dir netgen/synthesis -ofmt verilog -sim etape_process.ngc etape_process_synthesis.v 
+map -intstyle ise -p xc6slx16-csg324-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o etape_process_map.ncd etape_process.ngd etape_process.pcf 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+ngdbuild -intstyle ise -dd _ngo -nt timestamp -i -p xc6slx16-csg324-3 etape_process.ngc etape_process.ngd  
+map -intstyle ise -p xc6slx16-csg324-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o etape_process_map.ncd etape_process.ngd etape_process.pcf 
+netgen -intstyle ise -insert_glbl true -w -dir netgen/synthesis -ofmt verilog -sim etape_process.ngc etape_process_synthesis.v 
+map -intstyle ise -p xc6slx16-csg324-3 -w -logic_opt off -ol high -t 1 -xt 0 -register_duplication off -r 4 -global_opt off -mt off -ir off -pr off -lc off -power off -o etape_process_map.ncd etape_process.ngd etape_process.pcf 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+netgen -intstyle ise -insert_glbl true -w -dir netgen/synthesis -ofmt verilog -sim etape_process.ngc etape_process_synthesis.v 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+xst -intstyle ise -ifn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.xst" -ofn "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.syr" 
+netgen -intstyle ise -insert_glbl true -w -dir netgen/synthesis -ofmt verilog -sim etape_process.ngc etape_process_synthesis.v 
