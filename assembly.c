@@ -2,7 +2,7 @@
 //  assembly.c
 //  Système Info
 //
-//  Created by Rémi on 05/03/2015.
+//  Created on 05/03/2015.
 //
 
 #include "assembly.h"

@@ -2,7 +2,7 @@
 //  symbol.h
 //  Système Info
 //
-//  Created by Rémi on 26/02/2015.
+//  Created on 26/02/2015.
 //
 
 #ifndef __Syste_me_Info__symbol__

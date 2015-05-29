@@ -2,7 +2,7 @@
 //  assembly.h
 //  Système Info
 //
-//  Created by Rémi on 05/03/2015.
+//  Created on 05/03/2015.
 //
 
 #ifndef __Syste_me_Info__assembly__

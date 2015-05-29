@@ -2,7 +2,7 @@
 //  symbol.c
 //  Système Info
 //
-//  Created by Rémi on 26/02/2015.
+//  Created on 26/02/2015.
 //
 
 #include "symbol.h"
@@ -25,6 +25,7 @@ typedef struct {
 	int nestingLevel;
 } symbolTable_t;
 
+static symbol_t dummy = {true, "Dummy", 0, {0, 0, BT_INT}};
 
 static symbolTable_t symbolTable;
 static char *tempSymbol;
@@ -150,7 +151,7 @@ dereferencedSymbol_t createString(char const *value) {
 
 	dereferencedSymbol_t deref = getExistingSymbol(interningName, false);
 	symbol_t *tab = deref.symbol;
-	if(tab == NULL) {
+	if(tab == &dummy) {
 		tab = createTable(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
 		dereferencedSymbol_t data = getTabIndex(interningName, 0);
 		assert(data.symbol);
@@ -195,7 +196,7 @@ dereferencedSymbol_t getExistingSymbol(char const *name, bool failIfNotFound) {
 		yyerror("Variable %s non déclarée\n", name);
 	}
 
-	return DEREF(NULL, 0);
+	return DEREF(&dummy, 0);
 }
 
 symbol_t *createSymbol(char const *name, varType_t type) {
@@ -210,7 +211,7 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 		}
 		else if(sym->name != NULL && strcmp(sym->name, name) == 0) {
 			yyerror("La variable %s existe déjà !\n", name);
-			return NULL;
+			return &dummy;
 		}
 	}
 
@@ -264,7 +265,7 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 			else if(sym != NULL && sym->name != NULL) {
 				if(strcmp(sym->name, name) == 0) {
 					yyerror("La variable %s existe déjà !\n", name);
-					return NULL;
+					return &dummy;
 				}
 				break;
 			}

@@ -2,7 +2,7 @@
 //  constants.h
 //  Système Info
 //
-//  Created by Rémi on 26/02/2015.
+//  Created on 26/02/2015.
 //
 
 
@@ -12,7 +12,6 @@
 /**
  * TODO:
  * switch
- * enum
  * …
  */
 

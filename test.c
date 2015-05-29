@@ -158,8 +158,14 @@ void printTruc() {
 
 int global2 = 43;*/
 
+enum Plop {Plop1, Plop2};
+
 int main() {
-	int i = 0;
+	printf(Plop1);
+	printf("\n");
+	printf(Plop2);
+	printf("\n");
+/*	int i = 0;
 test:
 	++i;
 	printf(i);
@@ -169,7 +175,7 @@ test:
 	}
 	goto fin;
 fin:
-	printf("Fin\n");
+	printf("Fin\n");*/
 
 	/*int val = 12;
 	int *p = &val;

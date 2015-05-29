@@ -10,6 +10,7 @@
 	#include "assembly.h"
 	#include "function.h"
 	#include "utility.h"
+	#include "enum.h"
 
 	#define YYERROR_VERBOSE
 
@@ -30,6 +31,7 @@
 	static varType_t lastVarType, returnValueType;
 	static char const *idName = NULL;
 	static symbol_t *ternarySymbol;
+	static enumValue_t lastEnumValue = {NULL, 0};
 
 	function_t *currentFunction = NULL;
 
@@ -69,7 +71,7 @@
 
 %token tF
 
-%token tRETURN tGOTO tPRINTF
+%token tRETURN tGOTO tPRINTF tENUM
 %token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE
 
 %token tSIZEOF;
@@ -114,10 +116,43 @@ EndOrError : error tF {
 | tF;
 
 DefCorps : Def
+| tENUM tID { lastEnumValue.value = -1; createEnum($2); } tBO CorpsEnum tBF tF
+| tENUM tBO {lastEnumValue.value = -1; } CorpsEnum tBF tF
 | Type tID tPO {
 	paramsCount = 0;
 	returnValueType = $1;
 } Params tPF { idName = $2; } FonctionEnd;
+
+CorpsEnum : tID { lastEnumValue.name = strdup($1); } EnumVal EnumSuite;
+
+EnumSuite :
+| tVIR
+| tVIR CorpsEnum;
+
+EnumVal : {
+	++lastEnumValue.value;
+	addEnumValue(lastEnumValue);
+	symbol_t *val = createSymbol(lastEnumValue.name, (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT});
+	assemblyOutput(AFC" %d %d ; %s", val->address, lastEnumValue.value, lastEnumValue.name);
+	free(lastEnumValue.name);
+	lastEnumValue.name = NULL;
+}
+| tEGAL tID {
+	lastEnumValue.value = getEnumValue($2);
+	addEnumValue(lastEnumValue);
+	symbol_t *val = createSymbol(lastEnumValue.name, (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT});
+	assemblyOutput(AFC" %d %d ; %s", val->address, lastEnumValue.value, lastEnumValue.name);
+	free(lastEnumValue.name);
+	lastEnumValue.name = NULL;
+}
+| tEGAL tNOMBRE {
+	lastEnumValue.value = $2;
+	addEnumValue(lastEnumValue);
+	symbol_t *val = createSymbol(lastEnumValue.name, (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT});
+	assemblyOutput(AFC" %d %d ; %s", val->address, lastEnumValue.value, lastEnumValue.name);
+	free(lastEnumValue.name);
+	lastEnumValue.name = NULL;
+};
 
 FonctionEnd : { createFunction(&returnValueType, idName, false, paramsCount); } EndOrError
 | { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction;
@@ -200,7 +235,32 @@ Type : tINT {
 	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_CHAR};
 } Indirections {
 	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
+}
+| tENUM tID {
+	if(!enumExists($2)) {
+		yyerror("L'enum %s n'a pas été déclarée.", $2);
+	}
+	lastVarType = (varType_t){.constMask = 0, .indirectionCount = 0, .baseType = BT_INT};
+} Indirections {
+	$$ = (varType_t){.constMask = lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
+}
+| tCONST tENUM tID {
+	if(!enumExists($3)) {
+		yyerror("L'enum %s n'a pas été déclarée.", $3);
+	}
+	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT};
+} Indirections {
+	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
+}
+| tENUM tID tCONST {
+	if(!enumExists($2)) {
+		yyerror("L'enum %s n'a pas été déclarée.", $2);
+	}
+	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT};
+} Indirections {
+	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
 };
+
 
 PureType : Type { tabSize = 1; }
 | Type tCRO tNOMBRE tCRF { if($3 < 0) { yyerror("Un tableau ne peut pas avoir de taille négative."); } tabSize = $3; };
@@ -796,6 +856,7 @@ int main(int argc, char const **argv) {
 	closeAssemblyOutput(errorCount > 0, outputName);
 	free(outputName);
 	cleanSymbols();
+	cleanEnums();
 
 	if(errorCount > 0) {
 		fprintf(stderr, "Des erreurs sont survenues durant la compilation. Abandon.\n");

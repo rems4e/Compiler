@@ -69,6 +69,7 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 						return tCHAR_LITTERAL;
 					}
 
+"enum"				{ ECHO; return tENUM; }
 "goto"				{ ECHO; return tGOTO; }
 "return"			{ ECHO; return tRETURN; }
 "printf"			{ ECHO; return tPRINTF; }

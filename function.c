@@ -2,7 +2,7 @@
 //  function.c
 //  Système Info
 //
-//  Created by Rémi on 15/03/2015.
+//  Created on 15/03/2015.
 //
 
 #include "function.h"
