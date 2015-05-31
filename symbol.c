@@ -12,6 +12,7 @@
 #include <assert.h>
 #include "assembly.h"
 #include "utility.h"
+#include "error.h"
 
 #define ADDRESS_SHIFT 2
 
@@ -404,7 +405,7 @@ void clearSymbolStack() {
 symbol_t *dereferenceExp(dereferencedSymbol_t exp) {
 	symbol_t *s = exp.symbol;
 	if(!s->initialized && !isTemp(s)) {
-		yyerror("Variable %s non initialisée avant utilisation!", s->name);
+		warning("Variable %s non initialisée avant utilisation.", s->name);
 	}
 
 	if(exp.dereferenceCount > 0) {

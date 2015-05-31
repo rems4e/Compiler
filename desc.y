@@ -11,11 +11,11 @@
 	#include "function.h"
 	#include "utility.h"
 	#include "enum.h"
+	#include "error.h"
 
 	#define YYERROR_VERBOSE
 
 	#define MAX_INITIALIZER 2048
-	#define MAX_ERROR 20
 	#define MAX_STACK 1000
 	#define MAX_CASE 1024
 
@@ -41,9 +41,6 @@
 	} initializerList;
 
 	static int loopMarkers[MAX_NESTING];
-
-	static int errorCount = 0;
-	static bool errorToManage = false;
 
 	static struct {
 		int size;
@@ -123,7 +120,7 @@ Corps :
 
 EndOrError : error tF {
 	yyerrok;
-	errorToManage = false;
+	enableErrorReporting();
 }
 | tF;
 
@@ -607,26 +604,31 @@ Exp : tID {
 }
 | tNOMBRE {
 	symbol_t *s = allocTemp(0, BT_INT);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d %d", s->address, $1);
 	$$ = DEREF(s, 0);
 }
 | tTRUE {
 	symbol_t *s = allocTemp(0, BT_INT);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d 1", s->address);
 	$$ = DEREF(s, 0);
 }
 | tFALSE {
 	symbol_t *s = allocTemp(0, BT_INT);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d 0", s->address);
 	$$ = DEREF(s, 0);
 }
 | tNULL {
 	symbol_t *s = allocTemp(1, BT_VOID);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d 0", s->address);
 	$$ = DEREF(s, 0);
 }
 | tCHAR_LITTERAL {
 	symbol_t *s = allocTemp(0, BT_CHAR);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d %d", s->address, (int)($1[0]));
 	$$ = DEREF(s, 0);
 }
@@ -694,6 +696,9 @@ Exp : tID {
 	assemblyOutput(SCN" %d", s->address);
 }
 | tAMP Exp {
+	if(!$2.lvalue) {
+		yyerror("Impossible de prendre l'adresse d'une rvalue.");
+	}
 	symbol_t *s = $2.symbol;
 
 	if(isVoid(&s->type)) {
@@ -701,6 +706,7 @@ Exp : tID {
 	}
 
 	symbol_t *a = allocTemp(s->type.indirectionCount + 1 - $2.dereferenceCount, s->type.baseType);
+	a->type.constMask = s->type.constMask;
 	assemblyOutput(AFC" %d %d", a->address, s->address);
 	assemblyOutput(STK" %d 1", a->address);
 	$$ = DEREF(a, 0);
@@ -888,43 +894,6 @@ Exp : tID {
 
 %%
 
-void yyerror(const char *s, ...) {
-	if(errorToManage == true) {
-		// On n'affiche qu'une erreurs pour la même instruction
-		return;
-	}
-	errorToManage = true;
-
-	va_list args;
-	va_start(args, s);
-
-	fprintf(stderr, "Erreur ligne %d : ", lineNumber);
-	vfprintf(stderr, s, args);
-	fputc('\n', stderr);
-
-	++errorCount;
-
-	if(errorCount >= MAX_ERROR) {
-		fprintf(stderr, "Trop d'erreurs, on abandonne.\n");
-		exit(COMPILATION_FAILURE);
-	}
-
-	va_end(args);
-}
-
-void compilerError(const char *s, ...) {
-	va_list args;
-	va_start(args, s);
-
-	fprintf(stderr, "Erreur interne du compilateur (ligne courante : %d) : ", lineNumber);
-	vfprintf(stderr, s, args);
-	fputc('\n', stderr);
-
-	va_end(args);
-
-	exit(INTERNAL_FAILURE);
-}
-
 int main(int argc, char const **argv) {
 #ifdef YACC_DEBUG
 	extern int yydebug;
@@ -976,12 +945,12 @@ int main(int argc, char const **argv) {
 	yyparse();
 	free(buf);
 
-	closeAssemblyOutput(errorCount > 0, outputName);
+	closeAssemblyOutput(outputName);
 	free(outputName);
 	cleanSymbols();
 	cleanEnums();
 
-	if(errorCount > 0) {
+	if(errorsOccurred() > 0) {
 		fprintf(stderr, "Des erreurs sont survenues durant la compilation. Abandon.\n");
 		return COMPILATION_FAILURE;
 	}

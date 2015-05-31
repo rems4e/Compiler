@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include "error.h"
 
 #define MAX_SIZE 1000
 
@@ -90,7 +91,7 @@ void initAssemblyOutput(char const *path) {
 #endif
 }
 
-void closeAssemblyOutput(bool error, char const *path) {
+void closeAssemblyOutput(char const *path) {
 	char *pos;
 	char labelBuf[6];
 	int unknownLength = strlen(UNKNOWN_ADDRESS);
@@ -160,7 +161,7 @@ void closeAssemblyOutput(bool error, char const *path) {
 
 #endif
 
-	if(error) {
+	if(errorsOccurred()) {
 		fclose(output);
 		remove(path);
 	}

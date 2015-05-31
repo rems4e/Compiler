@@ -87,7 +87,7 @@
 #endif
 
 void initAssemblyOutput(char const *path);
-void closeAssemblyOutput(bool error, char const *path);
+void closeAssemblyOutput(char const *path);
 
 void assemblyOutput(char const *lineFormat, ...)  __attribute__ ((__format__ (__printf__, 1, 2))) ;//__printflike(1, 2);
 
