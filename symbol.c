@@ -305,7 +305,7 @@ symbol_t *createArray(char const *name, varType_t type, int size) {
 
 					assemblyOutput(AFC" %d %d ; Tableau \"%s\"", ptr->address, (*newSym)->address, comment ? comment : "");
 					free(comment);
-					assemblyOutput(ABS" %d", ptr->address);
+					assemblyOutput(STK" %d 1", ptr->address);
 
 					if(getGlobalScope()) {
 						symbolTable.globalCount += size;

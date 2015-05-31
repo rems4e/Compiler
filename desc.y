@@ -83,7 +83,7 @@
 
 %token tF
 
-%token tRETURN tGOTO tPRINTF tENUM
+%token tRETURN tGOTO tPRINT tSCAN tENUM
 %token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE tSWITCH tCASE tDEFAULT
 
 %token tSIZEOF;
@@ -665,7 +665,7 @@ Exp : tID {
 	callFunction(function, argsStack.argCount[--argsStack.size], returnValue);
 	$$ = DEREF(returnValue, 0);
 }
-| tPRINTF tPO Exp tPF {
+| tPRINT tPO Exp tPF {
 	symbol_t *s = dereferenceExp($3);
 	if(isVoid(&s->type)) {
 		yyerror("L'expression ne peut pas être de type void.");
@@ -685,6 +685,14 @@ Exp : tID {
 	symbol_t *ret = allocTemp(0, BT_VOID);
 	DEREF(ret, 0);
 }
+| tSCAN tPO Exp tPF {
+	symbol_t *s = dereferenceExp($3);
+	symbol_t dummy;
+	dummy.type = (varType_t){.constMask = 0, .indirectionCount = 1, .baseType = BT_INT};
+	dummy.name = "ptr";
+	checkCompatibilityForAffectation(&dummy, s, true);
+	assemblyOutput(SCN" %d", s->address);
+}
 | tAMP Exp {
 	symbol_t *s = $2.symbol;
 
@@ -694,7 +702,7 @@ Exp : tID {
 
 	symbol_t *a = allocTemp(s->type.indirectionCount + 1 - $2.dereferenceCount, s->type.baseType);
 	assemblyOutput(AFC" %d %d", a->address, s->address);
-	assemblyOutput(ABS" %d", a->address);
+	assemblyOutput(STK" %d 1", a->address);
 	$$ = DEREF(a, 0);
 }
 | Exp tEGAL Exp { affectation($1, dereferenceExp($3), false); $$ = DEREF($1.symbol, $1.dereferenceCount); }

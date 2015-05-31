@@ -22,7 +22,7 @@
 
 #ifdef OPCODE_TEXT
 
-#define STK "STK" // Ajout de l'opérande au stack pointer
+#define STK "STK" // Ajout de l'opérande 1 au stack pointer, ou du stack pointer à l'opérande 1 selon la valeur de l'opérande 2
 
 #define ADD "ADD"
 #define SOU "SOU"
@@ -31,7 +31,7 @@
 
 #define EQU "EQU"
 #define INF "INF"
-#define ABS "ABS"
+#define SCN "SCN"
 
 #define COP "COP"
 #define AFC "AFC"
@@ -63,7 +63,7 @@
 
 #define EQU "B"
 #define INF "9"
-#define ABS "A"
+#define SCN "A"
 
 #define COP "5"
 #define AFC "6"

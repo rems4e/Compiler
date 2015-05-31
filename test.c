@@ -160,17 +160,19 @@ int global2 = 43;*/
 
 int main() {
 	for(int i = 0; i <= 3; ++i) {
-		switch(i) {
+		int val = 42;
+		scan(&val);
+		switch(val) {
 			case 0:
-				printf(0);
+				print("zéro");
 			default:
-				printf(3);
+				print("autre");
 				break;
 			case 1:
-				printf(1);
+				print("un");
 				break;
 			case 2:
-				printf(2);
+				print("deux");
 				break;
 		}
 	}

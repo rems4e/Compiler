@@ -71,7 +71,8 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "enum"				{ ECHO; return tENUM; }
 "goto"				{ ECHO; return tGOTO; }
 "return"			{ ECHO; return tRETURN; }
-"printf"			{ ECHO; return tPRINTF; }
+"print"				{ ECHO; return tPRINT; }
+"scan"				{ ECHO; return tSCAN; }
 
 "true"				{ ECHO; return tTRUE; }
 "false"				{ ECHO; return tFALSE; }
