@@ -44,8 +44,8 @@ dereferencedSymbol_t createString(char const *value);
 dereferencedSymbol_t getExistingSymbol(char const *name, bool failIfNotFound);
 symbol_t *createSymbol(char const *name, varType_t type);
 
-symbol_t *createTable(char const *name, varType_t type, int size);
-dereferencedSymbol_t getTabIndex(char const *name, int index);
+symbol_t *createArray(char const *name, varType_t type, int size);
+dereferencedSymbol_t getArrayIndex(char const *name, int index);
 
 symbol_t *allocTemp(int indirectionCount, baseType_t baseType);
 bool isTemp(symbol_t *s);

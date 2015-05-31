@@ -35,8 +35,7 @@ char *cleanString(char const *string) {
 
 %}
 
-Delim		[ \t\n]+
-Nom			[_a-zA-Z][_a-zA-Z0-9]*
+nom			[_a-zA-Z][_a-zA-Z0-9]*
 chiffre		[0-9]
 chiffreOct	[0-7]
 chiffreHex	[0-9a-fA-F]
@@ -90,6 +89,9 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "break"				{ ECHO; return tBREAK; }
 "continue"			{ ECHO; return tCONTINUE; }
 
+"switch"			{ ECHO; return tSWITCH; }
+"case"				{ ECHO; return tCASE; }
+"default"			{ ECHO; return tDEFAULT; }
 "if"				{ ECHO; return tIF; }
 "else"				{ ECHO; return tELSE; }
 "&&"				{ ECHO; return tET; }
@@ -112,7 +114,7 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "}"					{ ECHO; return tBF; }
 ","					{ ECHO; return tVIR; }
 \n					{ ECHO; ++lineNumber; }
-Delim				{ ECHO; }
+[ \t]+				{ ECHO; }
 
 "++"				{ ECHO; return tINCR; }
 "--"				{ ECHO; return tDECR; }
@@ -153,7 +155,7 @@ Delim				{ ECHO; }
 
 "sizeof"		{ ECHO; return tSIZEOF; }
 
-{Nom}			{ ECHO; yylval.string = strdup(yytext); return tID; }
+{nom}			{ ECHO; yylval.string = strdup(yytext); return tID; }
 
 {nombre}			{
 						ECHO;

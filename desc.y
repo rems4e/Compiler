@@ -16,6 +16,8 @@
 
 	#define MAX_INITIALIZER 2048
 	#define MAX_ERROR 20
+	#define MAX_STACK 1000
+	#define MAX_CASE 1024
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
@@ -23,14 +25,12 @@
 	YY_BUFFER_STATE yy_scan_string(const char *yy_str);
 
 	extern int const lineNumber;
-	static int retourConditionFor;
-	static int paramsCount;
+	static int forConditionReturn;
 	static int tabSize;
 	static bool lastInstructionIsReturn = false;
 	static int loop = 0;
 	static varType_t lastVarType, returnValueType;
 	static char const *idName = NULL;
-	static symbol_t *ternarySymbol;
 	static enumValue_t lastEnumValue = {NULL, 0};
 
 	function_t *currentFunction = NULL;
@@ -44,6 +44,18 @@
 
 	static int errorCount = 0;
 	static bool errorToManage = false;
+
+	static struct {
+		int size;
+		int argCount[MAX_STACK];
+	} argsStack;
+
+	static struct {
+		int size;
+		int values[MAX_STACK][MAX_CASE];
+		int caseCount[MAX_STACK];
+		bool hasDefault[MAX_STACK];
+	} switchStack;
 
 	%}
 
@@ -72,7 +84,7 @@
 %token tF
 
 %token tRETURN tGOTO tPRINTF tENUM
-%token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE
+%token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE tSWITCH tCASE tDEFAULT
 
 %token tSIZEOF;
 
@@ -119,7 +131,7 @@ DefCorps : Def
 | tENUM tID { lastEnumValue.value = -1; createEnum($2); } tBO CorpsEnum tBF tF
 | tENUM tBO {lastEnumValue.value = -1; } CorpsEnum tBF tF
 | Type tID tPO {
-	paramsCount = 0;
+	argsStack.argCount[0] = 0;
 	returnValueType = $1;
 } Params tPF { idName = $2; } FonctionEnd;
 
@@ -154,8 +166,8 @@ EnumVal : {
 	lastEnumValue.name = NULL;
 };
 
-FonctionEnd : { createFunction(&returnValueType, idName, false, paramsCount); } EndOrError
-| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction;
+FonctionEnd : { createFunction(&returnValueType, idName, false, argsStack.argCount[0]); } EndOrError
+| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, argsStack.argCount[0]); pushBlock(); setGlobalScope(false); } CorpsFonction;
 
 CorpsFonction : tBO Instrucs tBF {
 	if(!lastInstructionIsReturn && !isVoid(&currentFunction->returnType)) {
@@ -196,7 +208,7 @@ Params :
 ParamsList : Param
 | ParamsList tVIR Param;
 
-Param : Type tID { ++paramsCount; pushParam($2, $1); };
+Param : Type tID { ++argsStack.argCount[0]; pushParam($2, $1); };
 
 Def : Type TypedDef;
 
@@ -237,7 +249,7 @@ Type : tINT {
 	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
 }
 | tENUM tID {
-	if(!enumExists($2)) {
+	if(!isEnum($2)) {
 		yyerror("L'enum %s n'a pas été déclarée.", $2);
 	}
 	lastVarType = (varType_t){.constMask = 0, .indirectionCount = 0, .baseType = BT_INT};
@@ -245,7 +257,7 @@ Type : tINT {
 	$$ = (varType_t){.constMask = lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
 }
 | tCONST tENUM tID {
-	if(!enumExists($3)) {
+	if(!isEnum($3)) {
 		yyerror("L'enum %s n'a pas été déclarée.", $3);
 	}
 	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT};
@@ -253,7 +265,7 @@ Type : tINT {
 	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
 }
 | tENUM tID tCONST {
-	if(!enumExists($2)) {
+	if(!isEnum($2)) {
 		yyerror("L'enum %s n'a pas été déclarée.", $2);
 	}
 	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT};
@@ -264,6 +276,7 @@ Type : tINT {
 
 PureType : Type { tabSize = 1; }
 | Type tCRO tNOMBRE tCRF { if($3 < 0) { yyerror("Un tableau ne peut pas avoir de taille négative."); } tabSize = $3; };
+| Type tPO Indirections tPF tCRO ExpOrEmpty tCRF { tabSize = 1; }
 | Type tCRO tCRF { tabSize = -1; };
 
 TypedDefNext : EndOrError
@@ -292,7 +305,7 @@ Tab : {
 		yyerror("Un tableau dont la dimension n'a pas été spécifiée doit être initialisé.");
 	}
 	else {
-		symbol_t *symTab = createTable(idName, lastVarType, tabSize);
+		symbol_t *symTab = createArray(idName, lastVarType, tabSize);
 	}
 }
 | tID tCRO tNOMBRE tCRF {
@@ -313,14 +326,14 @@ TabDef : tEGAL tBO FinTab {
 	if(tabSize == -1) {
 		tabSize = initializerList.count;
 	}
-	symbol_t *tab = createTable(idName, lastVarType, tabSize);
+	symbol_t *tab = createArray(idName, lastVarType, tabSize);
 
-	symbol_t *last = getTabIndex(tab->name, initializerList.count - 1).symbol;
+	symbol_t *last = getArrayIndex(tab->name, initializerList.count - 1).symbol;
 	if(last == NULL) {
 		yyerror("Trop d'éléments dans la liste d'initialisation de %s.", tab->name);
 	}
 	else {
-		symbol_t *current = getTabIndex(tab->name, 0).symbol;
+		symbol_t *current = getArrayIndex(tab->name, 0).symbol;
 		for(int i = 0; i < initializerList.count; ++i, ++current) {
 			symbol_t *init = initializerList.data[i];
 			assemblyOutput(COP" %d %d", current->address, init->address);
@@ -328,7 +341,7 @@ TabDef : tEGAL tBO FinTab {
 			current->initialized = true;
 		}
 		for(int i = initializerList.count; ; ++i) {
-			symbol_t *current = getTabIndex(tab->name, i).symbol;
+			symbol_t *current = getArrayIndex(tab->name, i).symbol;
 			if(current == NULL)
 				break;
 			current->initialized = true;
@@ -351,8 +364,8 @@ TabDef : tEGAL tBO FinTab {
 	else {
 		tabSize = len;
 
-		symbol_t *tab = createTable(idName, lastVarType, tabSize);
-		symbol_t *current = getTabIndex(tab->name, 0).symbol;
+		symbol_t *tab = createArray(idName, lastVarType, tabSize);
+		symbol_t *current = getArrayIndex(tab->name, 0).symbol;
 		for(int i = 0; i < len; ++i, ++current) {
 			assemblyOutput(AFC" %d %d", current->address, (int)($2[i]));
 			current->initialized = true;
@@ -370,8 +383,7 @@ FinTab : Exp tBF {
 Instrucs :
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
 
-Instruc : EndOrError
-| Def
+SwitchInstruc : EndOrError
 | tBO { pushBlock(); } Instrucs tBF { popBlock(); }
 | Exp tVIR Instruc
 | Exp EndOrError
@@ -385,6 +397,21 @@ Instruc : EndOrError
 | Return EndOrError { lastInstructionIsReturn = true; }
 | tIF CondIf Instruc %prec EndIf { popIfLabel(); }
 | tIF CondIf Instruc tELSE { pushIfLabelLastButOne(); assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS); popIfLabel(); } Instruc { popIfLabel(); }
+| tSWITCH tPO Exp {
+	pushSymbol(dereferenceExp($3));
+	loopMarkers[loop++] = 0;
+	switchStack.caseCount[switchStack.size] = 0;
+	switchStack.hasDefault[switchStack.size] = false;
+	++switchStack.size;
+} tPF tBO SwitchBody tBF {
+	popSymbol();
+	--loop;
+	--switchStack.size;
+
+	for(int i = 0; i < loopMarkers[loop]; ++i) {
+		popLoopLabel();
+	}
+}
 | tWHILE { pushInstructionCount(); } CondLoop { loopMarkers[loop++] = 0; } Instruc {
 	assemblyOutput(JMP" %d", popInstructionCount());
 	--loop;
@@ -405,10 +432,10 @@ Instruc : EndOrError
 | tFOR { pushBlock(); } tPO ExpOrEmptyOrDef { // Initialisation
 	pushInstructionCount();
 } ForCondition tF { // Action en fin de boucle
-	retourConditionFor = popInstructionCount();
+	forConditionReturn = popInstructionCount();
 	pushInstructionCount();
 } ExpOrEmpty {
-	assemblyOutput(JMP" %d", retourConditionFor);
+	assemblyOutput(JMP" %d", forConditionReturn);
 } tPF {  // Corps de boucle
 	popLoopLabel();
 	loopMarkers[loop++] = 0;
@@ -421,19 +448,104 @@ Instruc : EndOrError
 	popBlock();
 }
 | tBREAK {
-	if(!loop) {
-		yyerror("Le mot clé break doit se trouver dans une boucle.");
+	if(loop == 0) {
+		yyerror("Le mot clé 'break' doit se trouver dans une boucle ou un bloc switch.");
 	}
 	++loopMarkers[loop - 1];
 	pushLoopLabel();
-	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS" ; Break");
+	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS" ; break");
 }
 | tCONTINUE {
 	if(!loop) {
-		yyerror("Le mot clé continue doit se trouver dans une boucle.");
+		yyerror("Le mot clé 'continue' doit se trouver dans une boucle.");
 	}
-	assemblyOutput(JMP" %d ; Continue", lastInstructionCount());
+	assemblyOutput(JMP" %d ; continue", lastInstructionCount());
 };
+
+Instruc : SwitchInstruc
+| Def;
+
+SwitchBody :
+| tCASE SwitchCase
+| tDEFAULT SwitchDefault;
+
+SwitchInstrucs :
+| SwitchInstruc SwitchInstrucs;
+
+SwitchCase : tID {
+	pushIfLabel();
+
+	if(!isEnumValue($1)) {
+		yyerror("L'identificateur '%s' n'est pas une valeur constante.", $1);
+	}
+	else {
+		int val = getEnumValue($1);
+
+		for(int i = 0; i < switchStack.caseCount[switchStack.size - 1]; ++i) {
+			if(switchStack.values[switchStack.size - 1][i] == val) {
+				yyerror("Le cas '%d' a déjà été traité dans ce bloc switch.", $1);
+				break;
+			}
+		}
+		switchStack.values[switchStack.size - 1][switchStack.caseCount[switchStack.size - 1]++] = val;
+
+		symbol_t *valSym = allocTemp(0, BT_INT);
+		assemblyOutput(AFC" %d %d ; case %s", valSym->address, val, $1);
+		symbol_t *cond = popSymbol();
+		symbol_t *eq = binOp(EQU, cond, valSym);
+		assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, eq->address);
+		freeIfTemp(eq);
+
+		pushSymbol(cond);
+	}
+} tDEUXP SwitchInstrucs SwitchNextCase
+| tNOMBRE {
+	pushIfLabel();
+
+	for(int i = 0; i < switchStack.caseCount[switchStack.size - 1]; ++i) {
+		if(switchStack.values[switchStack.size - 1][i] == $1) {
+			yyerror("Le cas '%d' a déjà été traité dans ce bloc switch.", $1);
+			break;
+		}
+	}
+	switchStack.values[switchStack.size - 1][switchStack.caseCount[switchStack.size - 1]++] = $1;
+
+	symbol_t *valSym = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d %d ; case %d", valSym->address, $1, $1);
+	symbol_t *cond = popSymbol();
+	symbol_t *eq = binOp(EQU, cond, valSym);
+	assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, eq->address);
+	freeIfTemp(eq);
+
+	pushSymbol(cond);
+} tDEUXP SwitchInstrucs SwitchNextCase;
+
+SwitchDefault : {
+	if(switchStack.hasDefault[switchStack.size - 1]) {
+		yyerror("Un cas par défaut est déjà présent pour ce bloc switch.");
+	}
+	switchStack.hasDefault[switchStack.size - 1] = true;
+	pushIfLabel();
+	assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS " ; évitement du cas par défaut");
+	pushInstructionCount();
+} tDEUXP SwitchInstrucs SwitchNextDefault;
+
+SwitchNextCase : EndSwitch
+| tCASE { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 3); popIfLabel(); } SwitchCase
+| tDEFAULT { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 2); popIfLabel(); } SwitchDefault;
+
+SwitchNextDefault : {
+	++loopMarkers[loop - 1];
+	pushLoopLabel();
+	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS" ; break");
+} EndSwitch
+| tCASE { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 4); popIfLabel(); } SwitchCase
+| tDEFAULT { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 3); popIfLabel(); } SwitchDefault;
+
+EndSwitch : {
+	popIfLabel();
+	assemblyOutput(JMP" %d ; cas par défaut", popInstructionCount());
+ }
 
 ExpOrEmptyOrDef : EndOrError;
 | Exp EndOrError;
@@ -486,8 +598,8 @@ CondLoop : tPO Exp tPF {
 Args :
 | ArgsList;
 
-ArgsList : Exp { ++paramsCount; pushSymbol(dereferenceExp($1)); }
-| ArgsList tVIR Exp { ++paramsCount; pushSymbol(dereferenceExp($3)); };
+ArgsList : Exp { ++argsStack.argCount[argsStack.size - 1]; pushSymbol(dereferenceExp($1)); }
+| ArgsList tVIR Exp { ++argsStack.argCount[argsStack.size - 1]; pushSymbol(dereferenceExp($3)); };
 
 Exp : tID {
 	dereferencedSymbol_t id = getExistingSymbol($1, true);
@@ -547,10 +659,10 @@ Exp : tID {
 | tSTRING_LITTERAL {
 	$$ = createString($1);
 }
-| tID tPO { paramsCount = 0; } Args tPF {
+| tID tPO { argsStack.argCount[argsStack.size++] = 0; } Args tPF {
 	function_t *function = getFunction($1);
 	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount, function->returnType.baseType);
-	callFunction(function, paramsCount, returnValue);
+	callFunction(function, argsStack.argCount[--argsStack.size], returnValue);
 	$$ = DEREF(returnValue, 0);
 }
 | tPRINTF tPO Exp tPF {
@@ -725,7 +837,8 @@ Exp : tID {
 	freeIfTemp(cond);
 } Exp tDEUXP {
 	symbol_t *exp = dereferenceExp($4);
-	ternarySymbol = allocTemp(exp->type.indirectionCount, exp->type.baseType);
+	symbol_t *ternarySymbol = allocTemp(exp->type.indirectionCount, exp->type.baseType);
+	pushSymbol(ternarySymbol);
 	assemblyOutput(COP" %d %d", ternarySymbol->address, exp->address);
 
 	pushIfLabelLastButOne();
@@ -733,6 +846,7 @@ Exp : tID {
 	popIfLabel();
 } Exp {
 	symbol_t *exp = dereferenceExp($7);
+	symbol_t *ternarySymbol = popSymbol();
 	if(!sameType(&exp->type, &ternarySymbol->type)) {
 		yyerror("Les expressions de la condition ternaire doivent avoir le même type.");
 	}
@@ -808,7 +922,8 @@ int main(int argc, char const **argv) {
 	extern int yydebug;
 	yydebug = 1;
 #endif
-
+	argsStack.size = 0;
+	switchStack.size = 0;
 	initializerList.count = 0;
 
 	char *outputName = strdup("a.s");

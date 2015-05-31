@@ -136,7 +136,7 @@ void exec(char const *sourcePath) {
 #ifdef DEBUG
 		printf("Ligne : %d\nsp : %d\n", pc + 1, stackPointer);
 
-		for(int i = 0; i < 30; ++i) {
+		for(int i = 0; i < 10; ++i) {
 			printf("\tmemory[%d]: %d\n", i, memory[i]);
 		}
 		putc('\n', stdout);

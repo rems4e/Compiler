@@ -16,10 +16,11 @@ typedef struct {
 } enumValue_t;
 
 void createEnum(char const *name);
-bool enumExists(char const *name);
+bool isEnum(char const *name);
 void cleanEnums();
 
 void addEnumValue(enumValue_t value);
+bool isEnumValue(char const *name);
 int getEnumValue(char const *name);
 
 #endif /* defined(__Syste_me_Info__enum__) */

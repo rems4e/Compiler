@@ -9,12 +9,6 @@
 #ifndef Syste_me_Info_constants_h
 #define Syste_me_Info_constants_h
 
-/**
- * TODO:
- * switch
- * …
- */
-
 //#define YACC_DEBUG
 
 #ifdef YACC_DEBUG

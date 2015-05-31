@@ -13,7 +13,6 @@
 #include "symbol.h"
 
 //#define STRIP_COMMENTS
-
 //#define OPCODE_TEXT
 
 #define UNKNOWN_GOTO_PREFIX "UG_"

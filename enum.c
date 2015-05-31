@@ -16,7 +16,7 @@ static enumValue_t enumValues[ENUM_MAX] = {{NULL, 0}};
 static int enumCount = 0, enumValuesCount = 0;
 
 void createEnum(char const *name) {
-	if(enumExists(name)) {
+	if(isEnum(name)) {
 		yyerror("L'enum %s a déjà été déclarée.", name);
 	}
 	else {
@@ -29,7 +29,7 @@ void createEnum(char const *name) {
 	}
 }
 
-bool enumExists(char const *name) {
+bool isEnum(char const *name) {
 	for(int i = 0; i < enumCount; ++i) {
 		if(strcmp(name, enums[i]) == 0) {
 			return true;
@@ -57,6 +57,16 @@ void addEnumValue(enumValue_t value) {
 	else {
 		compilerError("Trop de valeurs d'enums déclarées dans cette unité de compilation.");
 	}
+}
+
+bool isEnumValue(char const *name) {
+	for(int i = 0; i < enumValuesCount; ++i) {
+		if(strcmp(enumValues[i].name, name) == 0) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 int getEnumValue(char const *name) {

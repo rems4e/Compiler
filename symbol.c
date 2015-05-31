@@ -38,6 +38,9 @@ void freeFunctionTable();
 void initSymbols() {
 	tempSymbol = strdup("__temp__");
 
+	symbolTable.stackSize = 0;
+	symbolTable.symbolsStack[0] = NULL;
+
 	symbolTable.nestingLevel = 0;
 	for(int i = 0; i < MAX_NESTING; ++i) {
 		for(int j = 0; j < SYM_COUNT; ++j) {
@@ -122,7 +125,7 @@ int getGlobalSymbolsCount() {
 int getSymbolSize(symbol_t const *symbol) {
 	if(symbol->type.indirectionCount > 0) {
 		if((symbol->type.constMask & (1 << symbol->type.indirectionCount)) != 0) {
-			dereferencedSymbol_t first = getTabIndex(symbol->name, 0);
+			dereferencedSymbol_t first = getArrayIndex(symbol->name, 0);
 			if(first.symbol != NULL) {
 				return getSymbolSize(first.symbol) * (symbol->address - first.symbol->address);
 			}
@@ -152,8 +155,8 @@ dereferencedSymbol_t createString(char const *value) {
 	dereferencedSymbol_t deref = getExistingSymbol(interningName, false);
 	symbol_t *tab = deref.symbol;
 	if(tab == &dummy) {
-		tab = createTable(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
-		dereferencedSymbol_t data = getTabIndex(interningName, 0);
+		tab = createArray(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
+		dereferencedSymbol_t data = getArrayIndex(interningName, 0);
 		assert(data.symbol);
 		for(int i = 0; i < len; ++i) {
 			assemblyOutput(AFC" %d %d", data.symbol->address + i, value[i]);
@@ -247,7 +250,7 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 	return NULL;
 }
 
-symbol_t *createTable(char const *name, varType_t type, int size) {
+symbol_t *createArray(char const *name, varType_t type, int size) {
 	int const nestingLevel = getGlobalScope() ? 0 : symbolTable.nestingLevel;
 
 	if(size == 0) {
@@ -317,12 +320,14 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 	return NULL;
 }
 
-dereferencedSymbol_t getTabIndex(char const *name, int index) {
+dereferencedSymbol_t getArrayIndex(char const *name, int index) {
 	char *toFind;
 	asprintf(&toFind, "%s__tabIndice%d", name, index);
 
 	dereferencedSymbol_t ret = getExistingSymbol(toFind, false);
-
+	if(ret.symbol == &dummy) {
+		ret.symbol = NULL;
+	}
 	free(toFind);
 	return ret;
 

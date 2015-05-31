@@ -158,13 +158,22 @@ void printTruc() {
 
 int global2 = 43;*/
 
-enum Plop {Plop1, Plop2};
-
 int main() {
-	printf(Plop1);
-	printf("\n");
-	printf(Plop2);
-	printf("\n");
+	for(int i = 0; i <= 3; ++i) {
+		switch(i) {
+			case 0:
+				printf(0);
+			default:
+				printf(3);
+				break;
+			case 1:
+				printf(1);
+				break;
+			case 2:
+				printf(2);
+				break;
+		}
+	}
 /*	int i = 0;
 test:
 	++i;
