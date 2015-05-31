@@ -35,26 +35,26 @@ char *cleanString(char const *string) {
 
 %}
 
-nom			[_a-zA-Z][_a-zA-Z0-9]*
-chiffre		[0-9]
-chiffreOct	[0-7]
-chiffreHex	[0-9a-fA-F]
-nombreExp	{chiffre}+(\.{chiffre}+)?((E|e)[+\-]?{chiffre}+)?
-nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
+identifier	[_a-zA-Z][_a-zA-Z0-9]*
+digit		[0-9]
+octDigit	[0-7]
+hexDigit	[0-9a-fA-F]
+numberExp	{digit}+(\.{digit}+)?((E|e)[+\-]?{digit}+)?
+number		(({digit}+)|(0{octDigit}+)|((0x|0X){hexDigit}+))
 
-%x C_COMMENT
-%x C_COMMENTL
+%x COMMENT_MODE
+%x LCOMMENT_MODE
 
 %%
 
-"/*"            	{ BEGIN(C_COMMENT); }
-<C_COMMENT>"*/" 	{ BEGIN(INITIAL); }
-<C_COMMENT>"\n"    	{ ++lineNumber; }
-<C_COMMENT>.    	{ }
+"/*"            	{ BEGIN(COMMENT_MODE); }
+<COMMENT_MODE>"*/" 	{ BEGIN(INITIAL); }
+<COMMENT_MODE>"\n"  { ++lineNumber; }
+<COMMENT_MODE>.    	{ }
 
-"//"            	{ BEGIN(C_COMMENTL); }
-<C_COMMENTL>"\n" 	{ BEGIN(INITIAL); ++lineNumber; }
-<C_COMMENTL>.    	{ }
+"//"            	{ BEGIN(LCOMMENT_MODE); }
+<LCOMMENT_MODE>"\n" { BEGIN(INITIAL); ++lineNumber; }
+<LCOMMENT_MODE>.    { }
 
 \"(\\.|[^\\"])*\"   { ECHO; yylval.string = cleanString(yytext); return tSTRING_LITTERAL; }
 
@@ -95,8 +95,8 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "default"			{ ECHO; return tDEFAULT; }
 "if"				{ ECHO; return tIF; }
 "else"				{ ECHO; return tELSE; }
-"&&"				{ ECHO; return tET; }
-"||"				{ ECHO; return tOU; }
+"&&"				{ ECHO; return tAND; }
+"||"				{ ECHO; return tOR; }
 "while"				{ ECHO; return tWHILE; }
 "for"				{ ECHO; return tFOR; }
 "do"				{ ECHO; return tDO; }
@@ -109,11 +109,11 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "<<"                { ECHO; return tSHIFTL; }
 ">>"                { ECHO; return tSHIFTR; }
 
-"("					{ ECHO; return tPO; }
-")"					{ ECHO; return tPF; }
-"{"					{ ECHO; return tBO; }
-"}"					{ ECHO; return tBF; }
-","					{ ECHO; return tVIR; }
+"("					{ ECHO; return tO_P; }
+")"					{ ECHO; return tC_P; }
+"{"					{ ECHO; return tO_BR; }
+"}"					{ ECHO; return tC_BR; }
+","					{ ECHO; return tCOMMA; }
 \n					{ ECHO; ++lineNumber; }
 [ \t]+				{ ECHO; }
 
@@ -123,7 +123,7 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "/="				{ ECHO; return tDIVEQ; }
 "*="				{ ECHO; return tMULEQ; }
 "%="				{ ECHO; return tMODEQ; }
-"-="				{ ECHO; return tMOINSEQ; }
+"-="				{ ECHO; return tMINUSEQ; }
 "+="				{ ECHO; return tPLUSEQ; }
 "&="                { ECHO; return tBITANDEQ; }
 "|="                { ECHO; return tBITOREQ; }
@@ -134,47 +134,47 @@ nombre		(({chiffre}+)|(0{chiffreOct}+)|((0x|0X){chiffreHex}+))
 "/"					{ ECHO; return tDIV; }
 "*"					{ ECHO; return tSTAR; }
 "%"					{ ECHO; return tMOD; }
-"-"					{ ECHO; return tMOINS; }
+"-"					{ ECHO; return tMINUS; }
 "+"					{ ECHO; return tPLUS; }
-"="					{ ECHO; return tEGAL ; }
-";"					{ ECHO; return tF; }
+"="					{ ECHO; return tEQUAL ; }
+";"					{ ECHO; return tSEMI; }
 "!"					{ ECHO; return tNOT; }
 
-"=="				{ ECHO; return tBOOLEGAL; }
-"<="				{ ECHO; return tINFEGAL; }
-">="				{ ECHO; return tSUPEGAL; }
-">"					{ ECHO; return tSUP; }
-"<"					{ ECHO; return tINF; }
+"=="				{ ECHO; return tBOOLEQUAL; }
+"<="				{ ECHO; return tLESSEQUAL; }
+">="				{ ECHO; return tGREATEQUAL; }
+">"					{ ECHO; return tGREAT; }
+"<"					{ ECHO; return tLESS; }
 "!="				{ ECHO; return tDIFF; }
 
 
-"["				{ ECHO; return tCRO; }
-"]"				{ ECHO; return tCRF; }
+"["					{ ECHO; return tO_SQBR; }
+"]"					{ ECHO; return tC_SQBR; }
 
-"?"				{ ECHO; return tQUESTION; }
-":"				{ ECHO; return tDEUXP; }
+"?"					{ ECHO; return tQUESTION; }
+":"					{ ECHO; return tCOLON; }
 
-"sizeof"		{ ECHO; return tSIZEOF; }
+"sizeof"			{ ECHO; return tSIZEOF; }
 
-{nom}			{ ECHO; yylval.string = strdup(yytext); return tID; }
+{identifier}		{ ECHO; yylval.string = strdup(yytext); return tID; }
 
-{nombre}			{
+{number}			{
 						ECHO;
 						char *last;
 						yylval.nb = strtol(yytext, &last, 0);
 						if(last - yytext < strlen(yytext)) {
 							yyerror("constante numérique invalide %s.", yytext);
 						}
-						return tNOMBRE;
+						return tNUMBER;
 					}
-{nombreExp}			{
+{numberExp}			{
 						ECHO;
 						char *last;
 						yylval.nb = (int)strtod(yytext, &last);
 						if(last - yytext < strlen(yytext)) {
 							yyerror("constante numérique invalide %s.", yytext);
 						}
-						return tNOMBRE;
+						return tNUMBER;
 					}
 
 %%

@@ -63,7 +63,7 @@
 	varType_t varType;
 }
 
-%token <nb> tNOMBRE
+%token <nb> tNUMBER
 %token <string> tID
 %token <string> tSTRING_LITTERAL
 %token <string> tCHAR_LITTERAL
@@ -71,72 +71,72 @@
 %type <dereferencedSymbol> Exp
 %type <varType> Type
 
-%token tPO tPF tVIR tBO tBF
+%token tO_P tC_P tCOMMA tO_BR tC_BR
 %token tCONST tINT tCHAR tCONSTC tVOID
 %token tINCR tDECR
 
 %token tNULL tTRUE tFALSE
 %token tAMP
 
-%token tF
+%token tSEMI
 
 %token tRETURN tGOTO tPRINT tSCAN tENUM
 %token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE tSWITCH tCASE tDEFAULT
 
 %token tSIZEOF;
 
-%right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL tBITANDEQ tBITOREQ tBITXOREQ tSHIFTLEQ tSHIFTREQ
+%right tPLUSEQ tMINUSEQ tDIVEQ tMULEQ tMODEQ tEQUAL tBITANDEQ tBITOREQ tBITXOREQ tSHIFTLEQ tSHIFTREQ
 
-%right tQUESTION tDEUXP
+%right tQUESTION tCOLON
 
-%left tOU
-%left tET
+%left tOR
+%left tAND
 %left tBITOR
 %left tBITXOR
-%left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tDIFF
+%left tBOOLEQUAL tLESSEQUAL tGREATEQUAL tGREAT tLESS tDIFF
 
 %left tSHIFTL tSHIFTR
 
-%left tPLUS tMOINS
+%left tPLUS tMINUS
 %left tDIV tSTAR tMOD
 
 %right tSIZEOF tAMP;
 
 %right tNOT tBITNOT
 
-%nonassoc tCRO tCRF
+%nonassoc tO_SQBR tC_SQBR
 
 %right tINCR tDECR
 
 %nonassoc EndIf
 %nonassoc tELSE
 
-%start Corps
+%start Body
 
 %%
 
-Corps :
-| Corps DefCorps;
+Body :
+| Body DefBody;
 
-EndOrError : error tF {
+EndOrError : error tSEMI {
 	yyerrok;
 	enableErrorReporting();
 }
-| tF;
+| tSEMI;
 
-DefCorps : Def
-| tENUM tID { lastEnumValue.value = -1; createEnum($2); } tBO CorpsEnum tBF tF
-| tENUM tBO {lastEnumValue.value = -1; } CorpsEnum tBF tF
-| Type tID tPO {
+DefBody : Def
+| tENUM tID { lastEnumValue.value = -1; createEnum($2); } tO_BR EnumBody tC_BR tSEMI
+| tENUM tO_BR {lastEnumValue.value = -1; } EnumBody tC_BR tSEMI
+| Type tID tO_P {
 	argsStack.argCount[0] = 0;
 	returnValueType = $1;
-} Params tPF { idName = $2; } FonctionEnd;
+} Params tC_P { idName = $2; } FunctionEnd;
 
-CorpsEnum : tID { lastEnumValue.name = strdup($1); } EnumVal EnumSuite;
+EnumBody : tID { lastEnumValue.name = strdup($1); } EnumVal EnumNext;
 
-EnumSuite :
-| tVIR
-| tVIR CorpsEnum;
+EnumNext :
+| tCOMMA
+| tCOMMA EnumBody;
 
 EnumVal : {
 	++lastEnumValue.value;
@@ -146,7 +146,7 @@ EnumVal : {
 	free(lastEnumValue.name);
 	lastEnumValue.name = NULL;
 }
-| tEGAL tID {
+| tEQUAL tID {
 	lastEnumValue.value = getEnumValue($2);
 	addEnumValue(lastEnumValue);
 	symbol_t *val = createSymbol(lastEnumValue.name, (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT});
@@ -154,7 +154,7 @@ EnumVal : {
 	free(lastEnumValue.name);
 	lastEnumValue.name = NULL;
 }
-| tEGAL tNOMBRE {
+| tEQUAL tNUMBER {
 	lastEnumValue.value = $2;
 	addEnumValue(lastEnumValue);
 	symbol_t *val = createSymbol(lastEnumValue.name, (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT});
@@ -163,10 +163,10 @@ EnumVal : {
 	lastEnumValue.name = NULL;
 };
 
-FonctionEnd : { createFunction(&returnValueType, idName, false, argsStack.argCount[0]); } EndOrError
-| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, argsStack.argCount[0]); pushBlock(); setGlobalScope(false); } CorpsFonction;
+FunctionEnd : { createFunction(&returnValueType, idName, false, argsStack.argCount[0]); } EndOrError
+| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, argsStack.argCount[0]); pushBlock(); setGlobalScope(false); } FunctionBody;
 
-CorpsFonction : tBO Instrucs tBF {
+FunctionBody : tO_BR Instrucs tC_BR {
 	if(!lastInstructionIsReturn && !isVoid(&currentFunction->returnType)) {
 		yyerror("Une valeur de retour est obligatoire à la fin d'une fonction ne retournant pas void.");
 	}
@@ -203,7 +203,7 @@ Params :
 | ParamsList;
 
 ParamsList : Param
-| ParamsList tVIR Param;
+| ParamsList tCOMMA Param;
 
 Param : Type tID { ++argsStack.argCount[0]; pushParam($2, $1); };
 
@@ -272,12 +272,12 @@ Type : tINT {
 
 
 PureType : Type { tabSize = 1; }
-| Type tCRO tNOMBRE tCRF { if($3 < 0) { yyerror("Un tableau ne peut pas avoir de taille négative."); } tabSize = $3; };
-| Type tPO Indirections tPF tCRO ExpOrEmpty tCRF { tabSize = 1; }
-| Type tCRO tCRF { tabSize = -1; };
+| Type tO_SQBR tNUMBER tC_SQBR { if($3 < 0) { yyerror("Un tableau ne peut pas avoir de taille négative."); } tabSize = $3; };
+| Type tO_P Indirections tC_P tO_SQBR ExpOrEmpty tC_SQBR { tabSize = 1; }
+| Type tO_SQBR tC_SQBR { tabSize = -1; };
 
 TypedDefNext : EndOrError
-| tVIR TypedDef;
+| tCOMMA TypedDef;
         
 TypedDef : tID {
 	if(topLevelConst(&lastVarType)) {
@@ -288,7 +288,7 @@ TypedDef : tID {
 	}
 	createSymbol($1, lastVarType);
 } TypedDefNext
-| tID tEGAL Exp {
+| tID tEQUAL Exp {
 	if(isVoid(&lastVarType)) {
 		yyerror("Impossible de déclarer une variable de type void.");
 	}
@@ -305,7 +305,7 @@ Tab : {
 		symbol_t *symTab = createArray(idName, lastVarType, tabSize);
 	}
 }
-| tID tCRO tNOMBRE tCRF {
+| tID tO_SQBR tNUMBER tC_SQBR {
 	if($3 < 0) {
 		yyerror("Impossible de créer un tableau de dimension négative.");
 	}
@@ -313,13 +313,13 @@ Tab : {
 	tabSize = $3;
 	idName = $1;
 }
-| tID tCRO tCRF {
+| tID tO_SQBR tC_SQBR {
 	tabSize = -1;
 	idName = $1;
 }
 | EndOrError;
 
-TabDef : tEGAL tBO FinTab {
+TabDef : tEQUAL tO_BR TabEnd {
 	if(tabSize == -1) {
 		tabSize = initializerList.count;
 	}
@@ -348,7 +348,7 @@ TabDef : tEGAL tBO FinTab {
 
 	initializerList.count = 0;
 }
-| tEGAL tSTRING_LITTERAL {
+| tEQUAL tSTRING_LITTERAL {
 	if(lastVarType.baseType != BT_CHAR || lastVarType.indirectionCount != 0) {
 		yyerror("Impossible d'affecter une chaîne de caractère à un tableau de ce type.");
 	}
@@ -370,21 +370,21 @@ TabDef : tEGAL tBO FinTab {
 	}
 };
 
-FinTab : Exp tBF {
+TabEnd : Exp tC_BR {
 	initializerList.data[initializerList.count++] = dereferenceExp($1);
 }
-| Exp tVIR {
+| Exp tCOMMA {
 	initializerList.data[initializerList.count++] = dereferenceExp($1);
-} FinTab;
+} TabEnd;
 
 Instrucs :
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
 
 SwitchInstruc : EndOrError
-| tBO { pushBlock(); } Instrucs tBF { popBlock(); }
-| Exp tVIR Instruc
+| tO_BR { pushBlock(); } Instrucs tC_BR { popBlock(); }
+| Exp tCOMMA Instruc
 | Exp EndOrError
-| tID tDEUXP {
+| tID tCOLON {
 	addGotoLabel($1);
 }
 | tGOTO tID EndOrError {
@@ -394,13 +394,13 @@ SwitchInstruc : EndOrError
 | Return EndOrError { lastInstructionIsReturn = true; }
 | tIF CondIf Instruc %prec EndIf { popIfLabel(); }
 | tIF CondIf Instruc tELSE { pushIfLabelLastButOne(); assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS); popIfLabel(); } Instruc { popIfLabel(); }
-| tSWITCH tPO Exp {
+| tSWITCH tO_P Exp {
 	pushSymbol(dereferenceExp($3));
 	loopMarkers[loop++] = 0;
 	switchStack.caseCount[switchStack.size] = 0;
 	switchStack.hasDefault[switchStack.size] = false;
 	++switchStack.size;
-} tPF tBO SwitchBody tBF {
+} tC_P tO_BR SwitchBody tC_BR {
 	popSymbol();
 	--loop;
 	--switchStack.size;
@@ -426,14 +426,14 @@ SwitchInstruc : EndOrError
 		popLoopLabel();
 	}
 }
-| tFOR { pushBlock(); } tPO ExpOrEmptyOrDef { // Initialisation
+| tFOR { pushBlock(); } tO_P ExpOrEmptyOrDef { // Initialisation
 	pushInstructionCount();
-} ForCondition tF { // Action en fin de boucle
+} ForCondition tSEMI { // Action en fin de boucle
 	forConditionReturn = popInstructionCount();
 	pushInstructionCount();
 } ExpOrEmpty {
 	assemblyOutput(JMP" %d", forConditionReturn);
-} tPF {  // Corps de boucle
+} tC_P {  // Corps de boucle
 	popLoopLabel();
 	loopMarkers[loop++] = 0;
 } Instruc { // Corps de boucle
@@ -495,8 +495,8 @@ SwitchCase : tID {
 
 		pushSymbol(cond);
 	}
-} tDEUXP SwitchInstrucs SwitchNextCase
-| tNOMBRE {
+} tCOLON SwitchInstrucs SwitchNextCase
+| tNUMBER {
 	pushIfLabel();
 
 	for(int i = 0; i < switchStack.caseCount[switchStack.size - 1]; ++i) {
@@ -515,7 +515,7 @@ SwitchCase : tID {
 	freeIfTemp(eq);
 
 	pushSymbol(cond);
-} tDEUXP SwitchInstrucs SwitchNextCase;
+} tCOLON SwitchInstrucs SwitchNextCase;
 
 SwitchDefault : {
 	if(switchStack.hasDefault[switchStack.size - 1]) {
@@ -525,7 +525,7 @@ SwitchDefault : {
 	pushIfLabel();
 	assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS " ; évitement du cas par défaut");
 	pushInstructionCount();
-} tDEUXP SwitchInstrucs SwitchNextDefault;
+} tCOLON SwitchInstrucs SwitchNextDefault;
 
 SwitchNextCase : EndSwitch
 | tCASE { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 3); popIfLabel(); } SwitchCase
@@ -572,7 +572,7 @@ ForCondition : { // Condition vide
 	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS);
 };
 
-CondIf : tPO Exp tPF {
+CondIf : tO_P Exp tC_P {
 	symbol_t *cond = dereferenceExp($2);
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
@@ -582,7 +582,7 @@ CondIf : tPO Exp tPF {
 	freeIfTemp(cond);
 };
 
-CondLoop : tPO Exp tPF {
+CondLoop : tO_P Exp tC_P {
 	symbol_t *cond = dereferenceExp($2);
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
@@ -596,13 +596,13 @@ Args :
 | ArgsList;
 
 ArgsList : Exp { ++argsStack.argCount[argsStack.size - 1]; pushSymbol(dereferenceExp($1)); }
-| ArgsList tVIR Exp { ++argsStack.argCount[argsStack.size - 1]; pushSymbol(dereferenceExp($3)); };
+| ArgsList tCOMMA Exp { ++argsStack.argCount[argsStack.size - 1]; pushSymbol(dereferenceExp($3)); };
 
 Exp : tID {
 	dereferencedSymbol_t id = getExistingSymbol($1, true);
 	$$ = LDEREF(id.symbol, id.dereferenceCount, true);
 }
-| tNOMBRE {
+| tNUMBER {
 	symbol_t *s = allocTemp(0, BT_INT);
 	s->type.constMask = 1;
 	assemblyOutput(AFC" %d %d", s->address, $1);
@@ -642,7 +642,7 @@ Exp : tID {
 	}
 	$$ = LDEREF($2.symbol, $2.dereferenceCount + 1, true);
 }
-| Exp tCRO Exp tCRF {
+| Exp tO_SQBR Exp tC_SQBR {
 	symbol_t *symbTab = dereferenceExp($1);
 	symbol_t *symbInd = dereferenceExp($3);
 	symbol_t *ind, *ind2;
@@ -661,13 +661,13 @@ Exp : tID {
 | tSTRING_LITTERAL {
 	$$ = createString($1);
 }
-| tID tPO { argsStack.argCount[argsStack.size++] = 0; } Args tPF {
+| tID tO_P { argsStack.argCount[argsStack.size++] = 0; } Args tC_P {
 	function_t *function = getFunction($1);
 	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount, function->returnType.baseType);
 	callFunction(function, argsStack.argCount[--argsStack.size], returnValue);
 	$$ = DEREF(returnValue, 0);
 }
-| tPRINT tPO Exp tPF {
+| tPRINT tO_P Exp tC_P {
 	symbol_t *s = dereferenceExp($3);
 	if(isVoid(&s->type)) {
 		yyerror("L'expression ne peut pas être de type void.");
@@ -687,7 +687,7 @@ Exp : tID {
 	symbol_t *ret = allocTemp(0, BT_VOID);
 	DEREF(ret, 0);
 }
-| tSCAN tPO Exp tPF {
+| tSCAN tO_P Exp tC_P {
 	symbol_t *s = dereferenceExp($3);
 	symbol_t dummy;
 	dummy.type = (varType_t){.constMask = 0, .indirectionCount = 1, .baseType = BT_INT};
@@ -711,7 +711,7 @@ Exp : tID {
 	assemblyOutput(STK" %d 1", a->address);
 	$$ = DEREF(a, 0);
 }
-| Exp tEGAL Exp { affectation($1, dereferenceExp($3), false); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tEQUAL Exp { affectation($1, dereferenceExp($3), false); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | tINCR Exp {
 	symbol_t *one = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d 1", one->address);
@@ -745,7 +745,7 @@ Exp : tID {
 	$$ = DEREF(copy, 0);
 }
 | Exp tPLUS Exp { $$ = DEREF(binOp(ADD, dereferenceExp($1), dereferenceExp($3)), 0); }
-| Exp tMOINS Exp { $$ = DEREF(binOp(SOU, dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tMINUS Exp { $$ = DEREF(binOp(SOU, dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tSTAR Exp { $$ = DEREF(binOp(MUL, dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tDIV Exp { $$ = DEREF(binOp(DIV, dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tMOD Exp {  $$ = DEREF(modulo(dereferenceExp($1), dereferenceExp($3)), 0); }
@@ -754,7 +754,7 @@ Exp : tID {
 | Exp tBITXOR Exp {  $$ = DEREF(bitxor(dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tSHIFTL Exp { $$ = DEREF(binOp(MUL, dereferenceExp($1), powerOfTwo(dereferenceExp($3))), 0); }
 | Exp tSHIFTR Exp { $$ = DEREF(binOp(DIV, dereferenceExp($1), powerOfTwo(dereferenceExp($3))), 0); }
-| tMOINS Exp %prec tSTAR {
+| tMINUS Exp %prec tSTAR {
 	symbol_t *tmp = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d -1", tmp->address);
 	$$ = DEREF(binOp(MUL, dereferenceExp($2), tmp), 0);
@@ -795,7 +795,7 @@ Exp : tID {
 	$$ = DEREF($1.symbol, $1.dereferenceCount);
 }
 | Exp tPLUSEQ Exp { binOpEq(ADD, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
-| Exp tMOINSEQ Exp { binOpEq(SOU, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tMINUSEQ Exp { binOpEq(SOU, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | Exp tDIVEQ Exp { binOpEq(DIV, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | Exp tMULEQ Exp { binOpEq(MUL, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | Exp tSHIFTLEQ Exp {
@@ -807,37 +807,37 @@ Exp : tID {
 	binOpEq(DIV, $1, tmp); $$ = DEREF($1.symbol, $1.dereferenceCount);
 }
 
-| Exp tET Exp {
+| Exp tAND Exp {
 	symbol_t *s = binOp(ADD, toBoolean(dereferenceExp($1)), toBoolean(dereferenceExp($3)));
 
 	symbol_t *deux = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", deux->address, 2);
 	$$ = DEREF(binOp(EQU, s, deux), 0);
 }
-| Exp tOU Exp {
+| Exp tOR Exp {
 	symbol_t *s = binOp(ADD, toBoolean(dereferenceExp($1)), toBoolean(dereferenceExp($3)));
 
 	symbol_t *zero = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", zero->address, 0);
 	$$ = DEREF(binOp(INF, zero, s), 0);
 }
-| Exp tINF Exp {
+| Exp tLESS Exp {
 	$$ = DEREF(binOp(INF, dereferenceExp($1), dereferenceExp($3)), 0);
 }
-| Exp tSUP Exp {
+| Exp tGREAT Exp {
 	$$ = DEREF(binOp(INF, dereferenceExp($3), dereferenceExp($1)), 0);
 }
-| Exp tINFEGAL Exp {
+| Exp tLESSEQUAL Exp {
 	$$ = DEREF(negate(binOp(INF, dereferenceExp($3), dereferenceExp($1))), 0);
 }
-| Exp tSUPEGAL Exp {
+| Exp tGREATEQUAL Exp {
 	$$ = DEREF(negate(binOp(INF, dereferenceExp($1), dereferenceExp($3))), 0);
 }
-| Exp tBOOLEGAL Exp {
+| Exp tBOOLEQUAL Exp {
 	$$ = DEREF(binOp(EQU, dereferenceExp($1), dereferenceExp($3)), 0);
 }
 
-| tPO Exp tPF { $$ = $2; }
+| tO_P Exp tC_P { $$ = $2; }
 | Exp tDIFF Exp {
 	$$ = DEREF(negate(binOp(EQU, dereferenceExp($1), dereferenceExp($3))), 0);
 }
@@ -849,7 +849,7 @@ Exp : tID {
 	pushIfLabel();
 	assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, cond->address);
 	freeIfTemp(cond);
-} Exp tDEUXP {
+} Exp tCOLON {
 	symbol_t *exp = dereferenceExp($4);
 	symbol_t *ternarySymbol = allocTemp(exp->type.indirectionCount, exp->type.baseType);
 	pushSymbol(ternarySymbol);
@@ -878,7 +878,7 @@ Exp : tID {
 
 	$$ = DEREF(s2, 0);
 }
-| tSIZEOF tPO PureType tPF {
+| tSIZEOF tO_P PureType tC_P {
 	if(isVoid(&lastVarType)) {
 		yyerror("Impossible de calculer la taille d'une expression de type incomplet.");
 	}
