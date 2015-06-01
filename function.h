@@ -10,7 +10,7 @@
 
 #include "symbol.h"
 
-#define MAX_PARAMS 100
+#define MAX_PARAMS 256
 
 typedef struct {
 	char *name;

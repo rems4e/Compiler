@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#define FUN_COUNT 1000
+#define FUN_COUNT 1024
 
 #define RETURN_ADDRESS 0
 #define RETURN_VALUE_ADDRESS 1
@@ -93,7 +93,7 @@ param_t popParam() {
 }
 
 void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
-	allocTemp(0, BT_INT), allocTemp(0, BT_INT);
+	allocTemp(0, BT_INT), allocTemp(0, BT_INT); // Adresse et valeur de retour
 	int const stackSize = getGlobalScope() ? getGlobalSymbolsCount() : getStackSize();
 
 	if(function->paramsCount != argsCount) {

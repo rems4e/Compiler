@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ENUM_MAX 1000
+#define ENUM_MAX 8192
 
 static char *enums[ENUM_MAX] = {NULL};
 static enumValue_t enumValues[ENUM_MAX] = {{NULL, 0}};

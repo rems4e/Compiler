@@ -16,7 +16,7 @@
 	#define YYERROR_VERBOSE
 
 	#define MAX_INITIALIZER 2048
-	#define MAX_STACK 1000
+	#define MAX_STACK 2048
 	#define MAX_CASE 1024
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;

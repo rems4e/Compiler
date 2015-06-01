@@ -16,7 +16,7 @@
 #include <string.h>
 #include "error.h"
 
-#define MAX_SIZE 1000
+#define MAX_SIZE 8192
 
 extern int errno;
 
