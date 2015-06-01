@@ -6,6 +6,7 @@
 //
 
 #include "symbol.h"
+#define _GNU_SOURCE // Pour asprintf et compagnie
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
