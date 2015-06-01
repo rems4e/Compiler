@@ -9,7 +9,6 @@
 #include "symbol.h"
 #include "function.h"
 #include "utility.h"
-#define _GNU_SOURCE // Pour asprintf et compagnie
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
