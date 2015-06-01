@@ -1,5 +1,6 @@
 [Inputs]
-CK
+clock
 RST
 [Outputs]
+=flag[3:0]=
 [BiDir]

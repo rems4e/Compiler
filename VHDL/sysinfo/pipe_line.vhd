@@ -46,7 +46,7 @@ begin
 	pipe_line : process(CK)
 	begin
 	--mémorise ses entrées le temps d'un clock ;
-		if CK'event and CK='1' then
+		if rising_edge(CK)then
 				OUT_A <= IN_A ;
 				OUT_B <= IN_B ;
 				OUT_C <= IN_C ;

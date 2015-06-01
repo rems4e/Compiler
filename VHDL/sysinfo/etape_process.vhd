@@ -92,7 +92,9 @@ architecture Behavioral of etape_process is
 	 
 	 COMPONENT MUX_ALU
 	     Port ( CK : in  STD_LOGIC;
-           IN_1,IN_2,sel : in  STD_LOGIC_VECTOR (7 downto 0);
+			  IN_1,IN_2 : in  STD_LOGIC_VECTOR (7 downto 0);
+				IN_3 : in  STD_LOGIC_VECTOR (3 downto 0);
+				sel : in  STD_LOGIC_VECTOR (7 downto 0);
            S : out  STD_LOGIC_VECTOR (7 downto 0));
 	  END COMPONENT ;
 	  
@@ -129,6 +131,11 @@ architecture Behavioral of etape_process is
            clock : out  STD_LOGIC);
 	END COMPONENT ;
 	
+	COMPONENT LC_mem
+		Port ( IN_LC : in  STD_LOGIC_VECTOR (7 downto 0);
+           OUT_LC : out  STD_LOGIC);
+	END COMPONENT ;
+	
 	signal out_ip : std_logic_vector(7 downto 0) ;
 	signal ins : std_logic_vector(31 downto 0) ;
 	signal out_a_decod : std_logic_vector(7 downto 0) ;
@@ -157,7 +164,7 @@ architecture Behavioral of etape_process is
 	signal out_mux_br : std_logic_vector(7 downto 0) ;
 	signal ctr_alu : std_logic_vector (2 downto 0) ;
 	signal out_alu : std_logic_vector(7 downto 0) ;
-	--signal flag : std_logic_vector(3 downto 0) ;
+	signal flag_alu : std_logic_vector(3 downto 0) ;
 	signal out_mux_alu : std_logic_vector(7 downto 0) ;
 	signal out_lc_data : std_logic ;
 	signal out_mem_data : std_logic_vector (7 downto 0) ;
@@ -235,6 +242,7 @@ begin
 			CK=> clock,
 			IN_1=>out_b_di,
 			IN_2=>out_alu,
+			IN_3=>flag_alu,
 			sel => out_op_di,
 			S => out_mux_alu
 		) ;
@@ -243,11 +251,11 @@ begin
 		op2=>out_c_di,
 		ctr_alu => ctr_alu,
 		S=> out_alu,
-		flag=>flag
+		flag=>flag_alu
 	);
 	
 	
-	lc_data : LC port map (
+	lc_data : LC_mem port map (
 		IN_LC => out_op_ex,
 		OUT_LC => out_lc_data
 	);
@@ -281,5 +289,6 @@ begin
 		clock,RST,out_a_li,out_op_li,out_b_li,out_c_li,
 		out_gest_aleas_op,out_a_gest_aleas,out_b_gest_aleas,out_c_gest_aleas,CK
 	) ;
+	flag <= flag_alu ;
 end Behavioral;
 

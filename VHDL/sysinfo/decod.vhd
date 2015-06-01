@@ -44,6 +44,5 @@ begin
 	OUT_B <= Instruc(15 downto 8) ;
 	OUT_C <= Instruc(7 downto 0) ;
 	OUT_OP <= Instruc(31 downto 24) ;
-	--peut être inutile : on peut p-e le faire lors du mappage
 end Behavioral;
 

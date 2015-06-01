@@ -12,23 +12,32 @@ Time resolution is 1 ps
 Simulator is doing circuit initialization process.
 at 0 ps, Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 at 0 ps, Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ps, Instance /test_etape_process/uut/alu_comp/ : Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
 Finished circuit initialization process.
 at 0 ps, Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 at 0 ps, Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 0 ps, Instance /test_etape_process/uut/alu_comp/ : Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
-at 5 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 at 5 ns(2), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 at 5 ns(2), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 15 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 25 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 35 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 45 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 55 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 65 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 75 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 85 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 95 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 105 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 35 ns(3), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 35 ns(3), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 100 ns(1), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 100 ns(1), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_etape_process/uut/mem_data/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(3), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_etape_process/uut/mem_data/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 125 ns(1), Instance /test_etape_process/uut/mem_data/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 145 ns(1), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 155 ns(1), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+ERROR: Index 255 out of bound 15 downto 0. 
+ERROR: In process gest_aleas.vhd:lecture 
+ 
+INFO: Simulator is stopped.
 ISim O.87xd (signature 0x8ddf5b5d)
 WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
@@ -38,20 +47,30 @@ This is a Lite version of ISim.
 Simulator is doing circuit initialization process.
 at 0 ps, Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 at 0 ps, Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 0 ps, Instance /test_etape_process/uut/alu_comp/ : Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
 Finished circuit initialization process.
 at 0 ps, Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 at 0 ps, Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 0 ps, Instance /test_etape_process/uut/alu_comp/ : Warning: There is an 'U'|'X'|'W'|'Z'|'-' in an arithmetic operand, the result will be 'X'(es).
-at 5 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 at 5 ns(2), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
 at 5 ns(2), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 15 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 25 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 35 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 45 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 55 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 65 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 75 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 85 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 95 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
-at 105 ns(1), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 35 ns(3), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 35 ns(3), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 100 ns(1), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 100 ns(1), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_etape_process/uut/mem_data/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 105 ns(3), Instance /test_etape_process/uut/instruct/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_etape_process/uut/mem_data/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 115 ns(1), Instance /test_etape_process/uut/gestion_aleas/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 125 ns(1), Instance /test_etape_process/uut/mem_data/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 145 ns(1), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+at 155 ns(1), Instance /test_etape_process/uut/banc_registre/ : Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+ERROR: Index 255 out of bound 15 downto 0. 
+ERROR: In process gest_aleas.vhd:lecture 
+ 
+INFO: Simulator is stopped.
+# exit 0

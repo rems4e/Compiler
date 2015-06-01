@@ -39,6 +39,10 @@ architecture Behavioral of LC_ALU is
 	constant MUL : STD_LOGIC_VECTOR(7 downto 0) := "00000010" ;
 	constant SUB : STD_LOGIC_VECTOR(7 downto 0) := "00000011" ;
 	constant DIV : STD_LOGIC_VECTOR(7 downto 0) := "00000100" ;
+	constant EQU : std_logic_vector(7 downto 0) := "00001001" ;
+	constant INF : std_logic_vector(7 downto 0) := "00001010" ;
+	constant SUP : std_logic_vector(7 downto 0) := "00001011" ;
+	
 
 	
 	constant ADD_ctr : STD_LOGIC_VECTOR(2 downto 0) := "001" ; --ctr_ALU 2 bit aurait suffit Cf spec p.36
@@ -52,6 +56,9 @@ begin
 	with IN_LC select
 		OUT_LC <= ADD_ctr when ADD, --On charge le controle a une valeur != de ZERO pour les op de calcul CF ALU
 					SUB_ctr when SUB,
+					SUB_ctr when EQU,
+					SUB_ctr when SUP,
+					SUB_ctr when INF,
 					MUL_ctr when MUL,
 					DIV_ctr when DIV,
 				DEFAULT when others ;
