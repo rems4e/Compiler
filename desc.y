@@ -699,8 +699,6 @@ Exp : tID {
 	}
 	assemblyOutput(PRI" %d %d", s->address, mode);
 	freeIfTemp(s);
-	symbol_t *ret = allocTemp(0, BT_VOID);
-	DEREF(ret, 0);
 }
 | tSCAN tO_P Exp tC_P {
 	symbol_t *s = dereferenceExp($3);

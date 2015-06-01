@@ -18,8 +18,6 @@
 
 #define MAX_SIZE 8192
 
-extern int errno;
-
 static char *assemblyBuffer = NULL;
 static char *globalBuffer = NULL;
 static FILE *output = NULL;

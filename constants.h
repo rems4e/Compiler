@@ -15,6 +15,7 @@
 #define YYDEBUG 1
 #endif
 
+#include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
 
