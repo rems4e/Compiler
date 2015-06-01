@@ -313,6 +313,21 @@ Tab : {
 	tabSize = $3;
 	idName = $1;
 }
+| tID tO_SQBR tID tC_SQBR {
+	if(!isEnumValue($3)) {
+		yyerror("L'identificateur '%s' n'est pas une valeur constante.", $3);
+		tabSize = 1;
+	}
+	else {
+		int val = getEnumValue($3);
+		if(val < 0) {
+			yyerror("Impossible de créer un tableau de dimension négative.");
+		}
+		tabSize = val;
+	}
+
+	idName = $1;
+}
 | tID tO_SQBR tC_SQBR {
 	tabSize = -1;
 	idName = $1;
