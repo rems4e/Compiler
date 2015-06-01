@@ -54,8 +54,11 @@ architecture Behavioral of ALU is
 	constant DIV : STD_LOGIC_VECTOR(2 downto 0) := "100" ;
 	
 	signal buff : STD_LOGIC_VECTOR (8 downto 0);
-	signal RES : STD_LOGIC_VECTOR (3 downto 0) ;
-	signal modif : STD_LOGIC ;
+	
+	signal Negatif: std_logic_vector(3 downto 0) ;
+	signal Overflow: std_logic_vector(3 downto 0) ;
+	signal Zero: std_logic_vector(3 downto 0) ;
+	signal Carry: std_logic_vector(3 downto 0) ;
 	
 begin
 		
@@ -63,33 +66,15 @@ begin
 		buff	<=  std_logic_vector(UNSIGNED("0" & op1) + UNSIGNED("0" & op2)) when ADD, --On charge le controle a une valeur != de ZERO pour les op de calcul CF ALU
 				 	 std_logic_vector(UNSIGNED("0" & op1) - UNSIGNED("0" & op2)) when SUB,
 					 std_logic_vector(TO_UNSIGNED(TO_INTEGER(UNSIGNED("0" & op1) * UNSIGNED("0" & op2)), 9)) when MUL,
+					 std_logic_vector(TO_UNSIGNED(TO_INTEGER(UNSIGNED("0" & op1) / UNSIGNED("0" & op2)), 9)) when DIV,
 				MOT_ZERO when others ;
 		S <= buff(7 downto 0);
-		modif <= '1' when modif = '0' else '0';
 		
-		
-	flag_async : process (modif)
-	begin
-
-		if modif'Event and modif = '1' then
-			--détermine les flags une fois l'opération effectuée
-			--détection par écoute du signal buff
-			RES <= no_flag ;
-			if(buff(8) = '1') then -- pas sure du fonctionnement : le mot est négatif
-				RES <= N;
-			end if ;
-			if(buff= MOT_ZERO) then -- pas sure du fonctionnement : le mot est nul
-				RES <= Z ;
-			end if ;
-			if op1(7)=op2(7) and op1(7)/=buff(7) then --sinon overflow= si signé
-				RES <= std_logic_vector(RES + O); 
-			end if ;
-			if(buff(8)='1') and (ctr_ALU = ADD or ctr_ALU = SUB) then --ce débordement est une retenue (nombre signés)
-				RES <= std_logic_vector(RES + C) ;
-			end if ;
-			flag <= RES ;
-		end if;
-	end process ;
-
+		Negatif <= N when buff(8) = '1' else no_flag ;
+		Overflow <= O when (op1(7)=op2(7) and op1(7)/=buff(7)) else no_flag;
+		Zero <= Z when buff= MOT_ZERO else no_flag ;
+		Carry <= C when (buff(8)='1') and (ctr_ALU = ADD or ctr_ALU = SUB) else no_flag ;
+			
+		flag <= std_logic_vector(Negatif + Overflow + Zero + Carry) ;
 end Behavioral;
 

@@ -45,14 +45,16 @@ architecture Behavioral of MUX_BancRegistres is
 	constant COP : STD_LOGIC_VECTOR(7 downto 0) := "00000101" ;
 	constant AFC : STD_LOGIC_VECTOR(7 downto 0) := "00000110" ;
 	constant LOAD : STD_LOGIC_VECTOR(7 downto 0) := "00000111" ;
+	constant NOP : STD_LOGIC_VECTOR(7 downto 0) := "00000000" ;
 	--constant STORE : STD_LOGIC_VECTOR(7 downto 0) := "00001000" ;
+	--constant EQU : std_logic_vector(7 downto 0) :="00001001";
 	
 	
 begin
 	with sel select
 	S <= 	IN_1 when AFC, 
 			IN_1 when LOAD,
-			IN_2 when COP,
+			IN_1 when NOP,
 			IN_2 when others;
 
 end Behavioral;

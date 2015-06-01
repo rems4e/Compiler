@@ -41,8 +41,9 @@ ARCHITECTURE behavior OF test_etape_process IS
  
     COMPONENT etape_process
     PORT(
-         CK : IN  std_logic;
-         RST : IN  std_logic
+         clock : IN  std_logic;
+         RST : IN  std_logic ;
+			flag : out std_logic_vector(3 downto 0)
         );
     END COMPONENT;
     
@@ -50,6 +51,9 @@ ARCHITECTURE behavior OF test_etape_process IS
    --Inputs
    signal CK : std_logic := '0';
    signal RST : std_logic := '0';
+	
+	--outputs
+	signal flag: std_logic_vector(3 downto 0) ;
    -- No clocks detected in port list. Replace <clock> below with 
    -- appropriate port name 
  
@@ -59,12 +63,13 @@ BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: etape_process PORT MAP (
-          CK => CK,
-          RST => RST
+          clock => CK,
+          RST => RST,
+			 flag => flag
         );
 
    -- Clock process definitions
-   CK_process :process
+   CK_process : process
    begin
 		CK <= '0';
 		wait for CK_period/2;
