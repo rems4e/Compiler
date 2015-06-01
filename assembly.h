@@ -2,7 +2,7 @@
 //  assembly.h
 //  Système Info
 //
-//  Created by Rémi on 05/03/2015.
+//  Created on 05/03/2015.
 //
 
 #ifndef __Syste_me_Info__assembly__
@@ -13,16 +13,16 @@
 #include "symbol.h"
 
 //#define STRIP_COMMENTS
-
 //#define OPCODE_TEXT
 
+#define UNKNOWN_GOTO_PREFIX "UG_"
 #define UNKNOWN_IF_PREFIX "UI_"
 #define UNKNOWN_LOOP_PREFIX "UL_"
 #define UNKNOWN_ADDRESS "00000"
 
 #ifdef OPCODE_TEXT
 
-#define STK "STK" // Ajout de l'opérande au stack pointer
+#define STK "STK" // Ajout de l'opérande 1 au stack pointer, ou du stack pointer à l'opérande 1 selon la valeur de l'opérande 2
 
 #define ADD "ADD"
 #define SOU "SOU"
@@ -31,7 +31,7 @@
 
 #define EQU "EQU"
 #define INF "INF"
-#define ABS "ABS"
+#define SCN "SCN"
 
 #define COP "COP"
 #define AFC "AFC"
@@ -40,8 +40,11 @@
 #define JMF "JMF"
 #define JMP_UNKNOWN_IF   "UI_JMP"
 #define JMP_UNKNOWN_LOOP "UL_JMP"
+#define JMP_UNKNOWN_GOTO "UG_JMP"
+
 #define JMF_UNKNOWN_IF   "UI_JMF"
 #define JMF_UNKNOWN_LOOP "UL_JMF"
+#define JMF_UNKNOWN_GOTO "UG_JMF"
 
 #define PRI "PRI"
 
@@ -60,7 +63,7 @@
 
 #define EQU "B"
 #define INF "9"
-#define ABS "A"
+#define SCN "A"
 
 #define COP "5"
 #define AFC "6"
@@ -69,8 +72,11 @@
 #define JMF "8"
 #define JMP_UNKNOWN_IF   "UI_7"
 #define JMP_UNKNOWN_LOOP "UL_7"
+#define JMP_UNKNOWN_GOTO "UG_7"
+
 #define JMF_UNKNOWN_IF   "UI_8"
 #define JMF_UNKNOWN_LOOP "UL_8"
+#define JMF_UNKNOWN_GOTO "UG_8"
 
 #define PRI "C"
 
@@ -81,7 +87,7 @@
 #endif
 
 void initAssemblyOutput(char const *path);
-void closeAssemblyOutput(void);
+void closeAssemblyOutput(char const *path);
 
 void assemblyOutput(char const *lineFormat, ...)  __attribute__ ((__format__ (__printf__, 1, 2))) ;//__printflike(1, 2);
 
@@ -97,6 +103,10 @@ void pushIfLabelLastButOne(void);
 void pushLoopLabel(void);
 void popLoopLabel(void);
 
+void addGotoLabel(char const *name);
+void pushGotoLabel(char const *name);
+void resetGotoLabels(void);
+
 void addFunctionReturnAddress(int returnAddress);
 
 void affectation(dereferencedSymbol_t id, symbol_t *value, bool allowConst);
@@ -109,6 +119,12 @@ symbol_t *negate(symbol_t *s);
 symbol_t *toBoolean(symbol_t *s);
 
 symbol_t *modulo(symbol_t *s1, symbol_t *s2);
+
+symbol_t *powerOfTwo(symbol_t *power);
+symbol_t *bitand(symbol_t *s1, symbol_t *s2);
+symbol_t *bitor(symbol_t *s1, symbol_t *s2);
+symbol_t *bitxor(symbol_t *s1, symbol_t *s2);
+symbol_t *bitnot(symbol_t *s1);
 
 
 #endif /* defined(__Syste_me_Info__assembly__) */

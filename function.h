@@ -2,7 +2,7 @@
 //  function.h
 //  Système Info
 //
-//  Created by Rémi on 15/03/2015.
+//  Created on 15/03/2015.
 //
 
 #ifndef __Syste_me_Info__function__

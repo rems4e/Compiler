@@ -10,10 +10,14 @@
 	#include "assembly.h"
 	#include "function.h"
 	#include "utility.h"
+	#include "enum.h"
+	#include "error.h"
 
 	#define YYERROR_VERBOSE
 
 	#define MAX_INITIALIZER 2048
+	#define MAX_STACK 1000
+	#define MAX_CASE 1024
 
 	typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
@@ -21,14 +25,13 @@
 	YY_BUFFER_STATE yy_scan_string(const char *yy_str);
 
 	extern int const lineNumber;
-	static int retourConditionFor;
-	static int paramsCount;
+	static int forConditionReturn;
 	static int tabSize;
 	static bool lastInstructionIsReturn = false;
 	static int loop = 0;
 	static varType_t lastVarType, returnValueType;
 	static char const *idName = NULL;
-	static symbol_t *ternarySymbol;
+	static enumValue_t lastEnumValue = {NULL, 0};
 
 	function_t *currentFunction = NULL;
 
@@ -39,6 +42,18 @@
 
 	static int loopMarkers[MAX_NESTING];
 
+	static struct {
+		int size;
+		int argCount[MAX_STACK];
+	} argsStack;
+
+	static struct {
+		int size;
+		int values[MAX_STACK][MAX_CASE];
+		int caseCount[MAX_STACK];
+		bool hasDefault[MAX_STACK];
+	} switchStack;
+
 	%}
 
 %union {
@@ -48,7 +63,7 @@
 	varType_t varType;
 }
 
-%token <nb> tNOMBRE
+%token <nb> tNUMBER
 %token <string> tID
 %token <string> tSTRING_LITTERAL
 %token <string> tCHAR_LITTERAL
@@ -56,64 +71,113 @@
 %type <dereferencedSymbol> Exp
 %type <varType> Type
 
-%token tPO tPF tVIR tBO tBF
+%token tO_P tC_P tCOMMA tO_BR tC_BR
 %token tCONST tINT tCHAR tCONSTC tVOID
 %token tINCR tDECR
 
 %token tNULL tTRUE tFALSE
 %token tAMP
 
-%token tF
+%token tSEMI
 
-%token tRETURN tPRINTF
-%token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE
+%token tRETURN tGOTO tPRINT tSCAN tENUM
+%token tIF tELSE tWHILE tFOR tDO tBREAK tCONTINUE tSWITCH tCASE tDEFAULT
 
 %token tSIZEOF;
 
-%right tPLUSEQ tMOINSEQ tDIVEQ tMULEQ tMODEQ tEGAL
+%right tPLUSEQ tMINUSEQ tDIVEQ tMULEQ tMODEQ tEQUAL tBITANDEQ tBITOREQ tBITXOREQ tSHIFTLEQ tSHIFTREQ
 
-%right tQUESTION
-%right tDEUXP
+%right tQUESTION tCOLON
 
-%left tBOOLEGAL tINFEGAL tSUPEGAL tSUP tINF tDIFF
-%left tET
-%left tOU
+%left tOR
+%left tAND
+%left tBITOR
+%left tBITXOR
+%left tBOOLEQUAL tLESSEQUAL tGREATEQUAL tGREAT tLESS tDIFF
 
-%left tPLUS tMOINS
+%left tSHIFTL tSHIFTR
+
+%left tPLUS tMINUS
 %left tDIV tSTAR tMOD
 
 %right tSIZEOF tAMP;
 
-%nonassoc tCRO tCRF
+%right tNOT tBITNOT
+
+%nonassoc tO_SQBR tC_SQBR
 
 %right tINCR tDECR
 
 %nonassoc EndIf
 %nonassoc tELSE
 
-%start Corps
+%start Body
 
 %%
 
-Corps :
-| Corps DefCorps;
+Body :
+| Body DefBody;
 
-DefCorps : Def
-| Type tID tPO {
-	paramsCount = 0;
+EndOrError : error tSEMI {
+	yyerrok;
+	enableErrorReporting();
+}
+| tSEMI;
+
+DefBody : Def
+| tENUM tID { lastEnumValue.value = -1; createEnum($2); } tO_BR EnumBody tC_BR tSEMI
+| tENUM tO_BR {lastEnumValue.value = -1; } EnumBody tC_BR tSEMI
+| Type tID tO_P {
+	argsStack.argCount[0] = 0;
 	returnValueType = $1;
-} Params tPF { idName = $2; } FonctionEnd;
+} Params tC_P { idName = $2; } FunctionEnd;
 
-FonctionEnd : { createFunction(&returnValueType, idName, false, paramsCount); } tF
-| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, paramsCount); pushBlock(); setGlobalScope(false); } CorpsFonction { currentFunction = NULL; popBlock(); setGlobalScope(true); };
+EnumBody : tID { lastEnumValue.name = strdup($1); } EnumVal EnumNext;
 
-CorpsFonction : tBO Instrucs tBF {
+EnumNext :
+| tCOMMA
+| tCOMMA EnumBody;
+
+EnumVal : {
+	++lastEnumValue.value;
+	addEnumValue(lastEnumValue);
+	symbol_t *val = createSymbol(lastEnumValue.name, (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT});
+	assemblyOutput(AFC" %d %d ; %s", val->address, lastEnumValue.value, lastEnumValue.name);
+	free(lastEnumValue.name);
+	lastEnumValue.name = NULL;
+}
+| tEQUAL tID {
+	lastEnumValue.value = getEnumValue($2);
+	addEnumValue(lastEnumValue);
+	symbol_t *val = createSymbol(lastEnumValue.name, (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT});
+	assemblyOutput(AFC" %d %d ; %s", val->address, lastEnumValue.value, lastEnumValue.name);
+	free(lastEnumValue.name);
+	lastEnumValue.name = NULL;
+}
+| tEQUAL tNUMBER {
+	lastEnumValue.value = $2;
+	addEnumValue(lastEnumValue);
+	symbol_t *val = createSymbol(lastEnumValue.name, (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT});
+	assemblyOutput(AFC" %d %d ; %s", val->address, lastEnumValue.value, lastEnumValue.name);
+	free(lastEnumValue.name);
+	lastEnumValue.name = NULL;
+};
+
+FunctionEnd : { createFunction(&returnValueType, idName, false, argsStack.argCount[0]); } EndOrError
+| { pushBlock(); setGlobalScope(false); createFunction(&returnValueType, idName, true, argsStack.argCount[0]); pushBlock(); setGlobalScope(false); } FunctionBody;
+
+FunctionBody : tO_BR Instrucs tC_BR {
 	if(!lastInstructionIsReturn && !isVoid(&currentFunction->returnType)) {
 		yyerror("Une valeur de retour est obligatoire à la fin d'une fonction ne retournant pas void.");
 	}
 	else if(!lastInstructionIsReturn) {
 		assemblyOutput(RET" ; Retour à la fonction appelante");
 	}
+
+	resetGotoLabels();
+	currentFunction = NULL;
+	popBlock();
+	setGlobalScope(true);
 };
 
 Return : tRETURN ReturnValue;
@@ -139,9 +203,9 @@ Params :
 | ParamsList;
 
 ParamsList : Param
-| ParamsList tVIR Param;
+| ParamsList tCOMMA Param;
 
-Param : Type tID { ++paramsCount; pushParam($2, $1); };
+Param : Type tID { ++argsStack.argCount[0]; pushParam($2, $1); };
 
 Def : Type TypedDef;
 
@@ -180,14 +244,40 @@ Type : tINT {
 	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_CHAR};
 } Indirections {
 	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
+}
+| tENUM tID {
+	if(!isEnum($2)) {
+		yyerror("L'enum %s n'a pas été déclarée.", $2);
+	}
+	lastVarType = (varType_t){.constMask = 0, .indirectionCount = 0, .baseType = BT_INT};
+} Indirections {
+	$$ = (varType_t){.constMask = lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
+}
+| tCONST tENUM tID {
+	if(!isEnum($3)) {
+		yyerror("L'enum %s n'a pas été déclarée.", $3);
+	}
+	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT};
+} Indirections {
+	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
+}
+| tENUM tID tCONST {
+	if(!isEnum($2)) {
+		yyerror("L'enum %s n'a pas été déclarée.", $2);
+	}
+	lastVarType = (varType_t){.constMask = 1, .indirectionCount = 0, .baseType = BT_INT};
+} Indirections {
+	$$ = (varType_t){.constMask = 1 | lastVarType.constMask, .indirectionCount = lastVarType.indirectionCount, .baseType = BT_CHAR};
 };
 
-PureType : Type { tabSize = 1; }
-| Type tCRO tNOMBRE tCRF { if($3 < 0) { yyerror("Un tableau ne peut pas avoir de taille négative."); } tabSize = $3; };
-| Type tCRO tCRF { tabSize = -1; };
 
-TypedDefNext : tF
-| tVIR TypedDef;
+PureType : Type { tabSize = 1; }
+| Type tO_SQBR tNUMBER tC_SQBR { if($3 < 0) { yyerror("Un tableau ne peut pas avoir de taille négative."); } tabSize = $3; };
+| Type tO_P Indirections tC_P tO_SQBR ExpOrEmpty tC_SQBR { tabSize = 1; }
+| Type tO_SQBR tC_SQBR { tabSize = -1; };
+
+TypedDefNext : EndOrError
+| tCOMMA TypedDef;
         
 TypedDef : tID {
 	if(topLevelConst(&lastVarType)) {
@@ -198,7 +288,7 @@ TypedDef : tID {
 	}
 	createSymbol($1, lastVarType);
 } TypedDefNext
-| tID tEGAL Exp {
+| tID tEQUAL Exp {
 	if(isVoid(&lastVarType)) {
 		yyerror("Impossible de déclarer une variable de type void.");
 	}
@@ -207,7 +297,15 @@ TypedDef : tID {
 } TypedDefNext
 | Tab TabDef TypedDefNext;
 
-Tab :  tID tCRO tNOMBRE tCRF {
+Tab : {
+	if(tabSize == -1) {
+		yyerror("Un tableau dont la dimension n'a pas été spécifiée doit être initialisé.");
+	}
+	else {
+		symbol_t *symTab = createArray(idName, lastVarType, tabSize);
+	}
+}
+| tID tO_SQBR tNUMBER tC_SQBR {
 	if($3 < 0) {
 		yyerror("Impossible de créer un tableau de dimension négative.");
 	}
@@ -215,31 +313,24 @@ Tab :  tID tCRO tNOMBRE tCRF {
 	tabSize = $3;
 	idName = $1;
 }
-| tID tCRO tCRF {
+| tID tO_SQBR tC_SQBR {
 	tabSize = -1;
 	idName = $1;
-};
-
-TabDef : {
-	if(tabSize == -1) {
-		yyerror("Un tableau dont la dimension n'a pas été spécifiée doit être initialisé.");
-	}
-	else {
-		symbol_t *symTab = createTable(idName, lastVarType, tabSize);
-	}
 }
-| tEGAL tBO FinTab {
+| EndOrError;
+
+TabDef : tEQUAL tO_BR TabEnd {
 	if(tabSize == -1) {
 		tabSize = initializerList.count;
 	}
-	symbol_t *tab = createTable(idName, lastVarType, tabSize);
+	symbol_t *tab = createArray(idName, lastVarType, tabSize);
 
-	symbol_t *last = getTabIndex(tab->name, initializerList.count - 1).symbol;
+	symbol_t *last = getArrayIndex(tab->name, initializerList.count - 1).symbol;
 	if(last == NULL) {
 		yyerror("Trop d'éléments dans la liste d'initialisation de %s.", tab->name);
 	}
 	else {
-		symbol_t *current = getTabIndex(tab->name, 0).symbol;
+		symbol_t *current = getArrayIndex(tab->name, 0).symbol;
 		for(int i = 0; i < initializerList.count; ++i, ++current) {
 			symbol_t *init = initializerList.data[i];
 			assemblyOutput(COP" %d %d", current->address, init->address);
@@ -247,7 +338,7 @@ TabDef : {
 			current->initialized = true;
 		}
 		for(int i = initializerList.count; ; ++i) {
-			symbol_t *current = getTabIndex(tab->name, i).symbol;
+			symbol_t *current = getArrayIndex(tab->name, i).symbol;
 			if(current == NULL)
 				break;
 			current->initialized = true;
@@ -257,7 +348,7 @@ TabDef : {
 
 	initializerList.count = 0;
 }
-| tEGAL tSTRING_LITTERAL {
+| tEQUAL tSTRING_LITTERAL {
 	if(lastVarType.baseType != BT_CHAR || lastVarType.indirectionCount != 0) {
 		yyerror("Impossible d'affecter une chaîne de caractère à un tableau de ce type.");
 	}
@@ -270,8 +361,8 @@ TabDef : {
 	else {
 		tabSize = len;
 
-		symbol_t *tab = createTable(idName, lastVarType, tabSize);
-		symbol_t *current = getTabIndex(tab->name, 0).symbol;
+		symbol_t *tab = createArray(idName, lastVarType, tabSize);
+		symbol_t *current = getArrayIndex(tab->name, 0).symbol;
 		for(int i = 0; i < len; ++i, ++current) {
 			assemblyOutput(AFC" %d %d", current->address, (int)($2[i]));
 			current->initialized = true;
@@ -279,24 +370,45 @@ TabDef : {
 	}
 };
 
-FinTab : Exp tBF {
+TabEnd : Exp tC_BR {
 	initializerList.data[initializerList.count++] = dereferenceExp($1);
 }
-| Exp tVIR {
+| Exp tCOMMA {
 	initializerList.data[initializerList.count++] = dereferenceExp($1);
-} FinTab;
+} TabEnd;
 
 Instrucs :
 | Instrucs { lastInstructionIsReturn = false; } Instruc { clearSymbolStack(); };
 
-Instruc : tF
-| Def
-| tBO { pushBlock(); } Instrucs tBF { popBlock(); }
-| Exp tVIR Instruc
-| Exp tF
-| Return tF { lastInstructionIsReturn = true; }
+SwitchInstruc : EndOrError
+| tO_BR { pushBlock(); } Instrucs tC_BR { popBlock(); }
+| Exp tCOMMA Instruc
+| Exp EndOrError
+| tID tCOLON {
+	addGotoLabel($1);
+}
+| tGOTO tID EndOrError {
+	pushGotoLabel($2);
+	assemblyOutput(JMP_UNKNOWN_GOTO" "UNKNOWN_ADDRESS" ; goto %s", $2);
+}
+| Return EndOrError { lastInstructionIsReturn = true; }
 | tIF CondIf Instruc %prec EndIf { popIfLabel(); }
 | tIF CondIf Instruc tELSE { pushIfLabelLastButOne(); assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS); popIfLabel(); } Instruc { popIfLabel(); }
+| tSWITCH tO_P Exp {
+	pushSymbol(dereferenceExp($3));
+	loopMarkers[loop++] = 0;
+	switchStack.caseCount[switchStack.size] = 0;
+	switchStack.hasDefault[switchStack.size] = false;
+	++switchStack.size;
+} tC_P tO_BR SwitchBody tC_BR {
+	popSymbol();
+	--loop;
+	--switchStack.size;
+
+	for(int i = 0; i < loopMarkers[loop]; ++i) {
+		popLoopLabel();
+	}
+}
 | tWHILE { pushInstructionCount(); } CondLoop { loopMarkers[loop++] = 0; } Instruc {
 	assemblyOutput(JMP" %d", popInstructionCount());
 	--loop;
@@ -307,21 +419,21 @@ Instruc : tF
 | tDO {
 	pushInstructionCount();
 	loopMarkers[loop++] = 0;
-} Instruc tWHILE CondLoop tF {
+} Instruc tWHILE CondLoop EndOrError {
 	assemblyOutput(JMP" %d", popInstructionCount());
 	--loop;
 	for(int i = 0; i < loopMarkers[loop] + 1; ++i) {
 		popLoopLabel();
 	}
 }
-| tFOR { pushBlock(); } tPO ExpOrEmptyOrDef { // Initialisation
+| tFOR { pushBlock(); } tO_P ExpOrEmptyOrDef { // Initialisation
 	pushInstructionCount();
-} ForCondition tF { // Action en fin de boucle
-	retourConditionFor = popInstructionCount();
+} ForCondition tSEMI { // Action en fin de boucle
+	forConditionReturn = popInstructionCount();
 	pushInstructionCount();
 } ExpOrEmpty {
-	assemblyOutput(JMP" %d", retourConditionFor);
-} tPF {  // Corps de boucle
+	assemblyOutput(JMP" %d", forConditionReturn);
+} tC_P {  // Corps de boucle
 	popLoopLabel();
 	loopMarkers[loop++] = 0;
 } Instruc { // Corps de boucle
@@ -333,22 +445,107 @@ Instruc : tF
 	popBlock();
 }
 | tBREAK {
-	if(!loop) {
-		yyerror("Le mot clé break doit se trouver dans une boucle.");
+	if(loop == 0) {
+		yyerror("Le mot clé 'break' doit se trouver dans une boucle ou un bloc switch.");
 	}
 	++loopMarkers[loop - 1];
 	pushLoopLabel();
-	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS" ; Break");
+	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS" ; break");
 }
 | tCONTINUE {
 	if(!loop) {
-		yyerror("Le mot clé continue doit se trouver dans une boucle.");
+		yyerror("Le mot clé 'continue' doit se trouver dans une boucle.");
 	}
-	assemblyOutput(JMP" %d ; Continue", lastInstructionCount());
+	assemblyOutput(JMP" %d ; continue", lastInstructionCount());
 };
 
-ExpOrEmptyOrDef : tF;
-| Exp tF;
+Instruc : SwitchInstruc
+| Def;
+
+SwitchBody :
+| tCASE SwitchCase
+| tDEFAULT SwitchDefault;
+
+SwitchInstrucs :
+| SwitchInstruc SwitchInstrucs;
+
+SwitchCase : tID {
+	pushIfLabel();
+
+	if(!isEnumValue($1)) {
+		yyerror("L'identificateur '%s' n'est pas une valeur constante.", $1);
+	}
+	else {
+		int val = getEnumValue($1);
+
+		for(int i = 0; i < switchStack.caseCount[switchStack.size - 1]; ++i) {
+			if(switchStack.values[switchStack.size - 1][i] == val) {
+				yyerror("Le cas '%d' a déjà été traité dans ce bloc switch.", $1);
+				break;
+			}
+		}
+		switchStack.values[switchStack.size - 1][switchStack.caseCount[switchStack.size - 1]++] = val;
+
+		symbol_t *valSym = allocTemp(0, BT_INT);
+		assemblyOutput(AFC" %d %d ; case %s", valSym->address, val, $1);
+		symbol_t *cond = popSymbol();
+		symbol_t *eq = binOp(EQU, cond, valSym);
+		assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, eq->address);
+		freeIfTemp(eq);
+
+		pushSymbol(cond);
+	}
+} tCOLON SwitchInstrucs SwitchNextCase
+| tNUMBER {
+	pushIfLabel();
+
+	for(int i = 0; i < switchStack.caseCount[switchStack.size - 1]; ++i) {
+		if(switchStack.values[switchStack.size - 1][i] == $1) {
+			yyerror("Le cas '%d' a déjà été traité dans ce bloc switch.", $1);
+			break;
+		}
+	}
+	switchStack.values[switchStack.size - 1][switchStack.caseCount[switchStack.size - 1]++] = $1;
+
+	symbol_t *valSym = allocTemp(0, BT_INT);
+	assemblyOutput(AFC" %d %d ; case %d", valSym->address, $1, $1);
+	symbol_t *cond = popSymbol();
+	symbol_t *eq = binOp(EQU, cond, valSym);
+	assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, eq->address);
+	freeIfTemp(eq);
+
+	pushSymbol(cond);
+} tCOLON SwitchInstrucs SwitchNextCase;
+
+SwitchDefault : {
+	if(switchStack.hasDefault[switchStack.size - 1]) {
+		yyerror("Un cas par défaut est déjà présent pour ce bloc switch.");
+	}
+	switchStack.hasDefault[switchStack.size - 1] = true;
+	pushIfLabel();
+	assemblyOutput(JMP_UNKNOWN_IF" "UNKNOWN_ADDRESS " ; évitement du cas par défaut");
+	pushInstructionCount();
+} tCOLON SwitchInstrucs SwitchNextDefault;
+
+SwitchNextCase : EndSwitch
+| tCASE { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 3); popIfLabel(); } SwitchCase
+| tDEFAULT { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 2); popIfLabel(); } SwitchDefault;
+
+SwitchNextDefault : {
+	++loopMarkers[loop - 1];
+	pushLoopLabel();
+	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS" ; break");
+} EndSwitch
+| tCASE { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 4); popIfLabel(); } SwitchCase
+| tDEFAULT { assemblyOutput(JMP" %d ; saut au cas suivant", instructionsCount() + 3); popIfLabel(); } SwitchDefault;
+
+EndSwitch : {
+	popIfLabel();
+	assemblyOutput(JMP" %d ; cas par défaut", popInstructionCount());
+ }
+
+ExpOrEmptyOrDef : EndOrError;
+| Exp EndOrError;
 | Def;
 
 ExpOrEmpty :
@@ -375,7 +572,7 @@ ForCondition : { // Condition vide
 	assemblyOutput(JMP_UNKNOWN_LOOP" "UNKNOWN_ADDRESS);
 };
 
-CondIf : tPO Exp tPF {
+CondIf : tO_P Exp tC_P {
 	symbol_t *cond = dereferenceExp($2);
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
@@ -385,7 +582,7 @@ CondIf : tPO Exp tPF {
 	freeIfTemp(cond);
 };
 
-CondLoop : tPO Exp tPF {
+CondLoop : tO_P Exp tC_P {
 	symbol_t *cond = dereferenceExp($2);
 	if(isVoid(&cond->type)) {
 		yyerror("La condition ne peut pas être de type void.");
@@ -398,35 +595,40 @@ CondLoop : tPO Exp tPF {
 Args :
 | ArgsList;
 
-ArgsList : Exp { ++paramsCount; pushSymbol(dereferenceExp($1)); }
-| ArgsList tVIR Exp { ++paramsCount; pushSymbol(dereferenceExp($3)); };
+ArgsList : Exp { ++argsStack.argCount[argsStack.size - 1]; pushSymbol(dereferenceExp($1)); }
+| ArgsList tCOMMA Exp { ++argsStack.argCount[argsStack.size - 1]; pushSymbol(dereferenceExp($3)); };
 
 Exp : tID {
 	dereferencedSymbol_t id = getExistingSymbol($1, true);
 	$$ = LDEREF(id.symbol, id.dereferenceCount, true);
 }
-| tNOMBRE {
+| tNUMBER {
 	symbol_t *s = allocTemp(0, BT_INT);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d %d", s->address, $1);
 	$$ = DEREF(s, 0);
 }
 | tTRUE {
 	symbol_t *s = allocTemp(0, BT_INT);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d 1", s->address);
 	$$ = DEREF(s, 0);
 }
 | tFALSE {
 	symbol_t *s = allocTemp(0, BT_INT);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d 0", s->address);
 	$$ = DEREF(s, 0);
 }
 | tNULL {
 	symbol_t *s = allocTemp(1, BT_VOID);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d 0", s->address);
 	$$ = DEREF(s, 0);
 }
 | tCHAR_LITTERAL {
 	symbol_t *s = allocTemp(0, BT_CHAR);
+	s->type.constMask = 1;
 	assemblyOutput(AFC" %d %d", s->address, (int)($1[0]));
 	$$ = DEREF(s, 0);
 }
@@ -440,7 +642,7 @@ Exp : tID {
 	}
 	$$ = LDEREF($2.symbol, $2.dereferenceCount + 1, true);
 }
-| Exp tCRO Exp tCRF {
+| Exp tO_SQBR Exp tC_SQBR {
 	symbol_t *symbTab = dereferenceExp($1);
 	symbol_t *symbInd = dereferenceExp($3);
 	symbol_t *ind, *ind2;
@@ -459,13 +661,13 @@ Exp : tID {
 | tSTRING_LITTERAL {
 	$$ = createString($1);
 }
-| tID tPO { paramsCount = 0; } Args tPF {
+| tID tO_P { argsStack.argCount[argsStack.size++] = 0; } Args tC_P {
 	function_t *function = getFunction($1);
 	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount, function->returnType.baseType);
-	callFunction(function, paramsCount, returnValue);
+	callFunction(function, argsStack.argCount[--argsStack.size], returnValue);
 	$$ = DEREF(returnValue, 0);
 }
-| tPRINTF tPO Exp tPF {
+| tPRINT tO_P Exp tC_P {
 	symbol_t *s = dereferenceExp($3);
 	if(isVoid(&s->type)) {
 		yyerror("L'expression ne peut pas être de type void.");
@@ -485,7 +687,18 @@ Exp : tID {
 	symbol_t *ret = allocTemp(0, BT_VOID);
 	DEREF(ret, 0);
 }
+| tSCAN tO_P Exp tC_P {
+	symbol_t *s = dereferenceExp($3);
+	symbol_t dummy;
+	dummy.type = (varType_t){.constMask = 0, .indirectionCount = 1, .baseType = BT_INT};
+	dummy.name = "ptr";
+	checkCompatibilityForAffectation(&dummy, s, true);
+	assemblyOutput(SCN" %d", s->address);
+}
 | tAMP Exp {
+	if(!$2.lvalue) {
+		yyerror("Impossible de prendre l'adresse d'une rvalue.");
+	}
 	symbol_t *s = $2.symbol;
 
 	if(isVoid(&s->type)) {
@@ -493,11 +706,12 @@ Exp : tID {
 	}
 
 	symbol_t *a = allocTemp(s->type.indirectionCount + 1 - $2.dereferenceCount, s->type.baseType);
+	a->type.constMask = s->type.constMask;
 	assemblyOutput(AFC" %d %d", a->address, s->address);
-	assemblyOutput(ABS" %d", a->address);
+	assemblyOutput(STK" %d 1", a->address);
 	$$ = DEREF(a, 0);
 }
-| Exp tEGAL Exp { affectation($1, dereferenceExp($3), false); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tEQUAL Exp { affectation($1, dereferenceExp($3), false); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | tINCR Exp {
 	symbol_t *one = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d 1", one->address);
@@ -531,16 +745,23 @@ Exp : tID {
 	$$ = DEREF(copy, 0);
 }
 | Exp tPLUS Exp { $$ = DEREF(binOp(ADD, dereferenceExp($1), dereferenceExp($3)), 0); }
-| Exp tMOINS Exp { $$ = DEREF(binOp(SOU, dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tMINUS Exp { $$ = DEREF(binOp(SOU, dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tSTAR Exp { $$ = DEREF(binOp(MUL, dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tDIV Exp { $$ = DEREF(binOp(DIV, dereferenceExp($1), dereferenceExp($3)), 0); }
 | Exp tMOD Exp {  $$ = DEREF(modulo(dereferenceExp($1), dereferenceExp($3)), 0); }
-| tMOINS Exp %prec tSTAR {
+| Exp tAMP Exp %prec tBITXOR {  $$ = DEREF(bitand(dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tBITOR Exp {  $$ = DEREF(bitor(dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tBITXOR Exp {  $$ = DEREF(bitxor(dereferenceExp($1), dereferenceExp($3)), 0); }
+| Exp tSHIFTL Exp { $$ = DEREF(binOp(MUL, dereferenceExp($1), powerOfTwo(dereferenceExp($3))), 0); }
+| Exp tSHIFTR Exp { $$ = DEREF(binOp(DIV, dereferenceExp($1), powerOfTwo(dereferenceExp($3))), 0); }
+| tMINUS Exp %prec tSTAR {
 	symbol_t *tmp = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d -1", tmp->address);
 	$$ = DEREF(binOp(MUL, dereferenceExp($2), tmp), 0);
 }
 | tPLUS Exp %prec tSTAR { $$ = $2; }
+| tBITNOT Exp { $$ = DEREF(bitnot(dereferenceExp($2)), 0); }
+| tNOT Exp { $$ = DEREF(negate(dereferenceExp($2)), 0); }
 | Exp tMODEQ Exp {
 	if(isTemp($1.symbol)) {
 		yyerror("L'expression doit être une lvalue.");
@@ -549,42 +770,74 @@ Exp : tID {
 	affectation($1, modulo($1.symbol, dereferenceExp($3)), false);
 	$$ = DEREF($1.symbol, $1.dereferenceCount);
 }
+| Exp tBITANDEQ Exp {
+	if(isTemp($1.symbol)) {
+		yyerror("L'expression doit être une lvalue.");
+	}
+
+	affectation($1, bitand($1.symbol, dereferenceExp($3)), false);
+	$$ = DEREF($1.symbol, $1.dereferenceCount);
+}
+| Exp tBITOREQ Exp {
+	if(isTemp($1.symbol)) {
+		yyerror("L'expression doit être une lvalue.");
+	}
+
+	affectation($1, bitor($1.symbol, dereferenceExp($3)), false);
+	$$ = DEREF($1.symbol, $1.dereferenceCount);
+}
+| Exp tBITXOREQ Exp {
+	if(isTemp($1.symbol)) {
+		yyerror("L'expression doit être une lvalue.");
+	}
+
+	affectation($1, bitxor($1.symbol, dereferenceExp($3)), false);
+	$$ = DEREF($1.symbol, $1.dereferenceCount);
+}
 | Exp tPLUSEQ Exp { binOpEq(ADD, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
-| Exp tMOINSEQ Exp { binOpEq(SOU, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tMINUSEQ Exp { binOpEq(SOU, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | Exp tDIVEQ Exp { binOpEq(DIV, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
 | Exp tMULEQ Exp { binOpEq(MUL, $1, dereferenceExp($3)); $$ = DEREF($1.symbol, $1.dereferenceCount); }
+| Exp tSHIFTLEQ Exp {
+	symbol_t *tmp = powerOfTwo(dereferenceExp($3));
+	binOpEq(MUL, $1, tmp); $$ = DEREF($1.symbol, $1.dereferenceCount);
+}
+| Exp tSHIFTREQ Exp {
+	symbol_t *tmp = powerOfTwo(dereferenceExp($3));
+	binOpEq(DIV, $1, tmp); $$ = DEREF($1.symbol, $1.dereferenceCount);
+}
 
-| Exp tET Exp {
+| Exp tAND Exp {
 	symbol_t *s = binOp(ADD, toBoolean(dereferenceExp($1)), toBoolean(dereferenceExp($3)));
 
 	symbol_t *deux = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", deux->address, 2);
 	$$ = DEREF(binOp(EQU, s, deux), 0);
 }
-| Exp tOU Exp {
+| Exp tOR Exp {
 	symbol_t *s = binOp(ADD, toBoolean(dereferenceExp($1)), toBoolean(dereferenceExp($3)));
 
 	symbol_t *zero = allocTemp(0, BT_INT);
 	assemblyOutput(AFC" %d %d", zero->address, 0);
 	$$ = DEREF(binOp(INF, zero, s), 0);
 }
-| Exp tINF Exp {
+| Exp tLESS Exp {
 	$$ = DEREF(binOp(INF, dereferenceExp($1), dereferenceExp($3)), 0);
 }
-| Exp tSUP Exp {
+| Exp tGREAT Exp {
 	$$ = DEREF(binOp(INF, dereferenceExp($3), dereferenceExp($1)), 0);
 }
-| Exp tINFEGAL Exp {
+| Exp tLESSEQUAL Exp {
 	$$ = DEREF(negate(binOp(INF, dereferenceExp($3), dereferenceExp($1))), 0);
 }
-| Exp tSUPEGAL Exp {
+| Exp tGREATEQUAL Exp {
 	$$ = DEREF(negate(binOp(INF, dereferenceExp($1), dereferenceExp($3))), 0);
 }
-| Exp tBOOLEGAL Exp {
+| Exp tBOOLEQUAL Exp {
 	$$ = DEREF(binOp(EQU, dereferenceExp($1), dereferenceExp($3)), 0);
 }
 
-| tPO Exp tPF { $$ = $2; }
+| tO_P Exp tC_P { $$ = $2; }
 | Exp tDIFF Exp {
 	$$ = DEREF(negate(binOp(EQU, dereferenceExp($1), dereferenceExp($3))), 0);
 }
@@ -596,9 +849,10 @@ Exp : tID {
 	pushIfLabel();
 	assemblyOutput(JMF_UNKNOWN_IF" %d "UNKNOWN_ADDRESS, cond->address);
 	freeIfTemp(cond);
-} Exp tDEUXP {
+} Exp tCOLON {
 	symbol_t *exp = dereferenceExp($4);
-	ternarySymbol = allocTemp(exp->type.indirectionCount, exp->type.baseType);
+	symbol_t *ternarySymbol = allocTemp(exp->type.indirectionCount, exp->type.baseType);
+	pushSymbol(ternarySymbol);
 	assemblyOutput(COP" %d %d", ternarySymbol->address, exp->address);
 
 	pushIfLabelLastButOne();
@@ -606,6 +860,7 @@ Exp : tID {
 	popIfLabel();
 } Exp {
 	symbol_t *exp = dereferenceExp($7);
+	symbol_t *ternarySymbol = popSymbol();
 	if(!sameType(&exp->type, &ternarySymbol->type)) {
 		yyerror("Les expressions de la condition ternaire doivent avoir le même type.");
 	}
@@ -623,7 +878,7 @@ Exp : tID {
 
 	$$ = DEREF(s2, 0);
 }
-| tSIZEOF tPO PureType tPF {
+| tSIZEOF tO_P PureType tC_P {
 	if(isVoid(&lastVarType)) {
 		yyerror("Impossible de calculer la taille d'une expression de type incomplet.");
 	}
@@ -639,25 +894,13 @@ Exp : tID {
 
 %%
 
-void yyerror(const char *s, ...) {
-	va_list args;
-	va_start(args, s);
-
-	fprintf(stderr, "Erreur ligne %d : ", lineNumber);
-	vfprintf(stderr, s, args);
-	fputc('\n', stderr);
-
-	va_end(args);
-
-	exit(1);
-}
-
 int main(int argc, char const **argv) {
 #ifdef YACC_DEBUG
 	extern int yydebug;
 	yydebug = 1;
 #endif
-
+	argsStack.size = 0;
+	switchStack.size = 0;
 	initializerList.count = 0;
 
 	char *outputName = strdup("a.s");
@@ -669,7 +912,7 @@ int main(int argc, char const **argv) {
 
 		if(len < 3 || argv[1][len - 1] != 'c' || argv[1][len - 2] != '.') {
 			fprintf(stderr, "Le fichier doit avoir l'extension \".c\" !\n");
-			return 1;
+			return INVALID_INVOCATION;
 		}
 		FILE *f = fopen(argv[1], "rb");
 		char *name = strdup(argv[1]);
@@ -693,18 +936,24 @@ int main(int argc, char const **argv) {
 			yy_scan_string(buf);
 		}
 		else {
-			return 1;
+			compilerError("Impossible de lire le fichier \"%s\".", argv[1]); // noreturn
 		}
 	}
 
 	initAssemblyOutput(outputName);
-	free(outputName);
 
 	yyparse();
 	free(buf);
 
-	closeAssemblyOutput();
+	closeAssemblyOutput(outputName);
+	free(outputName);
 	cleanSymbols();
+	cleanEnums();
+
+	if(errorsOccurred() > 0) {
+		fprintf(stderr, "Des erreurs sont survenues durant la compilation. Abandon.\n");
+		return COMPILATION_FAILURE;
+	}
 
 	return 0;
 }

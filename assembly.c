@@ -2,7 +2,7 @@
 //  assembly.c
 //  Système Info
 //
-//  Created by Rémi on 05/03/2015.
+//  Created on 05/03/2015.
 //
 
 #include "assembly.h"
@@ -14,56 +14,68 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include "error.h"
 
-#define TAILLE_MAX 1000
+#define MAX_SIZE 1000
+
+extern int errno;
 
 static char *assemblyBuffer = NULL;
 static char *globalBuffer = NULL;
 static FILE *output = NULL;
 
 typedef struct {
-	int adresseSaut;
+	int jumpAddress;
+	char *name;
 } label_t;
 
-typedef struct  {
-	label_t labels[TAILLE_MAX];
+typedef struct {
+	label_t labels[MAX_SIZE];
 	int size;
-	label_t *stack[TAILLE_MAX];
+	label_t *stack[MAX_SIZE];
 	int stackSize;
 } labelList_t;
 
 typedef struct {
-	int address[TAILLE_MAX];
+	int address[MAX_SIZE];
 	int size;
 } addressStack_t;
 
 typedef struct {
-	char *address[TAILLE_MAX];
+	char *address[MAX_SIZE];
 	int size;
 } returnStack_t;
 
-static labelList_t ifLabels, loopLabels;
+static labelList_t ifLabels, loopLabels, gotoLabels;
 static addressStack_t addressStack;
 static returnStack_t returnAddressStack;
+static int localGotoStart = 0;
 
 static int linesCount = 0, globalCount = 0;
 
 static void replaceLabels(char *txt, char const *prefix, labelList_t *labels, char *buf, size_t unknownLength);
+static void removeAssembyOutput(char const *path);
 
 void initAssemblyOutput(char const *path) {
-	output = fopen(path, "w+");
+	output = fopen(path, "w");
+	if(output == NULL) {
+		fprintf(stderr, "Le fichier de sortie \"%s\" n'a pas pu être ouvert : %s\n", path, strerror(errno));
+		exit(OPEN_OUTPUT_FAILURE);
+	}
 	assemblyBuffer = malloc(1);
 	assemblyBuffer[0] = '\0';
 	globalBuffer = malloc(1);
 	globalBuffer[0] = '\0';
 
-	ifLabels.size = loopLabels.size = 0;
-	ifLabels.stackSize = loopLabels.stackSize = 0;
+	ifLabels.size = loopLabels.size = gotoLabels.size = 0;
+	ifLabels.stackSize = loopLabels.stackSize = gotoLabels.stackSize = 0;
 	addressStack.size = 0;
-	for(int i = 0; i < TAILLE_MAX; ++i) {
-		ifLabels.labels[i].adresseSaut = loopLabels.labels[i].adresseSaut = 0;
-		ifLabels.stack[i] = loopLabels.stack[i] = NULL;
+	for(int i = 0; i < MAX_SIZE; ++i) {
+		ifLabels.labels[i].jumpAddress = loopLabels.labels[i].jumpAddress = 0;
+		gotoLabels.labels[i].jumpAddress = -1;
+		ifLabels.stack[i] = loopLabels.stack[i] = gotoLabels.stack[i] = NULL;
 		returnAddressStack.address[i] = NULL;
+		gotoLabels.labels[i].name = NULL;
 	}
 
 	setGlobalScope(false);
@@ -79,7 +91,7 @@ void initAssemblyOutput(char const *path) {
 #endif
 }
 
-void closeAssemblyOutput() {
+void closeAssemblyOutput(char const *path) {
 	char *pos;
 	char labelBuf[6];
 	int unknownLength = strlen(UNKNOWN_ADDRESS);
@@ -122,6 +134,21 @@ void closeAssemblyOutput() {
 	replaceLabels(assemblyBuffer, "\n"UNKNOWN_IF_PREFIX, &ifLabels, labelBuf, unknownLength);
 	replaceLabels(assemblyBuffer, "\n"UNKNOWN_LOOP_PREFIX, &loopLabels, labelBuf, unknownLength);
 
+	{
+		// On dépile la stack des goto dans la liste pour pouvoir utiliser le même algo que pour les if et while
+		label_t newTab[MAX_SIZE];
+		for(int i = 0; i < gotoLabels.size; ++i) {
+			free(gotoLabels.labels[i].name);
+			gotoLabels.labels[i].name = NULL;
+			newTab[i] = gotoLabels.labels[i];
+		}
+		for(int i = 0; i < gotoLabels.stackSize; ++i) {
+			gotoLabels.labels[i] = newTab[gotoLabels.stack[i] - gotoLabels.labels];
+		}
+		gotoLabels.size = gotoLabels.stackSize;
+	}
+	replaceLabels(assemblyBuffer, "\n"UNKNOWN_GOTO_PREFIX, &gotoLabels, labelBuf, unknownLength);
+
 #ifdef STRIP_COMMENTS
 	pos = assemblyBuffer;
 	while((pos = strstr(pos, ";")) != NULL) {
@@ -134,11 +161,17 @@ void closeAssemblyOutput() {
 
 #endif
 
-	fputs(assemblyBuffer, output);
-	fclose(output);
+	if(errorsOccurred()) {
+		fclose(output);
+		remove(path);
+	}
+	else {
+		fputs(assemblyBuffer, output);
+		fclose(output);
+	}
 	free(assemblyBuffer);
 	
-	for(int i = 0; i < TAILLE_MAX; ++i) {
+	for(int i = 0; i < MAX_SIZE; ++i) {
 		free(returnAddressStack.address[i]);
 	}
 }
@@ -151,7 +184,7 @@ void replaceLabels(char *txt, char const *prefix, labelList_t *labels, char *buf
 		txt[length + 1] = 0;
 
 		txt = strstr(txt, UNKNOWN_ADDRESS);
-		length = sprintf(buf, "%d", labels->labels[currentLabel].adresseSaut);
+		length = sprintf(buf, "%d", labels->labels[currentLabel].jumpAddress);
 
 		stringReplaceWithShorter(txt, unknownLength, buf, length);
 		++currentLabel;
@@ -187,7 +220,7 @@ int lastInstructionCount() {
 }
 
 void pushInstructionCount() {
-	assert(addressStack.size < TAILLE_MAX - 1);
+	assert(addressStack.size < MAX_SIZE - 1);
 	addressStack.address[addressStack.size++] = instructionsCount();
 }
 
@@ -197,18 +230,18 @@ int popInstructionCount() {
 }
 
 void pushIfLabel() {
-	assert(ifLabels.size < TAILLE_MAX - 1);
+	assert(ifLabels.size < MAX_SIZE - 1);
 	ifLabels.stack[ifLabels.stackSize++] = &ifLabels.labels[ifLabels.size++];
 }
 
 void popIfLabel() {
 	assert(ifLabels.stackSize > 0);
-	ifLabels.stack[--ifLabels.stackSize]->adresseSaut = instructionsCount();
+	ifLabels.stack[--ifLabels.stackSize]->jumpAddress = instructionsCount();
 	ifLabels.stack[ifLabels.stackSize] = NULL;
 }
 
 void pushIfLabelLastButOne() {
-	assert(ifLabels.size < TAILLE_MAX - 1);
+	assert(ifLabels.size < MAX_SIZE - 1);
 	assert(ifLabels.size > 0);
 
 	ifLabels.stack[ifLabels.stackSize] = ifLabels.stack[ifLabels.stackSize - 1];
@@ -216,18 +249,66 @@ void pushIfLabelLastButOne() {
 }
 
 void pushLoopLabel() {
-	assert(loopLabels.size < TAILLE_MAX - 1);
+	assert(loopLabels.size < MAX_SIZE - 1);
 	loopLabels.stack[loopLabels.stackSize++] = &loopLabels.labels[loopLabels.size++];
 }
 
 void popLoopLabel() {
 	assert(loopLabels.stackSize > 0);
-	loopLabels.stack[--loopLabels.stackSize]->adresseSaut = instructionsCount();
+	loopLabels.stack[--loopLabels.stackSize]->jumpAddress = instructionsCount();
 	loopLabels.stack[loopLabels.stackSize] = NULL;
 }
 
+void addGotoLabel(char const *name) {
+	label_t *newLabel = NULL;
+	for(int i = localGotoStart; i < gotoLabels.size; ++i) {
+		if(gotoLabels.labels[i].name != NULL && strcmp(gotoLabels.labels[i].name, name) == 0) {
+			if(gotoLabels.labels[i].jumpAddress != -1) {
+				yyerror("Le label %s a déjà été défini.", name);
+			}
+			else {
+				newLabel = &gotoLabels.labels[i];
+				gotoLabels.labels[i].jumpAddress = instructionsCount();
+			}
+			return;
+		}
+	}
+
+	if(newLabel == NULL) {
+		assert(gotoLabels.size < MAX_SIZE - 1);
+
+		gotoLabels.labels[gotoLabels.size].jumpAddress = instructionsCount();
+		gotoLabels.labels[gotoLabels.size].name = strdup(name);
+
+		++gotoLabels.size;
+	}
+}
+
+void pushGotoLabel(char const *name) {
+	label_t *newLabel = NULL;
+	for(int i = localGotoStart; i < gotoLabels.size; ++i) {
+		if(gotoLabels.labels[i].name != NULL && strcmp(gotoLabels.labels[i].name, name) == 0) {
+			newLabel = &gotoLabels.labels[i];
+			break;
+		}
+	}
+
+	if(newLabel == NULL) {
+		addGotoLabel(name);
+		newLabel = &gotoLabels.labels[gotoLabels.size - 1];
+		newLabel->jumpAddress = -1;
+	}
+
+	assert(gotoLabels.stackSize < MAX_SIZE - 1);
+	gotoLabels.stack[gotoLabels.stackSize++] = newLabel;
+}
+
+void resetGotoLabels() {
+	localGotoStart = gotoLabels.size;
+}
+
 void addFunctionReturnAddress(int returnAddress) {
-	assert(returnAddressStack.size < TAILLE_MAX - 1);
+	assert(returnAddressStack.size < MAX_SIZE - 1);
 	char *buf;
 	asprintf(&buf, "%d", returnAddress);
 	returnAddressStack.address[returnAddressStack.size++] = buf;
@@ -344,3 +425,27 @@ symbol_t *modulo(symbol_t *left, symbol_t *right) {
 	return binOp(SOU, leftBackup, res);
 }
 
+symbol_t *powerOfTwo(symbol_t *power) {
+	// TODO
+	return power;
+}
+
+symbol_t *bitand(symbol_t *s1, symbol_t *s2) {
+	// TODO
+	return s1;
+}
+
+symbol_t *bitor(symbol_t *s1, symbol_t *s2) {
+	// TODO
+	return s1;
+}
+
+symbol_t *bitxor(symbol_t *s1, symbol_t *s2) {
+	// TODO
+	return s1;
+}
+
+symbol_t *bitnot(symbol_t *s1) {
+	// TODO
+	return s1;
+}

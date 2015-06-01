@@ -2,7 +2,7 @@
 //  exec.c
 //  Système Info
 //
-//  Created by Rémi on 09/03/2015.
+//  Created on 09/03/2015.
 //
 
 #include <stdio.h>
@@ -36,8 +36,8 @@
 #define JMF 0x8
 
 #define PRI 0xC
+#define SCN 0xA
 
-#define ABS 0xA
 #define RET 0xD
 #define DR1 0xE
 #define DR2 0xF
@@ -136,15 +136,21 @@ void exec(char const *sourcePath) {
 #ifdef DEBUG
 		printf("Ligne : %d\nsp : %d\n", pc + 1, stackPointer);
 
-		for(int i = 0; i < 30; ++i) {
+		for(int i = 0; i < 50; ++i) {
 			printf("\tmemory[%d]: %d\n", i, memory[i]);
 		}
 		putc('\n', stdout);
 #endif
 		switch(opcode) {
 			case STK:
-				SCAN_ONE(STRINGIFY(STK));
-				stackPointer += op1;
+				SCAN_TWO(STRINGIFY(STK));
+				if(op2 == 0) {
+					stackPointer += op1;
+				}
+				else {
+					*getMemory(op1) += stackPointer;
+				}
+
 				break;
 			case ADD:
 				SCAN_THREE(STRINGIFY(ADD));
@@ -216,6 +222,16 @@ void exec(char const *sourcePath) {
 					funlockfile(stdout);
 				}
 				break;
+			case SCN: {
+				SCAN_ONE(STRINGIFY(SCN));
+				char c;
+				if(scanf("%d%c", &op2, &c) != 2 || c != '\n') {
+					while(getchar() != '\n');
+					op2 = 0;
+				}
+				*getMemory(*getMemory(op1) - stackPointer) = op2;
+				break;
+			}
 
 			case RET:
 				pc = *getMemory(0);
@@ -230,11 +246,6 @@ void exec(char const *sourcePath) {
 			case DR2:
 				SCAN_TWO(STRINGIFY(DR2));
 				*getMemory(op1) = memory[*getMemory(op2)];
-				break;
-
-			case ABS:
-				SCAN_ONE(STRINGIFY(ABS));
-				*getMemory(op1) += stackPointer;
 				break;
 		}
 

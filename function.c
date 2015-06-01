@@ -2,7 +2,7 @@
 //  function.c
 //  Système Info
 //
-//  Created by Rémi on 15/03/2015.
+//  Created on 15/03/2015.
 //
 
 #include "function.h"
@@ -114,7 +114,7 @@ void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
 		assemblyOutput(COP" %d %d ; Copie de l'argument %s lors de l'appel de %s", param->address, arg->address, function->params[i].name, function->name);
 	}
 
-	assemblyOutput(STK" %d ; Incrémentation stack pointer", stackSize);
+	assemblyOutput(STK" %d 0 ; Incrémentation stack pointer", stackSize);
 	if(currentFunction != NULL) {
 		assemblyOutput(AFC" %d %d ; Sauvegarde adresse retour ", RETURN_ADDRESS, instructionsCount() + 2);
 	}
@@ -130,7 +130,7 @@ void callFunction(function_t *function, int argsCount, symbol_t *returnSymbol) {
 	if(returnSymbol != NULL && (!isVoid(&returnSymbol->type))) {
 		assemblyOutput(COP" %d %d ; Récupération valeur de retour", returnSymbol->address - stackSize, RETURN_VALUE_ADDRESS);
 	}
-	assemblyOutput(STK" %d ; Décrémentation stack pointer", -stackSize);
+	assemblyOutput(STK" %d 0 ; Décrémentation stack pointer", -stackSize);
 }
 
 void createFunction(varType_t *returnType, char const *name, bool definition, int paramsCount) {

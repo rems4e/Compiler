@@ -2,7 +2,7 @@
 //  symbol.c
 //  Système Info
 //
-//  Created by Rémi on 26/02/2015.
+//  Created on 26/02/2015.
 //
 
 #include "symbol.h"
@@ -12,6 +12,7 @@
 #include <assert.h>
 #include "assembly.h"
 #include "utility.h"
+#include "error.h"
 
 #define ADDRESS_SHIFT 2
 
@@ -25,6 +26,7 @@ typedef struct {
 	int nestingLevel;
 } symbolTable_t;
 
+static symbol_t dummy = {true, "Dummy", 0, {0, 0, BT_INT}};
 
 static symbolTable_t symbolTable;
 static char *tempSymbol;
@@ -36,6 +38,9 @@ void freeFunctionTable();
 
 void initSymbols() {
 	tempSymbol = strdup("__temp__");
+
+	symbolTable.stackSize = 0;
+	symbolTable.symbolsStack[0] = NULL;
 
 	symbolTable.nestingLevel = 0;
 	for(int i = 0; i < MAX_NESTING; ++i) {
@@ -121,7 +126,7 @@ int getGlobalSymbolsCount() {
 int getSymbolSize(symbol_t const *symbol) {
 	if(symbol->type.indirectionCount > 0) {
 		if((symbol->type.constMask & (1 << symbol->type.indirectionCount)) != 0) {
-			dereferencedSymbol_t first = getTabIndex(symbol->name, 0);
+			dereferencedSymbol_t first = getArrayIndex(symbol->name, 0);
 			if(first.symbol != NULL) {
 				return getSymbolSize(first.symbol) * (symbol->address - first.symbol->address);
 			}
@@ -150,9 +155,9 @@ dereferencedSymbol_t createString(char const *value) {
 
 	dereferencedSymbol_t deref = getExistingSymbol(interningName, false);
 	symbol_t *tab = deref.symbol;
-	if(tab == NULL) {
-		tab = createTable(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
-		dereferencedSymbol_t data = getTabIndex(interningName, 0);
+	if(tab == &dummy) {
+		tab = createArray(interningName, (varType_t){.indirectionCount = 0, .baseType = BT_CHAR, .constMask = 1}, len);
+		dereferencedSymbol_t data = getArrayIndex(interningName, 0);
 		assert(data.symbol);
 		for(int i = 0; i < len; ++i) {
 			assemblyOutput(AFC" %d %d", data.symbol->address + i, value[i]);
@@ -195,7 +200,7 @@ dereferencedSymbol_t getExistingSymbol(char const *name, bool failIfNotFound) {
 		yyerror("Variable %s non déclarée\n", name);
 	}
 
-	return DEREF(NULL, 0);
+	return DEREF(&dummy, 0);
 }
 
 symbol_t *createSymbol(char const *name, varType_t type) {
@@ -210,7 +215,7 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 		}
 		else if(sym->name != NULL && strcmp(sym->name, name) == 0) {
 			yyerror("La variable %s existe déjà !\n", name);
-			return NULL;
+			return &dummy;
 		}
 	}
 
@@ -242,12 +247,16 @@ symbol_t *createSymbol(char const *name, varType_t type) {
 		}
 	}
 
-	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
+	compilerError("La table des symboles est trop petite, impossible de réserver l'espace pour le symbole %s. Essayez avec moins de variables/tableaux, ou contactez l'éditeur pour réduire cette limitation.", name);
 	return NULL;
 }
 
-symbol_t *createTable(char const *name, varType_t type, int size) {
+symbol_t *createArray(char const *name, varType_t type, int size) {
 	int const nestingLevel = getGlobalScope() ? 0 : symbolTable.nestingLevel;
+
+	if(size == 0) {
+		size = 1;
+	}
 
 	symbol_t **newSym = NULL;
 	for(int i = 0; i <= SYM_COUNT - size && newSym == NULL; ++i) {
@@ -260,7 +269,7 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 			else if(sym != NULL && sym->name != NULL) {
 				if(strcmp(sym->name, name) == 0) {
 					yyerror("La variable %s existe déjà !\n", name);
-					return NULL;
+					return &dummy;
 				}
 				break;
 			}
@@ -297,7 +306,7 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 
 					assemblyOutput(AFC" %d %d ; Tableau \"%s\"", ptr->address, (*newSym)->address, comment ? comment : "");
 					free(comment);
-					assemblyOutput(ABS" %d", ptr->address);
+					assemblyOutput(STK" %d 1", ptr->address);
 
 					if(getGlobalScope()) {
 						symbolTable.globalCount += size;
@@ -308,16 +317,18 @@ symbol_t *createTable(char const *name, varType_t type, int size) {
 		}
 	}
 
-	fprintf(stderr, "Symbol table too small, couldn't get room for new symbol %s.\n", name);
+	compilerError("La table des symboles est trop petite, impossible de réserver l'espace pour le symbole %s. Essayez avec moins de variables/tableaux, ou contactez l'éditeur pour réduire cette limitation.", name);
 	return NULL;
 }
 
-dereferencedSymbol_t getTabIndex(char const *name, int index) {
+dereferencedSymbol_t getArrayIndex(char const *name, int index) {
 	char *toFind;
 	asprintf(&toFind, "%s__tabIndice%d", name, index);
 
 	dereferencedSymbol_t ret = getExistingSymbol(toFind, false);
-
+	if(ret.symbol == &dummy) {
+		ret.symbol = NULL;
+	}
 	free(toFind);
 	return ret;
 
@@ -336,7 +347,7 @@ symbol_t *allocTemp(int indirectionCount, baseType_t baseType) {
 		}
 	}
 
-	fprintf(stderr, "Symbol table too small, couldn't get room for new temporary symbol.\n");
+	compilerError("La table des symboles est trop petite, impossible de réserver l'espace pour un symbole temporaire. Essayez avec moins de variables/tableaux, ou contactez l'éditeur pour réduire cette limitation.");
 	return NULL;
 }
 
@@ -394,12 +405,17 @@ void clearSymbolStack() {
 symbol_t *dereferenceExp(dereferencedSymbol_t exp) {
 	symbol_t *s = exp.symbol;
 	if(!s->initialized && !isTemp(s)) {
-		yyerror("Variable %s non initialisée avant utilisation!", s->name);
+		warning("Variable %s non initialisée avant utilisation.", s->name);
 	}
 
 	if(exp.dereferenceCount > 0) {
-		if (exp.dereferenceCount > s->type.indirectionCount){
-			yyerror("Impossible de déréférencer l'expresion %d fois.", exp.dereferenceCount);
+		if (exp.dereferenceCount > s->type.indirectionCount) {
+			if(exp.dereferenceCount == 1) {
+				yyerror("Impossible de déréférencer l'expression.");
+			}
+			else {
+				yyerror("Impossible de déréférencer l'expression %d fois.", exp.dereferenceCount);
+			}
 		}
 		else {
 			symbol_t *ind;
@@ -443,7 +459,7 @@ bool topLevelConst(varType_t const *t) {
 
 void checkScalar(symbol_t const *s) {
 	if(s->type.indirectionCount > 0) {
-		yyerror("L'expresion n'est pas un scalaire.");
+		yyerror("L'expression n'est pas un scalaire.");
 	}
 }
 

@@ -2,7 +2,7 @@
 //  utility.c
 //  Système Info
 //
-//  Created by Rémi on 16/03/2015.
+//  Created on 16/03/2015.
 //
 
 #include "utility.h"
