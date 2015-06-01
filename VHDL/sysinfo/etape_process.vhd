@@ -93,7 +93,7 @@ architecture Behavioral of etape_process is
 	 COMPONENT MUX_ALU
 	     Port ( CK : in  STD_LOGIC;
 			  IN_1,IN_2 : in  STD_LOGIC_VECTOR (7 downto 0);
-				IN_3 : in  STD_LOGIC_VECTOR (3 downto 0);
+				--IN_3 : in  STD_LOGIC_VECTOR (3 downto 0);
 				sel : in  STD_LOGIC_VECTOR (7 downto 0);
            S : out  STD_LOGIC_VECTOR (7 downto 0));
 	  END COMPONENT ;
@@ -242,7 +242,7 @@ begin
 			CK=> clock,
 			IN_1=>out_b_di,
 			IN_2=>out_alu,
-			IN_3=>flag_alu,
+			--IN_3=>flag_alu,
 			sel => out_op_di,
 			S => out_mux_alu
 		) ;

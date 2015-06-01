@@ -85,7 +85,7 @@ BEGIN
 		RST <= '0' ;
       wait for 100 ns;	
 		RST <= '1' ;
-      wait for CK_period*100;
+      wait for CK_period*300;
       -- insert stimulus here 
       wait;
    end process;

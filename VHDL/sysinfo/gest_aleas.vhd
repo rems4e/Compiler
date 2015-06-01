@@ -77,13 +77,13 @@ begin
 	lecture : process(CK)
 	begin
 		if rising_edge(CK) then
-			if RST='1' and (banc(to_integer(unsigned(B))) = "11" or banc(to_integer(unsigned(C))) = "11") then
+			if RST='1' and Inhib='0' and(banc(to_integer(unsigned(B(3 downto 0)))) /= "00" or banc(to_integer(unsigned(C(3 downto 0)))) /= "00") then
 				out_OP <= OP ;
 				out_a <=A;
 				out_b <=B;
 				out_c <=C;
 				Inhib <='1' ;
-			elsif RST='1' and (banc(to_integer(unsigned(B))) = "00" or banc(to_integer(unsigned(C))) = "00") then
+			elsif RST='1' and (banc(to_integer(unsigned(B(3 downto 0)))) = "00" and banc(to_integer(unsigned(C(3 downto 0)))) = "00") then
 				Inhib <='0' ;
 				out_OP <= OP ;
 				out_a <=A;
@@ -92,9 +92,9 @@ begin
 			else 
 				Inhib <='1' ;
 				out_OP <= NOP ;
-				out_a <=A;
-				out_b <=B;
-				out_c <=C;
+				out_a <=NOP;
+				out_b <=NOP;
+				out_c <=NOP;
 			end if ;	
 		end if ;
 	end process ;

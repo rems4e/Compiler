@@ -13,7 +13,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="12" />
+   <WVObjectSize size="11" />
    <wvobject fp_name="/test_etape_process/ck" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">ck</obj_property>
       <obj_property name="ObjectShortName">ck</obj_property>
@@ -53,10 +53,6 @@
    <wvobject fp_name="/test_etape_process/uut/gestion_aleas/inhib" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">inhib</obj_property>
       <obj_property name="ObjectShortName">inhib</obj_property>
-   </wvobject>
-   <wvobject fp_name="/test_etape_process/uut/gestion_aleas/out_op" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">out_op[7:0]</obj_property>
-      <obj_property name="ObjectShortName">out_op[7:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/test_etape_process/uut/gestion_aleas/banc" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">banc[15:0]</obj_property>
