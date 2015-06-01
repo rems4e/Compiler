@@ -10,9 +10,9 @@
 
 #include <stdbool.h>
 
-void yyerror(const char *s, ...);
-void warning(const char *s, ...);
-void compilerError(const char *s, ...);
+void yyerror(const char *s, ...) __attribute__ ((__format__ (__printf__, 1, 2)));
+void warning(const char *s, ...) __attribute__ ((__format__ (__printf__, 1, 2)));
+void compilerError(const char *s, ...) __attribute__ ((__format__ (__printf__, 1, 2)));
 
 void enableErrorReporting(void);
 

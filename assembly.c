@@ -54,7 +54,6 @@ static int localGotoStart = 0;
 static int linesCount = 0, globalCount = 0;
 
 static void replaceLabels(char *txt, char const *prefix, labelList_t *labels, char *buf, size_t unknownLength);
-static void removeAssembyOutput(char const *path);
 
 void initAssemblyOutput(char const *path) {
 	output = fopen(path, "w");

@@ -441,11 +441,6 @@ symbol_t *dereferenceExp(dereferencedSymbol_t exp) {
 void printSymbolTable() {
 	symbol_t *symbols = symbolTable.symbols;
 
-	int *a;
-	int * const b;
-
-	a = b;
-
 	for(int i = 0; i < SYM_COUNT; ++i) {
 		if(symbols[i].name != NULL) {
 			printf("%#x: \"%s\" affected: %s\n", symbols[i].address, symbols[i].name, (symbols[i].initialized ? "true" : "false"));

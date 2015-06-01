@@ -302,7 +302,7 @@ Tab : {
 		yyerror("Un tableau dont la dimension n'a pas été spécifiée doit être initialisé.");
 	}
 	else {
-		symbol_t *symTab = createArray(idName, lastVarType, tabSize);
+		createArray(idName, lastVarType, tabSize);
 	}
 }
 | tID tO_SQBR tNUMBER tC_SQBR {
@@ -495,7 +495,7 @@ SwitchCase : tID {
 
 		for(int i = 0; i < switchStack.caseCount[switchStack.size - 1]; ++i) {
 			if(switchStack.values[switchStack.size - 1][i] == val) {
-				yyerror("Le cas '%d' a déjà été traité dans ce bloc switch.", $1);
+				yyerror("Le cas '%s' a déjà été traité dans ce bloc switch.", $1);
 				break;
 			}
 		}
@@ -660,7 +660,7 @@ Exp : tID {
 | Exp tO_SQBR Exp tC_SQBR {
 	symbol_t *symbTab = dereferenceExp($1);
 	symbol_t *symbInd = dereferenceExp($3);
-	symbol_t *ind, *ind2;
+	symbol_t *ind2;
 	int indCount = symbTab->type.indirectionCount;
 
 	checkBinOp(ADD, symbTab, symbInd);
@@ -921,7 +921,7 @@ int main(int argc, char const **argv) {
 	char *outputName = strdup("a.s");
 
 	initSymbols();
-	char *buf;
+	char *buf = NULL;
 	if(argc > 1) {
 		long len = strlen(argv[1]);
 
