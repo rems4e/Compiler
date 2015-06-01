@@ -11,9 +11,9 @@
 #include "constants.h"
 #include <stdint.h>
 
-#define SYM_COUNT 1000
-#define GLOBAL_COUNT 1000
-#define MAX_NESTING 20
+#define SYM_COUNT 8192
+#define GLOBAL_COUNT 1024
+#define MAX_NESTING 128
 
 #define SIZEOF_PTR 1
 #define SIZEOF_INT 1

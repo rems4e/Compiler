@@ -409,7 +409,7 @@ symbol_t *dereferenceExp(dereferencedSymbol_t exp) {
 	}
 
 	if(exp.dereferenceCount > 0) {
-		if (exp.dereferenceCount > s->type.indirectionCount) {
+		if(exp.dereferenceCount > s->type.indirectionCount) {
 			if(exp.dereferenceCount == 1) {
 				yyerror("Impossible de déréférencer l'expression.");
 			}
