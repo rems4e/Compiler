@@ -23,7 +23,7 @@ Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_
 Starting static elaboration
 Completed static elaboration
 Fuse Memory Usage: 98140 KB
-Fuse CPU Usage: 1320 ms
+Fuse CPU Usage: 1330 ms
 Compiling package standard
 Compiling package std_logic_1164
 Compiling package numeric_std
@@ -51,5 +51,5 @@ Waiting for 1 sub-compilation(s) to finish...
 Compiled 38 VHDL Units
 Built simulation executable /home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process_isim_beh.exe
 Fuse Memory Usage: 674236 KB
-Fuse CPU Usage: 1540 ms
+Fuse CPU Usage: 1550 ms
 GCC CPU Usage: 170 ms
