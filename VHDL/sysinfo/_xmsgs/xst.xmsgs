@@ -8,13 +8,19 @@
 <msg type="info" file="Xst" num="0" delta="new" >Part-select index evaluated to out of bound value may lead to incorrect synthesis results; it is recommended not to use them in RTL
 </msg>
 
-<msg type="info" file="Xst" num="3210" delta="old" >&quot;<arg fmt="%s" index="1">/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd</arg>&quot; line <arg fmt="%s" index="2">200</arg>: Output port &lt;<arg fmt="%s" index="3">OUT_C</arg>&gt; of the instance &lt;<arg fmt="%s" index="4">ex_Mem</arg>&gt; is unconnected or connected to loadless signal.
+<msg type="info" file="Xst" num="3210" delta="new" >&quot;<arg fmt="%s" index="1">/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd</arg>&quot; line <arg fmt="%s" index="2">207</arg>: Output port &lt;<arg fmt="%s" index="3">OUT_C</arg>&gt; of the instance &lt;<arg fmt="%s" index="4">ex_Mem</arg>&gt; is unconnected or connected to loadless signal.
 </msg>
 
-<msg type="info" file="Xst" num="3210" delta="old" >&quot;<arg fmt="%s" index="1">/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd</arg>&quot; line <arg fmt="%s" index="2">212</arg>: Output port &lt;<arg fmt="%s" index="3">OUT_C</arg>&gt; of the instance &lt;<arg fmt="%s" index="4">mem_re</arg>&gt; is unconnected or connected to loadless signal.
+<msg type="info" file="Xst" num="3210" delta="new" >&quot;<arg fmt="%s" index="1">/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd</arg>&quot; line <arg fmt="%s" index="2">219</arg>: Output port &lt;<arg fmt="%s" index="3">OUT_C</arg>&gt; of the instance &lt;<arg fmt="%s" index="4">mem_re</arg>&gt; is unconnected or connected to loadless signal.
 </msg>
 
 <msg type="warning" file="Xst" num="2999" delta="old" >Signal &apos;<arg fmt="%s" index="1">banc_instruc</arg>&apos;, unconnected in block &apos;<arg fmt="%s" index="2">Instruc_Mem</arg>&apos;, is tied to its initial value.
+</msg>
+
+<msg type="warning" file="Xst" num="647" delta="new" >Input &lt;<arg fmt="%s" index="1">IN_3&lt;0:0&gt;</arg>&gt; is never used. This port will be preserved and left unconnected if it belongs to a top-level block or it belongs to a sub-block and the hierarchy of this sub-block is preserved.
+</msg>
+
+<msg type="warning" file="Xst" num="647" delta="new" >Input &lt;<arg fmt="%s" index="1">IN_3&lt;2:2&gt;</arg>&gt; is never used. This port will be preserved and left unconnected if it belongs to a top-level block or it belongs to a sub-block and the hierarchy of this sub-block is preserved.
 </msg>
 
 <msg type="warning" file="Xst" num="647" delta="old" >Input &lt;<arg fmt="%s" index="1">CK</arg>&gt; is never used. This port will be preserved and left unconnected if it belongs to a top-level block or it belongs to a sub-block and the hierarchy of this sub-block is preserved.

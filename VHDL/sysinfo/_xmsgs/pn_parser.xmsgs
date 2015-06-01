@@ -8,37 +8,7 @@
 <!-- Copyright (c) 1995-2011 Xilinx, Inc.  All rights reserved.    -->
 
 <messages>
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/ALU_Test.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/banc_registres_test.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/mem_data_test.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/mem_instruc_test.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1845" ><arg fmt="%s" index="1">Analyzing Verilog file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/netgen/translate/banc_registres_translate.v&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1845" ><arg fmt="%s" index="1">Analyzing Verilog file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/netgen/translate/etape_process_translate.v&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/pipe_line_test.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_etape_process.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_fifo.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_gest_alea.vhd&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/test_processor.vhd&quot; into library work</arg>
+<msg type="info" file="ProjectMgmt" num="1061" ><arg fmt="%s" index="1">Parsing VHDL file &quot;/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/gest_aleas.vhd&quot; into library work</arg>
 </msg>
 
 </messages>

@@ -4,15 +4,15 @@ Copyright (c) 1995-2011 Xilinx, Inc.  All rights reserved.
 Parameter TMPDIR set to xst/projnav.tmp
 
 
-Total REAL time to Xst completion: 1.00 secs
-Total CPU time to Xst completion: 0.07 secs
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.08 secs
  
 --> 
 Parameter xsthdpdir set to xst
 
 
-Total REAL time to Xst completion: 1.00 secs
-Total CPU time to Xst completion: 0.07 secs
+Total REAL time to Xst completion: 0.00 secs
+Total CPU time to Xst completion: 0.08 secs
  
 --> 
 Reading design: etape_process.prj
@@ -124,6 +124,9 @@ Parsing architecture <Behavioral> of entity <mux_bancregistres>.
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_ALU.vhd" into library work
 Parsing entity <MUX_ALU>.
 Parsing architecture <Behavioral> of entity <mux_alu>.
+Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/LC_mem.vhd" into library work
+Parsing entity <LC_mem>.
+Parsing architecture <Behavioral> of entity <lc_mem>.
 Parsing VHDL file "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/LC_ALU.vhd" into library work
 Parsing entity <LC_ALU>.
 Parsing architecture <Behavioral> of entity <lc_alu>.
@@ -181,6 +184,8 @@ Elaborating entity <MUX_ALU> (architecture <Behavioral>) from library <work>.
 
 Elaborating entity <ALU> (architecture <Behavioral>) from library <work>.
 
+Elaborating entity <LC_mem> (architecture <Behavioral>) from library <work>.
+
 Elaborating entity <Data_Mem> (architecture <Behavioral>) from library <work>.
 
 Elaborating entity <MUX_MemData> (architecture <Behavioral>) from library <work>.
@@ -195,8 +200,8 @@ Elaborating entity <gest_aleas> (architecture <Behavioral>) from library <work>.
 
 Synthesizing Unit <etape_process>.
     Related source file is "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd".
-INFO:Xst:3210 - "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd" line 200: Output port <OUT_C> of the instance <ex_Mem> is unconnected or connected to loadless signal.
-INFO:Xst:3210 - "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd" line 212: Output port <OUT_C> of the instance <mem_re> is unconnected or connected to loadless signal.
+INFO:Xst:3210 - "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd" line 207: Output port <OUT_C> of the instance <ex_Mem> is unconnected or connected to loadless signal.
+INFO:Xst:3210 - "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/etape_process.vhd" line 219: Output port <OUT_C> of the instance <mem_re> is unconnected or connected to loadless signal.
     Summary:
 	no macro.
 Unit <etape_process> synthesized.
@@ -285,9 +290,11 @@ Unit <LC_ALU> synthesized.
 
 Synthesizing Unit <MUX_ALU>.
     Related source file is "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/MUX_ALU.vhd".
+WARNING:Xst:647 - Input <IN_3<0:0>> is never used. This port will be preserved and left unconnected if it belongs to a top-level block or it belongs to a sub-block and the hierarchy of this sub-block is preserved.
+WARNING:Xst:647 - Input <IN_3<2:2>> is never used. This port will be preserved and left unconnected if it belongs to a top-level block or it belongs to a sub-block and the hierarchy of this sub-block is preserved.
 WARNING:Xst:647 - Input <CK> is never used. This port will be preserved and left unconnected if it belongs to a top-level block or it belongs to a sub-block and the hierarchy of this sub-block is preserved.
     Summary:
-	inferred   1 Multiplexer(s).
+	no macro.
 Unit <MUX_ALU> synthesized.
 
 Synthesizing Unit <ALU>.
@@ -340,6 +347,12 @@ Synthesizing Unit <div_9u_9u>.
 	inferred  10 Comparator(s).
 	inferred  73 Multiplexer(s).
 Unit <div_9u_9u> synthesized.
+
+Synthesizing Unit <LC_mem>.
+    Related source file is "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/LC_mem.vhd".
+    Summary:
+	no macro.
+Unit <LC_mem> synthesized.
 
 Synthesizing Unit <Data_Mem>.
     Related source file is "/home/yann/Documents/INSA/TP/repos/sysinfo/VHDL/sysinfo/Data_Mem.vhd".
@@ -644,22 +657,22 @@ Synthesizing Unit <gest_aleas>.
     Found 8-bit register for signal <out_c>.
     Found 1-bit register for signal <Inhib>.
     Found 2-bit register for signal <banc<15>>.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_86_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_89_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_92_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_95_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_98_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_101_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_104_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_107_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_110_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_113_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_116_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_119_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_122_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_125_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_128_OUT<1:0>> created at line 70.
-    Found 2-bit subtractor for signal <GND_38_o_GND_38_o_sub_131_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_86_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_89_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_92_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_95_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_98_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_101_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_104_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_107_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_110_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_113_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_116_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_119_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_122_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_125_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_128_OUT<1:0>> created at line 70.
+    Found 2-bit subtractor for signal <GND_39_o_GND_39_o_sub_131_OUT<1:0>> created at line 70.
     Found 2-bit 16-to-1 multiplexer for signal <B[3]_banc[15][1]_wide_mux_184_OUT> created at line 86.
     Found 2-bit 16-to-1 multiplexer for signal <C[3]_banc[15][1]_wide_mux_186_OUT> created at line 86.
     Summary:
@@ -707,11 +720,11 @@ Macro Statistics
  18-bit comparator lessequal                           : 1
  4-bit comparator equal                                : 2
  9-bit comparator lessequal                            : 1
-# Multiplexers                                         : 94
+# Multiplexers                                         : 93
  1-bit 2-to-1 multiplexer                              : 73
  2-bit 16-to-1 multiplexer                             : 2
  8-bit 16-to-1 multiplexer                             : 2
- 8-bit 2-to-1 multiplexer                              : 6
+ 8-bit 2-to-1 multiplexer                              : 5
  8-bit 256-to-1 multiplexer                            : 1
  9-bit 2-to-1 multiplexer                              : 10
 # Xors                                                 : 2
@@ -812,11 +825,11 @@ Macro Statistics
  18-bit comparator lessequal                           : 1
  4-bit comparator equal                                : 2
  9-bit comparator lessequal                            : 1
-# Multiplexers                                         : 107
+# Multiplexers                                         : 106
  1-bit 16-to-1 multiplexer                             : 16
  1-bit 2-to-1 multiplexer                              : 72
  2-bit 16-to-1 multiplexer                             : 2
- 8-bit 2-to-1 multiplexer                              : 6
+ 8-bit 2-to-1 multiplexer                              : 5
  8-bit 256-to-1 multiplexer                            : 1
  9-bit 2-to-1 multiplexer                              : 10
 # Xors                                                 : 2
@@ -875,9 +888,10 @@ Mapping all equations...
 Building and optimizing final netlist ...
 Found area constraint ratio of 100 (+ 5) on block etape_process, actual ratio is 46.
 FlipFlop di_ex/OUT_B_5 has been replicated 2 time(s)
-FlipFlop di_ex/OUT_C_0 has been replicated 3 time(s)
+FlipFlop di_ex/OUT_B_6 has been replicated 1 time(s)
+FlipFlop di_ex/OUT_C_0 has been replicated 2 time(s)
 FlipFlop di_ex/OUT_C_1 has been replicated 3 time(s)
-FlipFlop di_ex/OUT_C_2 has been replicated 3 time(s)
+FlipFlop di_ex/OUT_C_2 has been replicated 2 time(s)
 FlipFlop di_ex/OUT_C_3 has been replicated 2 time(s)
 FlipFlop di_ex/OUT_C_4 has been replicated 2 time(s)
 FlipFlop di_ex/OUT_C_5 has been replicated 1 time(s)
@@ -901,8 +915,8 @@ Unit <etape_process> processed.
 Final Register Report
 
 Macro Statistics
-# Registers                                            : 2358
- Flip-Flops                                            : 2358
+# Registers                                            : 2357
+ Flip-Flops                                            : 2357
 # Shift Registers                                      : 8
  3-bit shift register                                  : 8
 
@@ -927,22 +941,22 @@ Top Level Output File Name         : etape_process.ngc
 
 Primitive and Black Box Usage:
 ------------------------------
-# BELS                             : 1818
+# BELS                             : 1867
 #      GND                         : 1
 #      INV                         : 2
 #      LUT1                        : 7
-#      LUT2                        : 17
-#      LUT3                        : 67
-#      LUT4                        : 49
-#      LUT5                        : 100
-#      LUT6                        : 1032
+#      LUT2                        : 12
+#      LUT3                        : 70
+#      LUT4                        : 56
+#      LUT5                        : 110
+#      LUT6                        : 1057
 #      MUXCY                       : 33
-#      MUXF7                       : 315
+#      MUXF7                       : 324
 #      MUXF8                       : 156
 #      VCC                         : 1
 #      XORCY                       : 38
-# FlipFlops/Latches                : 2366
-#      FD                          : 118
+# FlipFlops/Latches                : 2365
+#      FD                          : 117
 #      FDE                         : 24
 #      FDR                         : 48
 #      FDRE                        : 2176
@@ -965,17 +979,17 @@ Selected Device : 6slx16csg324-3
 
 
 Slice Logic Utilization: 
- Number of Slice Registers:            2366  out of  18224    12%  
- Number of Slice LUTs:                 1282  out of   9112    14%  
-    Number used as Logic:              1274  out of   9112    13%  
+ Number of Slice Registers:            2365  out of  18224    12%  
+ Number of Slice LUTs:                 1322  out of   9112    14%  
+    Number used as Logic:              1314  out of   9112    14%  
     Number used as Memory:                8  out of   2176     0%  
        Number used as SRL:                8
 
 Slice Logic Distribution: 
- Number of LUT Flip Flop pairs used:   3493
-   Number with an unused Flip Flop:    1127  out of   3493    32%  
-   Number with an unused LUT:          2211  out of   3493    63%  
-   Number of fully used LUT-FF pairs:   155  out of   3493     4%  
+ Number of LUT Flip Flop pairs used:   3537
+   Number with an unused Flip Flop:    1172  out of   3537    33%  
+   Number with an unused LUT:          2215  out of   3537    62%  
+   Number of fully used LUT-FF pairs:   150  out of   3537     4%  
    Number of unique control sets:       280
 
 IO Utilization: 
@@ -1010,7 +1024,7 @@ Clock Information:
 Clock Signal                       | Clock buffer(FF name)  | Load  |
 -----------------------------------+------------------------+-------+
 CK(gestion_aleas/Mmux_clock11:O)   | BUFG(*)(ipTest/Add_0)  | 45    |
-clock                              | IBUF+BUFG              | 2331  |
+clock                              | IBUF+BUFG              | 2330  |
 -----------------------------------+------------------------+-------+
 (*) This 1 clock signal(s) are generated by combinatorial logic,
 and XST is not able to identify which are the primary clock signals.
@@ -1024,9 +1038,9 @@ Timing Summary:
 ---------------
 Speed Grade: -3
 
-   Minimum period: 17.844ns (Maximum Frequency: 56.040MHz)
+   Minimum period: 18.136ns (Maximum Frequency: 55.138MHz)
    Minimum input arrival time before clock: 5.955ns
-   Maximum output required time after clock: 23.069ns
+   Maximum output required time after clock: 20.335ns
    Maximum combinational path delay: No path found
 
 Timing Details:
@@ -1056,10 +1070,10 @@ Delay:               2.531ns (Levels of Logic = 0)
 
 =========================================================================
 Timing constraint: Default period analysis for Clock 'clock'
-  Clock period: 17.844ns (frequency: 56.040MHz)
-  Total number of paths / destination ports: 17575285 / 4510
+  Clock period: 18.136ns (frequency: 55.138MHz)
+  Total number of paths / destination ports: 64099106 / 4509
 -------------------------------------------------------------------------
-Delay:               17.844ns (Levels of Logic = 18)
+Delay:               18.136ns (Levels of Logic = 19)
   Source:            di_ex/OUT_B_7 (FF)
   Destination:       ex_Mem/OUT_B_0 (FF)
   Source Clock:      clock rising
@@ -1069,29 +1083,30 @@ Delay:               17.844ns (Levels of Logic = 18)
                                 Gate     Net
     Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
     ----------------------------------------  ------------
-     FD:C->Q              17   0.447   1.028  di_ex/OUT_B_7 (di_ex/OUT_B_7)
-     LUT2:I1->O            5   0.205   0.819  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_5_OUT_Madd_Madd_cy<7>1 (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_5_OUT_Madd_Madd_cy<7>)
-     LUT6:I4->O            7   0.203   0.774  alu_comp/GND_32_o_GND_32_o_div_3/o<7>11 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<7>)
-     LUT6:I5->O            5   0.205   0.962  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_9_OUT_Madd_Madd_lut<6>1 (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_9_OUT_Madd_Madd_lut<6>)
-     LUT6:I2->O            3   0.203   0.651  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_9_OUT_Madd_Madd_cy<7>11 (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_9_OUT_Madd_Madd_cy<7>)
-     LUT6:I5->O           12   0.205   1.137  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_183_o181 (alu_comp/GND_32_o_GND_32_o_div_3/a[8]_GND_34_o_MUX_175_o)
-     LUT6:I3->O            2   0.205   0.617  alu_comp/GND_32_o_GND_32_o_div_3/o<4>11_1 (alu_comp/GND_32_o_GND_32_o_div_3/o<4>11)
-     LUT6:I5->O            5   0.205   0.715  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_209_o161 (alu_comp/GND_32_o_GND_32_o_div_3/a[6]_GND_34_o_MUX_203_o)
-     LUT3:I2->O            8   0.205   0.803  alu_comp/GND_32_o_GND_32_o_div_3/o<3>24_SW2 (N82)
-     LUT6:I5->O           17   0.205   1.028  alu_comp/GND_32_o_GND_32_o_div_3/o<3>24 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<3>)
-     LUT6:I5->O            2   0.205   0.864  alu_comp/GND_32_o_GND_32_o_div_3/o<2>1_SW0 (N21)
-     LUT5:I1->O           17   0.203   1.028  alu_comp/GND_32_o_GND_32_o_div_3/o<2>1 (alu_comp/GND_32_o_GND_32_o_div_3/o<2>2)
-     LUT6:I5->O            2   0.205   0.617  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_255_o161 (alu_comp/GND_32_o_GND_32_o_div_3/a[6]_GND_34_o_MUX_249_o)
-     LUT5:I4->O            1   0.205   0.580  alu_comp/GND_32_o_GND_32_o_div_3/o<1>21_SW0 (N195)
-     LUT5:I4->O           10   0.205   0.857  alu_comp/GND_32_o_GND_32_o_div_3/o<1>21 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<1>)
+     FD:C->Q              18   0.447   1.050  di_ex/OUT_B_7 (di_ex/OUT_B_7)
+     LUT2:I1->O            5   0.205   0.715  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_5_OUT_Madd_Madd_cy<7>1 (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_5_OUT_Madd_Madd_cy<7>)
+     LUT6:I5->O            8   0.205   0.803  alu_comp/GND_32_o_GND_32_o_div_3/o<7>11 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<7>)
+     LUT6:I5->O           18   0.205   1.154  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_155_o181 (alu_comp/GND_32_o_GND_32_o_div_3/a[8]_GND_34_o_MUX_147_o)
+     LUT6:I4->O           13   0.203   1.037  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_183_o151 (alu_comp/GND_32_o_GND_32_o_div_3/a[5]_GND_34_o_MUX_178_o)
+     LUT5:I3->O            5   0.203   0.714  alu_comp/GND_32_o_GND_32_o_div_3/o<4>11_SW5 (N236)
+     MUXF7:S->O            1   0.148   0.827  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_209_o161_SW1 (N288)
+     LUT6:I2->O            8   0.203   0.803  alu_comp/GND_32_o_GND_32_o_div_3/o<3>24_SW2 (N82)
+     LUT6:I5->O           19   0.205   1.072  alu_comp/GND_32_o_GND_32_o_div_3/o<3>24 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<3>)
+     LUT6:I5->O            4   0.205   0.683  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_233_o151 (alu_comp/GND_32_o_GND_32_o_div_3/a[5]_GND_34_o_MUX_228_o)
+     MUXCY:DI->O           1   0.145   0.000  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_15_OUT_Madd_Madd_cy<5> (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_15_OUT_Madd_Madd_cy<5>)
+     XORCY:CI->O           4   0.180   0.788  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_15_OUT_Madd_Madd_xor<6> (alu_comp/GND_32_o_GND_32_o_div_3/GND_34_o_b[8]_add_15_OUT<6>)
+     LUT6:I4->O            2   0.203   0.845  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_255_o161 (alu_comp/GND_32_o_GND_32_o_div_3/a[6]_GND_34_o_MUX_249_o)
+     LUT6:I3->O            1   0.205   0.684  alu_comp/GND_32_o_GND_32_o_div_3/o<1>21_SW0_SW1 (N307)
+     LUT5:I3->O           10   0.203   0.857  alu_comp/GND_32_o_GND_32_o_div_3/o<1>21 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<1>)
      LUT5:I4->O            1   0.205   0.580  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1_SW4 (N36)
-     LUT5:I4->O            1   0.205   0.000  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1_G (N262)
+     LUT5:I4->O            1   0.205   0.000  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1_G (N362)
      MUXF7:I1->O           2   0.140   0.617  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1 (alu_comp/GND_32_o_GND_32_o_div_3/o<0>2)
-     LUT6:I5->O            1   0.205   0.000  mux_alu_comp/Mmux_S11 (out_mux_alu<0>)
+     LUT6:I5->O            1   0.205   0.684  mux_alu_comp/S<0>1 (mux_alu_comp/S<0>)
+     LUT6:I4->O            1   0.203   0.000  mux_alu_comp/S<0>3 (out_mux_alu<0>)
      FD:D                      0.102          ex_Mem/OUT_B_0
     ----------------------------------------
-    Total                     17.844ns (4.168ns logic, 13.676ns route)
-                                       (23.4% logic, 76.6% route)
+    Total                     18.136ns (4.225ns logic, 13.911ns route)
+                                       (23.3% logic, 76.7% route)
 
 =========================================================================
 Timing constraint: Default OFFSET IN BEFORE for Clock 'CK'
@@ -1115,7 +1130,7 @@ Offset:              5.510ns (Levels of Logic = 2)
 
 =========================================================================
 Timing constraint: Default OFFSET IN BEFORE for Clock 'clock'
-  Total number of paths / destination ports: 4387 / 4355
+  Total number of paths / destination ports: 4386 / 4354
 -------------------------------------------------------------------------
 Offset:              5.955ns (Levels of Logic = 4)
   Source:            RST (PAD)
@@ -1137,9 +1152,9 @@ Offset:              5.955ns (Levels of Logic = 4)
 
 =========================================================================
 Timing constraint: Default OFFSET OUT AFTER for Clock 'clock'
-  Total number of paths / destination ports: 17374204 / 4
+  Total number of paths / destination ports: 31948413 / 4
 -------------------------------------------------------------------------
-Offset:              23.069ns (Levels of Logic = 21)
+Offset:              20.335ns (Levels of Logic = 19)
   Source:            di_ex/OUT_B_7 (FF)
   Destination:       flag<1> (PAD)
   Source Clock:      clock rising
@@ -1148,31 +1163,29 @@ Offset:              23.069ns (Levels of Logic = 21)
                                 Gate     Net
     Cell:in->out      fanout   Delay   Delay  Logical Name (Net Name)
     ----------------------------------------  ------------
-     FD:C->Q              17   0.447   1.028  di_ex/OUT_B_7 (di_ex/OUT_B_7)
-     LUT2:I1->O            5   0.205   0.819  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_5_OUT_Madd_Madd_cy<7>1 (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_5_OUT_Madd_Madd_cy<7>)
-     LUT6:I4->O            7   0.203   0.774  alu_comp/GND_32_o_GND_32_o_div_3/o<7>11 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<7>)
-     LUT6:I5->O            5   0.205   0.962  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_9_OUT_Madd_Madd_lut<6>1 (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_9_OUT_Madd_Madd_lut<6>)
-     LUT6:I2->O            3   0.203   0.651  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_9_OUT_Madd_Madd_cy<7>11 (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_9_OUT_Madd_Madd_cy<7>)
-     LUT6:I5->O           12   0.205   1.137  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_183_o181 (alu_comp/GND_32_o_GND_32_o_div_3/a[8]_GND_34_o_MUX_175_o)
-     LUT6:I3->O            2   0.205   0.617  alu_comp/GND_32_o_GND_32_o_div_3/o<4>11_1 (alu_comp/GND_32_o_GND_32_o_div_3/o<4>11)
-     LUT6:I5->O            5   0.205   0.715  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_209_o161 (alu_comp/GND_32_o_GND_32_o_div_3/a[6]_GND_34_o_MUX_203_o)
-     LUT3:I2->O            8   0.205   0.803  alu_comp/GND_32_o_GND_32_o_div_3/o<3>24_SW2 (N82)
-     LUT6:I5->O           17   0.205   1.028  alu_comp/GND_32_o_GND_32_o_div_3/o<3>24 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<3>)
-     LUT6:I5->O            2   0.205   0.864  alu_comp/GND_32_o_GND_32_o_div_3/o<2>1_SW0 (N21)
-     LUT5:I1->O           17   0.203   1.028  alu_comp/GND_32_o_GND_32_o_div_3/o<2>1 (alu_comp/GND_32_o_GND_32_o_div_3/o<2>2)
-     LUT6:I5->O            2   0.205   0.617  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_255_o161 (alu_comp/GND_32_o_GND_32_o_div_3/a[6]_GND_34_o_MUX_249_o)
-     LUT5:I4->O            1   0.205   0.580  alu_comp/GND_32_o_GND_32_o_div_3/o<1>21_SW0 (N195)
-     LUT5:I4->O           10   0.205   0.857  alu_comp/GND_32_o_GND_32_o_div_3/o<1>21 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<1>)
+     FD:C->Q              18   0.447   1.050  di_ex/OUT_B_7 (di_ex/OUT_B_7)
+     LUT2:I1->O            5   0.205   0.715  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_5_OUT_Madd_Madd_cy<7>1 (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_5_OUT_Madd_Madd_cy<7>)
+     LUT6:I5->O            8   0.205   0.803  alu_comp/GND_32_o_GND_32_o_div_3/o<7>11 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<7>)
+     LUT6:I5->O           18   0.205   1.154  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_155_o181 (alu_comp/GND_32_o_GND_32_o_div_3/a[8]_GND_34_o_MUX_147_o)
+     LUT6:I4->O           13   0.203   1.037  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_183_o151 (alu_comp/GND_32_o_GND_32_o_div_3/a[5]_GND_34_o_MUX_178_o)
+     LUT5:I3->O            5   0.203   0.714  alu_comp/GND_32_o_GND_32_o_div_3/o<4>11_SW5 (N236)
+     MUXF7:S->O            1   0.148   0.827  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_209_o161_SW1 (N288)
+     LUT6:I2->O            8   0.203   0.803  alu_comp/GND_32_o_GND_32_o_div_3/o<3>24_SW2 (N82)
+     LUT6:I5->O           19   0.205   1.072  alu_comp/GND_32_o_GND_32_o_div_3/o<3>24 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<3>)
+     LUT6:I5->O            4   0.205   0.683  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_233_o151 (alu_comp/GND_32_o_GND_32_o_div_3/a[5]_GND_34_o_MUX_228_o)
+     MUXCY:DI->O           1   0.145   0.000  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_15_OUT_Madd_Madd_cy<5> (alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_15_OUT_Madd_Madd_cy<5>)
+     XORCY:CI->O           4   0.180   0.788  alu_comp/GND_32_o_GND_32_o_div_3/Madd_GND_34_o_b[8]_add_15_OUT_Madd_Madd_xor<6> (alu_comp/GND_32_o_GND_32_o_div_3/GND_34_o_b[8]_add_15_OUT<6>)
+     LUT6:I4->O            2   0.203   0.845  alu_comp/GND_32_o_GND_32_o_div_3/Mmux_a[0]_GND_34_o_MUX_255_o161 (alu_comp/GND_32_o_GND_32_o_div_3/a[6]_GND_34_o_MUX_249_o)
+     LUT6:I3->O            1   0.205   0.684  alu_comp/GND_32_o_GND_32_o_div_3/o<1>21_SW0_SW1 (N307)
+     LUT5:I3->O           10   0.203   0.857  alu_comp/GND_32_o_GND_32_o_div_3/o<1>21 (alu_comp/GND_32_o_GND_32_o_div_3_OUT<1>)
      LUT5:I4->O            1   0.205   0.580  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1_SW4 (N36)
-     LUT5:I4->O            1   0.205   0.000  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1_G (N262)
-     MUXF7:I1->O           2   0.140   0.864  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1 (alu_comp/GND_32_o_GND_32_o_div_3/o<0>2)
-     LUT6:I2->O            1   0.203   0.580  alu_comp/Mmux_buff614 (out_alu<0>)
-     LUT6:I5->O            1   0.205   0.944  alu_comp/buff[8]_GND_32_o_equal_9_o<8>_SW0 (N17)
-     LUT6:I0->O            1   0.203   0.579  alu_comp/buff[8]_GND_32_o_equal_9_o<8> (flag_1_OBUF)
+     LUT5:I4->O            1   0.205   0.000  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1_G (N362)
+     MUXF7:I1->O           2   0.140   0.617  alu_comp/GND_32_o_GND_32_o_div_3/o<0>1 (alu_comp/GND_32_o_GND_32_o_div_3/o<0>2)
+     LUT6:I5->O            2   0.205   0.616  alu_comp/buff[8]_GND_32_o_equal_9_o<8> (flag_1_OBUF)
      OBUF:I->O                 2.571          flag_1_OBUF (flag<1>)
     ----------------------------------------
-    Total                     23.069ns (7.043ns logic, 16.026ns route)
-                                       (30.5% logic, 69.5% route)
+    Total                     20.335ns (6.491ns logic, 13.844ns route)
+                                       (31.9% logic, 68.1% route)
 
 =========================================================================
 
@@ -1193,21 +1206,21 @@ Clock to Setup on destination clock clock
 Source Clock   |Dest:Rise|Dest:Rise|Dest:Fall|Dest:Fall|
 ---------------+---------+---------+---------+---------+
 CK             |    5.311|         |         |         |
-clock          |   17.844|         |         |         |
+clock          |   18.136|         |         |         |
 ---------------+---------+---------+---------+---------+
 
 =========================================================================
 
 
-Total REAL time to Xst completion: 28.00 secs
-Total CPU time to Xst completion: 26.57 secs
+Total REAL time to Xst completion: 32.00 secs
+Total CPU time to Xst completion: 30.19 secs
  
 --> 
 
 
-Total memory usage is 421836 kilobytes
+Total memory usage is 421972 kilobytes
 
 Number of errors   :    0 (   0 filtered)
-Number of warnings :   49 (   0 filtered)
+Number of warnings :   51 (   0 filtered)
 Number of infos    :    6 (   0 filtered)
 
