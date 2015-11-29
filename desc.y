@@ -678,9 +678,14 @@ Exp : tID {
 }
 | tID tO_P { argsStack.argCount[argsStack.size++] = 0; } Args tC_P {
 	function_t *function = getFunction($1);
-	symbol_t *returnValue = allocTemp(function->returnType.indirectionCount, function->returnType.baseType);
-	callFunction(function, argsStack.argCount[--argsStack.size], returnValue);
-	$$ = DEREF(returnValue, 0);
+	if(function != NULL) {
+		symbol_t *returnValue = allocTemp(function->returnType.indirectionCount, function->returnType.baseType);
+		callFunction(function, argsStack.argCount[--argsStack.size], returnValue);
+		$$ = DEREF(returnValue, 0);
+	}
+	else {
+		$$ = DEREF(allocTemp(0, BT_INT), 0);
+	}
 }
 | tPRINT tO_P Exp tC_P {
 	symbol_t *s = dereferenceExp($3);
